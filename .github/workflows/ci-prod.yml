@@ -1,0 +1,14 @@
+name: CI Prod Placeholder
+
+# Se lance uniquement sur les PR vers la branche 'prod'
+on:
+  pull_request:
+    branches: [ "prod" ]
+
+jobs:
+  dummy-test:
+    runs-on: ubuntu-latest
+    steps:
+      # Affiche ton message
+      - name: Print Debug Message
+        run: echo -e "======= GIt actions launch OK ======== \n Need to code the test now."
