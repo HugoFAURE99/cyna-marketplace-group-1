@@ -41,7 +41,6 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
   })
 
   const onSubmit = async (data: ProductFormData) => {
-    console.log('data envoyée :', data) // ← ajoute ça
     try {
       await createProduct(data)
       alert('Produit créé !')

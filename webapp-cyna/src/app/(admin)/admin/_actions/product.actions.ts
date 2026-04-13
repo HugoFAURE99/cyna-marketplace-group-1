@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
+import type { Tables } from '@/types/database.types'
 
 export async function createProduct(formData: {
   nom_pro: string
@@ -9,14 +10,12 @@ export async function createProduct(formData: {
   pro_carac_technique?: string
   idcategorie: number
 }) {
-    
-  // 1. Stripe en premier
+
   const stripeProduct = await stripe.products.create({
     name: formData.nom_pro,
     description: formData.pro_description,
   })
 
-  // 2. Supabase seulement si Stripe OK
   const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('produit')
@@ -31,10 +30,32 @@ export async function createProduct(formData: {
     .select()
     .single()
 
-  // 3. Si Supabase échoue → on archive sur Stripe pour nettoyer
   if (error) {
     await stripe.products.update(stripeProduct.id, { active: false })
     throw new Error(`Erreur création produit : ${error.message}`)
+  }
+
+  return data
+}
+
+export async function getProducts() {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('produit')
+    .select(`
+      id_produit,
+      nom_pro,
+      pro_description,
+      statut_produit,
+      stripe_product_id,
+      categorie (
+        cat_nom
+      )
+    `)
+    .order('date_ajout', { ascending: false })
+
+  if (error) {
+    throw new Error(`Erreur chargement produits : ${error.message}`)
   }
 
   return data
