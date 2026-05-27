@@ -8,6 +8,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import type { getProducts } from '@/app/(admin)/admin/_actions/product.actions'
+import DeleteProductButton from '@/components/admin/ProductsTable/DeleteProductButton'
 
 type Product = Awaited<ReturnType<typeof getProducts>>[number]
 
@@ -31,9 +32,15 @@ export default function ProductsTable({ products }: { products: Product[] }) {
             <TableCell>{product.statut_produit ? 'Actif' : 'Inactif'}</TableCell>
             <TableCell>{product.stripe_product_id}</TableCell>
             <TableCell>
-              <Link href={`/admin/products/${product.id_produit}`}>
-                Modifier
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link href={`/admin/products/${product.id_produit}`}>
+                  Modifier
+                </Link>
+                <DeleteProductButton
+                  productId={product.id_produit}
+                  productName={product.nom_pro}
+                />
+              </div>
             </TableCell>
           </TableRow>
         ))}

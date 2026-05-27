@@ -1,5 +1,6 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/server'
 import { stripe } from '@/lib/stripe'
 import type { Tables } from '@/types/database.types'
@@ -59,4 +60,24 @@ export async function getProducts() {
   }
 
   return data
+}
+
+export async function deleteProduct(productId: number) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('produit')
+    .delete()
+    .eq('id_produit', productId)
+    .select('stripe_product_id')
+    .single()
+
+  if (error) {
+    throw new Error(`Erreur suppression produit : ${error.message}`)
+  }
+
+  if (data?.stripe_product_id) {
+    await stripe.products.update(data.stripe_product_id, { active: false })
+  }
+
+  revalidatePath('/admin/products')
 }
