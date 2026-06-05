@@ -1,0 +1,46 @@
+src/
+├── app/
+│   ├── layout.tsx              ← layout racine (header, footer...)
+│   ├── page.tsx                ← page d'accueil /
+│   ├── globals.css
+│   ├── (auth)/                 ← groupe de routes (pas dans l'URL)
+│   │   ├── login/
+│   │   │   └── page.tsx        ← /login
+│   │   └── register/
+│   │       └── page.tsx        ← /register
+│   ├── dashboard/
+│   │   ├── layout.tsx          ← layout spécifique dashboard
+│   │   └── page.tsx            ← /dashboard
+│   └── products/
+│       ├── page.tsx            ← /products
+│       └── [id]/
+│           └── page.tsx        ← /products/123 (route dynamique)
+├── components/
+│   ├── ui/                     ← composants génériques (Button, Input...)
+│   └── layout/                 ← Header, Footer, Sidebar...
+├── lib/
+│   ├── supabase.ts             ← client Supabase
+│   └── utils.ts                ← fonctions utilitaires
+└── types/
+    └── index.ts                ← tes types TypeScript globaux
+
+
+
+app/
+├── (public)/             ← pages sans auth requise
+│   ├── page.tsx          → /
+│   └── products/page.tsx → /products
+└── (protected)/          ← pages qui nécessitent d'être connecté
+    ├── layout.tsx         ← vérifie la session Supabase ici
+    └── dashboard/page.tsx → /dashboard
+
+
+
+
+type Product = {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    image: string;
+}
