@@ -3,6 +3,11 @@ export type Product = {
     nom_pro: string
     pro_description: string
     statut_produit: boolean
-    stripe_product_id: string
     categorie: { cat_nom: string } | null
+    prix_tarif: {
+      id_prix: string
+      prix: number
+      stripe_price_id: string
+      type_facturation: string
+    }[]
   }

@@ -5,7 +5,7 @@ export default function AdminPage() {
   return (
     <div>
       <h1>Backoffice</h1>
-      <Button render={<Link href="/admin/products"/>}>Gérer les produits</Button>
+      <Button nativeButton={false} render={<Link href="/admin/products"/>}>Gérer les produits</Button>
     </div>
   )
 }
