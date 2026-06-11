@@ -20,17 +20,21 @@ export default function ProductsTable({ products }: { products: Product[] }) {
           <TableHead>Nom</TableHead>
           <TableHead>Catégorie</TableHead>
           <TableHead>Statut</TableHead>
+          <TableHead>Prix</TableHead>
           <TableHead>Stripe ID</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {products.map((product) => (
+        {products.map((product) => {
+          const tarif = product.prix_tarif?.[0]
+          return (
           <TableRow key={product.id_produit}>
             <TableCell>{product.nom_pro}</TableCell>
             <TableCell>{(product.categorie as { cat_nom: string } | null)?.cat_nom ?? '—'}</TableCell>
             <TableCell>{product.statut_produit ? 'Actif' : 'Inactif'}</TableCell>
-            <TableCell>{product.stripe_product_id}</TableCell>
+            <TableCell>{tarif ? `${(tarif.prix / 100).toFixed(2)} € / ${tarif.type_facturation}` : '—'}</TableCell>
+            <TableCell>{tarif?.stripe_price_id ?? '—'}</TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
                 <Link href={`/admin/products/${product.id_produit}`}>
@@ -43,7 +47,8 @@ export default function ProductsTable({ products }: { products: Product[] }) {
               </div>
             </TableCell>
           </TableRow>
-        ))}
+          )
+        })}
       </TableBody>
     </Table>
   )

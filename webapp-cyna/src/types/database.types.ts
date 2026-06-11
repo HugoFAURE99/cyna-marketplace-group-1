@@ -18,22 +18,28 @@ export type Database = {
         Row: {
           date_debut: string
           date_fin: string | null
+          id_abonnement: number
           id_commande: number
-          id_compte: string
+          id_compte: string | null
+          id_prix: number
           statut_abonnement: string
         }
         Insert: {
           date_debut: string
           date_fin?: string | null
+          id_abonnement?: number
           id_commande: number
-          id_compte: string
+          id_compte?: string | null
+          id_prix: number
           statut_abonnement: string
         }
         Update: {
           date_debut?: string
           date_fin?: string | null
+          id_abonnement?: number
           id_commande?: number
-          id_compte?: string
+          id_compte?: string | null
+          id_prix?: number
           statut_abonnement?: string
         }
         Relationships: [
@@ -51,20 +57,29 @@ export type Database = {
             referencedRelation: "utilisateur"
             referencedColumns: ["id_compte"]
           },
+          {
+            foreignKeyName: "abonnement_id_prix_fkey"
+            columns: ["id_prix"]
+            isOneToOne: false
+            referencedRelation: "prix_tarif"
+            referencedColumns: ["id_prix"]
+          },
         ]
       }
-      adresse_facturation: {
+      adresse: {
         Row: {
           adresse: string
           adresse_complement: string | null
           code_postal: string
           id_adresse: number
-          id_compte: string
+          id_compte: string | null
+          is_deleted: boolean
           nom: string
           pays: string
           prenom: string
           region: string
           telephone: string | null
+          type_adresse: string | null
           ville: string
         }
         Insert: {
@@ -72,12 +87,14 @@ export type Database = {
           adresse_complement?: string | null
           code_postal: string
           id_adresse?: number
-          id_compte: string
+          id_compte?: string | null
+          is_deleted?: boolean
           nom: string
           pays: string
           prenom: string
           region: string
           telephone?: string | null
+          type_adresse?: string | null
           ville: string
         }
         Update: {
@@ -85,17 +102,19 @@ export type Database = {
           adresse_complement?: string | null
           code_postal?: string
           id_adresse?: number
-          id_compte?: string
+          id_compte?: string | null
+          is_deleted?: boolean
           nom?: string
           pays?: string
           prenom?: string
           region?: string
           telephone?: string | null
+          type_adresse?: string | null
           ville?: string
         }
         Relationships: [
           {
-            foreignKeyName: "adresse_facturation_id_compte_fkey"
+            foreignKeyName: "adresse_id_compte_fkey"
             columns: ["id_compte"]
             isOneToOne: false
             referencedRelation: "utilisateur"
@@ -107,30 +126,64 @@ export type Database = {
         Row: {
           cat_description: string | null
           cat_nom: string
-          id_image_cat: string | null
-          idcategorie: number
+          id_categorie: number
+          lien_image_cat: string | null
           ordre_affichage: number | null
         }
         Insert: {
           cat_description?: string | null
           cat_nom: string
-          id_image_cat?: string | null
-          idcategorie?: number
+          id_categorie?: number
+          lien_image_cat?: string | null
           ordre_affichage?: number | null
         }
         Update: {
           cat_description?: string | null
           cat_nom?: string
-          id_image_cat?: string | null
-          idcategorie?: number
+          id_categorie?: number
+          lien_image_cat?: string | null
           ordre_affichage?: number | null
         }
         Relationships: []
+      }
+      code_promo: {
+        Row: {
+          id_code_promo: number
+          id_promotion: number
+          is_actif: boolean
+          lib_code: string
+          type_promo: string | null
+        }
+        Insert: {
+          id_code_promo?: number
+          id_promotion: number
+          is_actif?: boolean
+          lib_code: string
+          type_promo?: string | null
+        }
+        Update: {
+          id_code_promo?: number
+          id_promotion?: number
+          is_actif?: boolean
+          lib_code?: string
+          type_promo?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "code_promo_id_promotion_fkey"
+            columns: ["id_promotion"]
+            isOneToOne: true
+            referencedRelation: "promotion"
+            referencedColumns: ["id_promotion"]
+          },
+        ]
       }
       commande: {
         Row: {
           date_commande: string
           id_commande: number
+          id_promotion: number | null
+          mail_utilisateur_invite: string | null
           montant_total: number
           statut_commande: string
           url_facture: string | null
@@ -138,6 +191,8 @@ export type Database = {
         Insert: {
           date_commande?: string
           id_commande?: number
+          id_promotion?: number | null
+          mail_utilisateur_invite?: string | null
           montant_total: number
           statut_commande?: string
           url_facture?: string | null
@@ -145,9 +200,43 @@ export type Database = {
         Update: {
           date_commande?: string
           id_commande?: number
+          id_promotion?: number | null
+          mail_utilisateur_invite?: string | null
           montant_total?: number
           statut_commande?: string
           url_facture?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commande_id_promotion_fkey"
+            columns: ["id_promotion"]
+            isOneToOne: false
+            referencedRelation: "promotion"
+            referencedColumns: ["id_promotion"]
+          },
+        ]
+      }
+      image_carrousel: {
+        Row: {
+          description_image: string | null
+          est_actif: boolean
+          id_image: number
+          lien_image_caroussel: string
+          titre_image: string
+        }
+        Insert: {
+          description_image?: string | null
+          est_actif?: boolean
+          id_image?: number
+          lien_image_caroussel: string
+          titre_image: string
+        }
+        Update: {
+          description_image?: string | null
+          est_actif?: boolean
+          id_image?: number
+          lien_image_caroussel?: string
+          titre_image?: string
         }
         Relationships: []
       }
@@ -155,19 +244,19 @@ export type Database = {
         Row: {
           id_image: number
           id_produit: number
-          image_url: string
+          lien_image_produit: string
           ordre_affichage: number | null
         }
         Insert: {
           id_image?: number
           id_produit: number
-          image_url: string
+          lien_image_produit: string
           ordre_affichage?: number | null
         }
         Update: {
           id_image?: number
           id_produit?: number
-          image_url?: string
+          lien_image_produit?: string
           ordre_affichage?: number | null
         }
         Relationships: [
@@ -180,30 +269,96 @@ export type Database = {
           },
         ]
       }
+      lien_categorie_promo: {
+        Row: {
+          id_categorie: number
+          id_promotion: number
+        }
+        Insert: {
+          id_categorie: number
+          id_promotion: number
+        }
+        Update: {
+          id_categorie?: number
+          id_promotion?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lien_categorie_promo_id_categorie_fkey"
+            columns: ["id_categorie"]
+            isOneToOne: false
+            referencedRelation: "categorie"
+            referencedColumns: ["id_categorie"]
+          },
+          {
+            foreignKeyName: "lien_categorie_promo_id_promotion_fkey"
+            columns: ["id_promotion"]
+            isOneToOne: false
+            referencedRelation: "promotion"
+            referencedColumns: ["id_promotion"]
+          },
+        ]
+      }
+      lien_produit_promo: {
+        Row: {
+          id_produit: number
+          id_promotion: number
+        }
+        Insert: {
+          id_produit: number
+          id_promotion: number
+        }
+        Update: {
+          id_produit?: number
+          id_promotion?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lien_produit_promo_id_produit_fkey"
+            columns: ["id_produit"]
+            isOneToOne: false
+            referencedRelation: "produit"
+            referencedColumns: ["id_produit"]
+          },
+          {
+            foreignKeyName: "lien_produit_promo_id_promotion_fkey"
+            columns: ["id_promotion"]
+            isOneToOne: false
+            referencedRelation: "promotion"
+            referencedColumns: ["id_promotion"]
+          },
+        ]
+      }
       ligne_commande: {
         Row: {
           id_commande: number
-          id_prix: string
+          id_prix: number
           id_promotion: number | null
           prix_unitaire: number
           quantite: number
+          remise_unitaire_appliquee: string | null
           sous_total: number
+          taux_remise_donne: string | null
         }
         Insert: {
           id_commande: number
-          id_prix: string
+          id_prix: number
           id_promotion?: number | null
           prix_unitaire: number
           quantite?: number
+          remise_unitaire_appliquee?: string | null
           sous_total: number
+          taux_remise_donne?: string | null
         }
         Update: {
           id_commande?: number
-          id_prix?: string
+          id_prix?: number
           id_promotion?: number | null
           prix_unitaire?: number
           quantite?: number
+          remise_unitaire_appliquee?: string | null
           sous_total?: number
+          taux_remise_donne?: string | null
         }
         Relationships: [
           {
@@ -231,24 +386,27 @@ export type Database = {
       }
       prix_tarif: {
         Row: {
-          id_prix: string
+          id_prix: number
           id_produit: number
+          nom_prix_tarif: string | null
           prix: number
           stripe_price_id: string
           type_facturation: string
           unite: string | null
         }
         Insert: {
-          id_prix: string
+          id_prix?: number
           id_produit: number
+          nom_prix_tarif?: string | null
           prix: number
           stripe_price_id: string
           type_facturation: string
           unite?: string | null
         }
         Update: {
-          id_prix?: string
+          id_prix?: number
           id_produit?: number
+          nom_prix_tarif?: string | null
           prix?: number
           stripe_price_id?: string
           type_facturation?: string
@@ -267,74 +425,98 @@ export type Database = {
       produit: {
         Row: {
           date_ajout: string
+          id_categorie: number
           id_produit: number
-          idcategorie: number
-          mis_avant: boolean | null
+          mis_avant: boolean
           nom_pro: string
-          ordre_priorite: number | null
+          ordre_priorite: number
           pro_carac_technique: string | null
           pro_description: string | null
+          quantite_produit: number
           statut_produit: boolean
           stripe_product_id: string | null
         }
         Insert: {
           date_ajout?: string
+          id_categorie: number
           id_produit?: number
-          idcategorie: number
-          mis_avant?: boolean | null
+          mis_avant?: boolean
           nom_pro: string
-          ordre_priorite?: number | null
+          ordre_priorite?: number
           pro_carac_technique?: string | null
           pro_description?: string | null
+          quantite_produit?: number
           statut_produit?: boolean
           stripe_product_id?: string | null
         }
         Update: {
           date_ajout?: string
+          id_categorie?: number
           id_produit?: number
-          idcategorie?: number
-          mis_avant?: boolean | null
+          mis_avant?: boolean
           nom_pro?: string
-          ordre_priorite?: number | null
+          ordre_priorite?: number
           pro_carac_technique?: string | null
           pro_description?: string | null
+          quantite_produit?: number
           statut_produit?: boolean
           stripe_product_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "produit_idcategorie_fkey"
-            columns: ["idcategorie"]
+            foreignKeyName: "produit_id_categorie_fkey"
+            columns: ["id_categorie"]
             isOneToOne: false
             referencedRelation: "categorie"
-            referencedColumns: ["idcategorie"]
+            referencedColumns: ["id_categorie"]
           },
         ]
       }
       promotion: {
         Row: {
-          actif: boolean | null
-          code_promo: string
           date_expiration: string
           id_promotion: number
-          lien_image: string | null
-          pourcentage_remise: number
+          is_actif: boolean
+          is_code_promo: boolean
+          lien_image_promo: string | null
+          type_remise: string
+          valeur_remise: number
         }
         Insert: {
-          actif?: boolean | null
-          code_promo: string
           date_expiration: string
           id_promotion?: number
-          lien_image?: string | null
-          pourcentage_remise: number
+          is_actif?: boolean
+          is_code_promo?: boolean
+          lien_image_promo?: string | null
+          type_remise: string
+          valeur_remise: number
         }
         Update: {
-          actif?: boolean | null
-          code_promo?: string
           date_expiration?: string
           id_promotion?: number
-          lien_image?: string | null
-          pourcentage_remise?: number
+          is_actif?: boolean
+          is_code_promo?: boolean
+          lien_image_promo?: string | null
+          type_remise?: string
+          valeur_remise?: number
+        }
+        Relationships: []
+      }
+      texte_general: {
+        Row: {
+          emplacement_texte: string
+          id_texte: number
+          texte: string
+        }
+        Insert: {
+          emplacement_texte: string
+          id_texte?: number
+          texte: string
+        }
+        Update: {
+          emplacement_texte?: string
+          id_texte?: number
+          texte?: string
         }
         Relationships: []
       }
@@ -386,23 +568,26 @@ export type Database = {
         Row: {
           adresse_mail: string
           id_compte: string
+          is_actif: boolean
           nom_complet: string
-          role: string | null
-          token_connexion_stripe: string | null
+          role: string
+          token_connexion_stripe: string
         }
         Insert: {
           adresse_mail: string
           id_compte: string
+          is_actif?: boolean
           nom_complet: string
-          role?: string | null
-          token_connexion_stripe?: string | null
+          role?: string
+          token_connexion_stripe: string
         }
         Update: {
           adresse_mail?: string
           id_compte?: string
+          is_actif?: boolean
           nom_complet?: string
-          role?: string | null
-          token_connexion_stripe?: string | null
+          role?: string
+          token_connexion_stripe?: string
         }
         Relationships: []
       }

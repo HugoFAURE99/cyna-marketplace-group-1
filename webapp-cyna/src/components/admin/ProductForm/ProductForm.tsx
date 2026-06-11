@@ -17,7 +17,7 @@ import { createProduct } from '@/app/(admin)/admin/_actions/product.actions'
 import styles from './ProductForm.module.scss'
 
 type Category = {
-  idcategorie: number
+  id_categorie: number
   cat_nom: string
 }
 
@@ -25,7 +25,13 @@ const productSchema = z.object({
   nom_pro: z.string().min(1, 'Le nom est obligatoire'),
   pro_description: z.string().min(1, 'La description est obligatoire'),
   pro_carac_technique: z.string().optional(),
-  idcategorie: z.number({ error: 'La catégorie est obligatoire' }),
+  id_categorie: z.number({ error: 'La catégorie est obligatoire' }),
+  prix: z
+    .number({ error: 'Le prix est obligatoire' })
+    .positive('Le prix doit être supérieur à 0'),
+  type_facturation: z.enum(['mensuel', 'annuel', 'unique'], {
+    error: 'Le type de facturation est obligatoire',
+  }),
 })
 
 type ProductFormData = z.infer<typeof productSchema>
@@ -73,21 +79,55 @@ export default function ProductForm({ categories }: { categories: Category[] }) 
       </div>
 
       <div className={styles.field}>
+        <Label htmlFor="prix">Prix (€)</Label>
+        <Input
+          id="prix"
+          type="number"
+          step="0.01"
+          {...register('prix', { valueAsNumber: true })}
+        />
+        {errors.prix && (
+          <span className={styles.error}>{errors.prix.message}</span>
+        )}
+      </div>
+
+      <div className={styles.field}>
+        <Label>Facturation</Label>
+        <Select
+          onValueChange={(value) =>
+            setValue('type_facturation', value as ProductFormData['type_facturation'])
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Choisir un type de facturation" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="mensuel">Mensuel</SelectItem>
+            <SelectItem value="annuel">Annuel</SelectItem>
+            <SelectItem value="unique">Paiement unique</SelectItem>
+          </SelectContent>
+        </Select>
+        {errors.type_facturation && (
+          <span className={styles.error}>{errors.type_facturation.message}</span>
+        )}
+      </div>
+
+      <div className={styles.field}>
         <Label>Catégorie</Label>
-        <Select onValueChange={(value) => setValue('idcategorie', Number(value))}>
+        <Select onValueChange={(value) => setValue('id_categorie', Number(value))}>
           <SelectTrigger>
             <SelectValue placeholder="Choisir une catégorie" />
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
-              <SelectItem key={cat.idcategorie} value={String(cat.idcategorie)}>
+              <SelectItem key={cat.id_categorie} value={String(cat.id_categorie)}>
                 {cat.cat_nom}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        {errors.idcategorie && (
-          <span className={styles.error}>{errors.idcategorie.message}</span>
+        {errors.id_categorie && (
+          <span className={styles.error}>{errors.id_categorie.message}</span>
         )}
       </div>
 
