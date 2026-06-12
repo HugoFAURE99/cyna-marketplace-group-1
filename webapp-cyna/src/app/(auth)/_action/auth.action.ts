@@ -26,7 +26,7 @@ export async function login(formData: FormData) {
     return { error: "Identifiants incorrects." }
   }
 
-  // Si tout est bon, on redirige vers le dashboard sécurisé
+  // Si tout est bon, on redirige vers le dashboard (compte utilisateur)
   redirect('/dashboard')
 }
 
@@ -65,12 +65,12 @@ export async function register(formData: FormData) {
         nom_complet: nomComplet,
         role: 'client', // Rôle par défaut
         is_actif: true,
-        // D'après ton schéma BDD, cette colonne est obligatoire (pas de '?') :
+        // cette colonne est obligatoire (et n'a pas de default) :
         token_connexion_stripe: 'non_configure', 
       })
 
     if (dbError) {
-      // En cas d'erreur BDD, on pourrait annuler la création Auth, 
+      // En cas d'erreur BDD, on pourrait annuler la création Auth, avec un trigger dasn la BDD 
       // mais on renvoie déjà l'erreur pour comprendre ce qui cloche.
       return { error: `Erreur création profil: ${dbError.message}` }
     }

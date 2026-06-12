@@ -41,9 +41,8 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   /* =========================================================================
-     4. REDIRECTIONS SÉCURISÉES (DÉSACTIVÉES TEMPORAIREMENT)
+     4. REDIRECTIONS SÉCURISÉES 
      -> Commentaire à enlever dès que le système de login est prêt.
-     -> Ne bloque pas les autres développeurs pour l'instant.
      =========================================================================
   
   const url = request.nextUrl.clone()
@@ -64,7 +63,7 @@ export async function middleware(request: NextRequest) {
   
   ========================================================================= */
 
-  // 5. On renvoie la réponse (laisse passer tout le monde en mode "dev")
+  // 5. On renvoie la réponse 
   return supabaseResponse
 }
 

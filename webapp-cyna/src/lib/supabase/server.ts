@@ -16,7 +16,7 @@ export function createAdminClient() {
 }
 
 // CLIENT : Le Serveur Utilisateur
-// À utiliser dans les Server Components et Server Actions pour les clients normaux
+// À utiliser dans les Server Components et Server Actions pour les clients normaux qui ont des RLS
 export async function createServerClient() {
   const cookieStore = await cookies()
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
