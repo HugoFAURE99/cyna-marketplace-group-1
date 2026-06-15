@@ -119,6 +119,123 @@ export async function getProducts() {
   return data
 }
 
+export async function getProductById(id: number) {
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('produit')
+    .select(`
+      id_produit,
+      nom_pro,
+      pro_description,
+      pro_carac_technique,
+      id_categorie,
+      stripe_product_id,
+      statut_produit,
+      prix_tarif (
+        id_prix,
+        prix,
+        stripe_price_id,
+        type_facturation
+      )
+    `)
+    .eq('id_produit', id)
+    .single()
+
+  if (error) {
+    throw new Error(`Erreur chargement produit : ${error.message}`)
+  }
+
+  return data
+}
+
+export async function updateProduct(
+  id: number,
+  formData: {
+    nom_pro: string
+    pro_description: string
+    pro_carac_technique?: string
+    id_categorie: number
+    prix: number
+    type_facturation: 'mensuel' | 'annuel' | 'unique'
+  },
+) {
+  const supabase = createAdminClient()
+
+  const { data: existing, error: existingError } = await supabase
+    .from('produit')
+    .select('stripe_product_id')
+    .eq('id_produit', id)
+    .single()
+
+  if (existingError || !existing) {
+    throw new Error(`Produit introuvable : ${existingError?.message}`)
+  }
+
+  if (existing.stripe_product_id) {
+    await stripe.products.update(existing.stripe_product_id, {
+      name: formData.nom_pro,
+      description: formData.pro_description,
+    })
+  }
+
+  const { error: produitError } = await supabase
+    .from('produit')
+    .update({
+      nom_pro: formData.nom_pro,
+      pro_description: formData.pro_description,
+      pro_carac_technique: formData.pro_carac_technique,
+      id_categorie: formData.id_categorie,
+    })
+    .eq('id_produit', id)
+
+  if (produitError) {
+    throw new Error(`Erreur mise à jour produit : ${produitError.message}`)
+  }
+
+  const prixCentimes = Math.round(formData.prix * 100)
+
+  const { data: existingTarif } = await supabase
+    .from('prix_tarif')
+    .select('id_prix, prix, type_facturation')
+    .eq('id_produit', id)
+    .single()
+
+  if (
+    existingTarif &&
+    (existingTarif.prix !== prixCentimes ||
+      existingTarif.type_facturation !== formData.type_facturation)
+  ) {
+    const stripePrice = await stripe.prices.create({
+      product: existing.stripe_product_id!,
+      currency: 'eur',
+      unit_amount: prixCentimes,
+      ...(formData.type_facturation === 'unique'
+        ? {}
+        : {
+            recurring: {
+              interval:
+                formData.type_facturation === 'annuel' ? 'year' : 'month',
+            },
+          }),
+    })
+
+    const { error: prixError } = await supabase
+      .from('prix_tarif')
+      .update({
+        prix: prixCentimes,
+        stripe_price_id: stripePrice.id,
+        type_facturation: formData.type_facturation,
+      })
+      .eq('id_prix', existingTarif.id_prix)
+
+    if (prixError) {
+      throw new Error(`Erreur mise à jour tarif : ${prixError.message}`)
+    }
+  }
+
+  revalidatePath('/admin/products')
+}
+
 export async function deleteProduct(productId: number) {
   const supabase = createAdminClient()
 
@@ -148,3 +265,4 @@ export async function deleteProduct(productId: number) {
 
   revalidatePath('/admin/products')
 }
+
