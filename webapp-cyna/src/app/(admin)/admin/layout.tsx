@@ -8,12 +8,12 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   return (
-      <SidebarProvider>
-        <AdminSidebar />
-        <main className={styles.main}>
-          <SidebarTrigger />
-          {children}
-        </main>
-      </SidebarProvider>
+    <SidebarProvider>
+      <AdminSidebar />
+      <main className={styles.main}>
+        <SidebarTrigger />
+        {children}
+      </main>
+    </SidebarProvider>
   )
 }

@@ -10,7 +10,7 @@ export default async function ProductsPage() {
     <div>
       <div>
         <h1>Produits</h1>
-        <Button render={<Link href="./products/new" />}>
+        <Button nativeButton={false} render={<Link href="./products/new" />}>
           Ajouter un produit
         </Button>
       </div>
