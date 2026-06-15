@@ -70,7 +70,8 @@ export async function register(formData: FormData) {
       })
 
     if (dbError) {
-      // En cas d'erreur BDD, on pourrait annuler la création Auth, avec un trigger dasn la BDD 
+      // suppresion du compte en cas d'erreur
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
       // mais on renvoie déjà l'erreur pour comprendre ce qui cloche.
       return { error: `Erreur création profil: ${dbError.message}` }
     }
