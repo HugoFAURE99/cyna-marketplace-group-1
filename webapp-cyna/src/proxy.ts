@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // 1. On crée une réponse par défaut qui dit "laisse passer la requête"
   let supabaseResponse = NextResponse.next({
     request: {
@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  // 2. On initialise un client Supabase exclusif au middleware
+  // 2. On initialise un client Supabase exclusif au proxy
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -21,7 +21,7 @@ export async function middleware(request: NextRequest) {
         setAll(cookiesToSet) {
           // Si Supabase génère un nouveau token, on le met d'abord dans la requête en cours...
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          
+
           // ... puis on l'attache à la réponse qui sera envoyée au navigateur de l'utilisateur
           supabaseResponse = NextResponse.next({
             request,
