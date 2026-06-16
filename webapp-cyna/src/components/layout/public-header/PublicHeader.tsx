@@ -1,0 +1,48 @@
+// Fixed public site header: logo, search, cart, and the menu drawer.
+import Image from "next/image";
+import Link from "next/link";
+
+import CartButton from "@/components/layout/public-header/CartButton";
+import PublicMenuSheet from "@/components/layout/public-header/PublicMenuSheet";
+import SearchForm from "@/components/layout/public-header/SearchForm";
+
+type PublicHeaderProps = {
+  cartCount?: number;
+};
+
+export default function PublicHeader({ cartCount = 0 }: PublicHeaderProps) {
+  return (
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200 bg-white shadow-sm">
+      {/* logo | search | actions. Search is centered in the flex-1 track between
+          logo and actions, so its gap to each side stays even despite their
+          different widths. */}
+      <div className="mx-auto flex h-[72px] w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        <Link
+          aria-label="CYNA home"
+          className="inline-flex w-fit shrink-0 items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+          href="/"
+        >
+          <Image
+            alt="CYNA"
+            className="h-auto w-[118px]"
+            height={32}
+            priority
+            src="/brand/cyna-logo-v2-header.svg"
+            width={118}
+          />
+        </Link>
+
+        <div className="hidden min-w-0 flex-1 md:block">
+          <div className="mx-auto w-full max-w-[600px]">
+            <SearchForm />
+          </div>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-3">
+          <CartButton count={cartCount} />
+          <PublicMenuSheet />
+        </div>
+      </div>
+    </header>
+  );
+}
