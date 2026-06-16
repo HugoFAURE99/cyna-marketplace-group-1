@@ -1,10 +1,10 @@
-import Link from 'next/link'
-import { getCategories } from '@/app/(admin)/admin/_actions/category.actions'
-import CategoriesTable from '@/components/admin/CategoriesTable/CategoriesTable'
-import { Button } from '@/components/ui/button'
+import Link from "next/link";
+import { getCategories } from "@/app/(admin)/admin/_actions/category.actions";
+import CategoriesTable from "@/components/admin/CategoriesTable/CategoriesTable";
+import { Button } from "@/components/ui/button";
 
 export default async function CategoriesPage() {
-  const categories = await getCategories()
+  const categories = await getCategories();
 
   return (
     <div>
@@ -16,5 +16,5 @@ export default async function CategoriesPage() {
       </div>
       <CategoriesTable categories={categories} />
     </div>
-  )
+  );
 }

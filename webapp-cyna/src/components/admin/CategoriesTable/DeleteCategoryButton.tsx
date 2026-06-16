@@ -1,37 +1,39 @@
-'use client'
+"use client";
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { deleteCategory } from '@/app/(admin)/admin/_actions/category.actions'
-import { Dialog } from '@base-ui/react/dialog'
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { deleteCategory } from "@/app/(admin)/admin/_actions/category.actions";
+import { Dialog } from "@base-ui/react/dialog";
 
 type DeleteCategoryButtonProps = {
-  categoryId: number
-  categoryName: string
-}
+  categoryId: number;
+  categoryName: string;
+};
 
 export default function DeleteCategoryButton({
   categoryId,
   categoryName,
 }: DeleteCategoryButtonProps) {
-  const [open, setOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
-  const router = useRouter()
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const onDelete = () => {
-    setError(null)
+    setError(null);
     startTransition(async () => {
       try {
-        await deleteCategory(categoryId)
-        setOpen(false)
-        router.refresh()
+        await deleteCategory(categoryId);
+        setOpen(false);
+        router.refresh();
       } catch {
-        setError("Impossible de supprimer cette catégorie. Elle est peut-être utilisée par des produits.")
+        setError(
+          "Impossible de supprimer cette catégorie. Elle est peut-être utilisée par des produits.",
+        );
       }
-    })
-  }
+    });
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -46,7 +48,8 @@ export default function DeleteCategoryButton({
             Confirmer la suppression
           </Dialog.Title>
           <Dialog.Description className="mt-2 text-sm text-muted-foreground">
-            Supprimer la catégorie &quot;{categoryName}&quot; ? Cette action est définitive.
+            Supprimer la catégorie &quot;{categoryName}&quot; ? Cette action est
+            définitive.
           </Dialog.Description>
 
           {error && <p className="mt-3 text-sm text-destructive">{error}</p>}
@@ -55,12 +58,17 @@ export default function DeleteCategoryButton({
             <Dialog.Close render={<Button variant="outline" size="sm" />}>
               Annuler
             </Dialog.Close>
-            <Button variant="destructive" size="sm" onClick={onDelete} disabled={isPending}>
-              {isPending ? 'Suppression...' : 'Confirmer'}
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={onDelete}
+              disabled={isPending}
+            >
+              {isPending ? "Suppression..." : "Confirmer"}
             </Button>
           </div>
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
-  )
+  );
 }

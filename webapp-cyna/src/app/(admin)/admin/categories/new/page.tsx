@@ -1,4 +1,4 @@
-import CategoryForm from '@/components/admin/CategoryForm/CategoryForm'
+import CategoryForm from "@/components/admin/CategoryForm/CategoryForm";
 
 export default async function NewCategoryPage() {
   return (
@@ -6,5 +6,5 @@ export default async function NewCategoryPage() {
       <h1>Nouvelle catégorie</h1>
       <CategoryForm />
     </div>
-  )
+  );
 }

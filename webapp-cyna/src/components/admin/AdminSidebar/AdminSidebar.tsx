@@ -7,23 +7,22 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-} from '@/components/ui/sidebar'
-import { Package, Layers } from 'lucide-react'
-import Link from 'next/link'
+} from "@/components/ui/sidebar";
+import { Package, Layers } from "lucide-react";
+import Link from "next/link";
 
 const menuItems = [
   {
-    label: 'Produits',
-    href: '/admin/products',
+    label: "Produits",
+    href: "/admin/products",
     icon: Package,
   },
   {
-    label: 'Catégories',
-    href: '/admin/categories',
+    label: "Catégories",
+    href: "/admin/categories",
     icon: Layers,
   },
-  
-]
+];
 
 export function AdminSidebar() {
   return (
@@ -46,5 +45,5 @@ export function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
-  )
+  );
 }

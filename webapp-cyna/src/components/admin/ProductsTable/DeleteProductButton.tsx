@@ -1,37 +1,37 @@
-'use client'
+"use client";
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
-import { deleteProduct } from '@/app/(admin)/admin/_actions/product.actions'
-import { Dialog } from '@base-ui/react/dialog'
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { deleteProduct } from "@/app/(admin)/admin/_actions/product.actions";
+import { Dialog } from "@base-ui/react/dialog";
 
 type DeleteProductButtonProps = {
-  productId: number
-  productName: string
-}
+  productId: number;
+  productName: string;
+};
 
 export default function DeleteProductButton({
   productId,
   productName,
 }: DeleteProductButtonProps) {
-  const [open, setOpen] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
-  const router = useRouter()
+  const [open, setOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const onDelete = () => {
-    setError(null)
+    setError(null);
     startTransition(async () => {
       try {
-        await deleteProduct(productId)
-        setOpen(false)
-        router.refresh()
+        await deleteProduct(productId);
+        setOpen(false);
+        router.refresh();
       } catch {
-        setError("La suppression a échoué. Réessaie.")
+        setError("La suppression a échoué. Réessaie.");
       }
-    })
-  }
+    });
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
@@ -55,12 +55,17 @@ export default function DeleteProductButton({
             <Dialog.Close render={<Button variant="outline" size="sm" />}>
               Annuler
             </Dialog.Close>
-            <Button variant="destructive" size="sm" onClick={onDelete} disabled={isPending}>
-              {isPending ? 'Suppression...' : 'Confirmer'}
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={onDelete}
+              disabled={isPending}
+            >
+              {isPending ? "Suppression..." : "Confirmer"}
             </Button>
           </div>
         </Dialog.Popup>
       </Dialog.Portal>
     </Dialog.Root>
-  )
+  );
 }

@@ -6,7 +6,7 @@ import NavBar from "@/components/navbar/NavBar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import RightSideBar from "@/components/navbar/RightSideBar";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,13 +31,18 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+      className={cn(
+        "h-full",
+        "antialiased",
+        geistSans.variable,
+        geistMono.variable,
+        "font-sans",
+        inter.variable,
+      )}
     >
       <body className="antialiased">
         <SidebarProvider defaultOpen={false}>
-          <div className="flex flex-col w-full">
-            {children}
-          </div>
+          <div className="flex flex-col w-full">{children}</div>
           <RightSideBar />
         </SidebarProvider>
       </body>
