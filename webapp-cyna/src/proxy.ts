@@ -51,6 +51,7 @@ export async function proxy(request: NextRequest) {
 
   // Règle A : L'utilisateur n'est PAS connecté et veut voir une zone protégée
   if (!user && isProtectedRoute) {
+    url.searchParams.set('next', url.pathname + url.search)
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
