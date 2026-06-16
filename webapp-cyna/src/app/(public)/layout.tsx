@@ -42,7 +42,10 @@ export default function RootLayout({
     >
       <body className="antialiased">
         <SidebarProvider defaultOpen={false}>
-          <div className="flex flex-col w-full">{children}</div>
+          <div className="flex flex-col w-full">
+            <NavBar />
+            {children}
+          </div>
           <RightSideBar />
         </SidebarProvider>
       </body>

@@ -6,7 +6,6 @@ import GridItems from "@/components/home/GridItems";
 export default function Home() {
   return (
     <>
-      <NavBar />
       <CustomCarousel />
       <div className="my-10 mb-40 mx-50">
         <h1 className="text-purple-800">WHY CYNA</h1>
