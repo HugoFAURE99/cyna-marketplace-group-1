@@ -51,14 +51,13 @@ export async function proxy(request: NextRequest) {
 
   // Règle A : L'utilisateur n'est PAS connecté et veut voir une zone protégée
   if (!user && isProtectedRoute) {
-    url.searchParams.set('next', url.pathname + url.search)
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
   // Règle B : L'utilisateur EST connecté et essaie d'aller sur la page de login ou register
   if (user && isAuthRoute) {
-    url.pathname = '/dashboard'
+    url.pathname = '/'
     return NextResponse.redirect(url)
   }
   

@@ -9,17 +9,20 @@ import { createServerClient, createAdminClient } from '@/lib/supabase/server'
 export async function login(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-  const nextUrl = (formData.get('nextUrl') as string) || '/dashboard'
 
-  if (!email || !password) return { error: "l'email et le mot des passe est Requis." }
+  if (!email || !password) {
+    return { error: "L'email et le mot de passe sont requis." }
+  }
 
   const supabase = await createServerClient()
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-  if (error) return { error: "Identifiants incorrects." }
+  if (error) {
+    return { error: "Identifiants incorrects." }
+  }
 
-  // Redirection fluide !
-  redirect(nextUrl)
+  // Redirection simple vers l'accueil
+  redirect('/')
 }
 
 // ============================================================================
@@ -29,27 +32,25 @@ export async function register(formData: FormData) {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const nomComplet = formData.get('nom_complet') as string
-  const nextUrl = (formData.get('nextUrl') as string) || '/dashboard'
 
   if (!email || !password || !nomComplet) {
     return { error: "Tous les champs sont requis." }
   }
 
-  // connexion admin a la BDD
   const supabaseAdmin = createAdminClient()
 
-  // 1. On crée le compte Auth en silence (Admin API)
+  // 1. Création du compte en silence (sans auto-login)
   const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
-    email_confirm: true // On valide l'email informatiquement pour qu'il puisse se connecter direct
+    email_confirm: true
   })
 
   if (authError) {
     return { error: authError.message }
   }
 
-  // 2. On crée le profil dans la table utilisateur
+  // 2. Création du profil en BDD
   if (authData.user) {
     const { error: dbError } = await supabaseAdmin
       .from('utilisateur')
@@ -68,10 +69,10 @@ export async function register(formData: FormData) {
     }
   }
 
-
-  // 4. On le redirige vers le login
+  // 3. Redirection vers la page login avec un message de succès
   const message = encodeURIComponent("Compte créé avec succès ! Veuillez vous connecter.")
-  redirect(`/login?message=${message}&next=${encodeURIComponent(nextUrl)}`)
+  redirect(`/login?message=${message}`)
+
 
 
   // --- Avec Confirmation email d'inscription ---
@@ -86,12 +87,8 @@ export async function register(formData: FormData) {
 // ============================================================================
 export async function logout() {
   const supabase = await createServerClient()
-
-  // Détruit la session et le cookie
   await supabase.auth.signOut()
-
-  // Renvoie vers la page de connexion
-  redirect('/login')
+  redirect('/')
 }
 
 
