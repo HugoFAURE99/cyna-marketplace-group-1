@@ -18,8 +18,8 @@ export default function NavBar() {
             <SidebarTrigger className="my-1.5" />
           </div>
         </div>
-        <a href="/admin" className="my-1">
-          espace admin
+        <a href="/login" className="my-1">
+          login
         </a>
       </div>
     </nav>
