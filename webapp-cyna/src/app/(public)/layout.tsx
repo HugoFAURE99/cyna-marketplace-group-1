@@ -28,26 +28,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={cn(
-        "h-full",
-        "antialiased",
-        geistSans.variable,
-        geistMono.variable,
-        "font-sans",
-        inter.variable,
-      )}
-    >
-      <body className="antialiased">
-        <div className="flex min-h-screen w-full flex-col">
-          <PublicHeader />
-          {/* Spacer offsets the fixed header (h-[72px]). */}
-          <div aria-hidden="true" className="h-[72px] shrink-0" />
-          <div className="flex flex-1 flex-col">{children}</div>
-          <PublicFooter />
-        </div>
-      </body>
-    </html>
+    <div className="flex min-h-screen w-full flex-col">
+      <PublicHeader />
+      {/* Spacer offsets the fixed header (h-[72px]). */}
+      <div aria-hidden="true" className="h-[72px] shrink-0" />
+      <div className="flex flex-1 flex-col">{children}</div>
+      <PublicFooter />
+    </div>
   );
 }
