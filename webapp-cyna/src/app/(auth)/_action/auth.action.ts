@@ -1,7 +1,8 @@
 'use server'
 
 import { redirect } from 'next/navigation'
-import { createServerClient, createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
+import { createServerClient } from '@/lib/supabase/server-client'
 
 // ============================================================================
 // 1. CONNEXION (LOGIN)

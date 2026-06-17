@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server'
+import { createServerClient } from '@/lib/supabase/server-client'
 
 export async function GET(request: Request) {
   // 1. On récupère l'URL complète cliquée par l'utilisateur
