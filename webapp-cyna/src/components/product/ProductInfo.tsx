@@ -1,5 +1,6 @@
 // Product heading, description, and technical specs list.
 import { Check } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
 type ProductInfoProps = {
   description: string | null;
@@ -7,11 +8,13 @@ type ProductInfoProps = {
   specs: string[];
 };
 
-export default function ProductInfo({
+export default async function ProductInfo({
   description,
   name,
   specs,
 }: ProductInfoProps) {
+  const t = await getTranslations("product");
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -28,7 +31,7 @@ export default function ProductInfo({
       {specs.length > 0 && (
         <section className="rounded-lg bg-white p-6 shadow-xs ring-1 ring-black/5">
           <h2 className="mb-4 text-xl font-semibold text-slate-950">
-            Technical Specifications
+            {t("technicalSpecifications")}
           </h2>
           <ul className="space-y-3">
             {specs.map((spec) => (

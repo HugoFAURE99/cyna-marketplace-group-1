@@ -1,22 +1,27 @@
 // "Similar Services" grid; renders nothing when there are none.
-import Link from "next/link";
 import { ImageOff } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
+import { Link } from "@/i18n/navigation";
 import type { SimilarProduct } from "@/lib/products/public-products";
 
 type SimilarProductsProps = {
   products: SimilarProduct[];
 };
 
-export default function SimilarProducts({ products }: SimilarProductsProps) {
+export default async function SimilarProducts({
+  products,
+}: SimilarProductsProps) {
   if (products.length === 0) {
     return null;
   }
 
+  const t = await getTranslations("product");
+
   return (
     <section className="mt-20">
       <h2 className="mb-6 text-2xl font-bold text-slate-950">
-        Similar Services
+        {t("similarServices")}
       </h2>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {products.map((product) => {
@@ -34,7 +39,7 @@ export default function SimilarProducts({ products }: SimilarProductsProps) {
               <div className="aspect-[16/9] overflow-hidden bg-slate-100">
                 {imageUrl ? (
                   <div
-                    aria-label={`${product.nom_pro} image`}
+                    aria-label={t("imageAlt", { name: product.nom_pro })}
                     className="h-full w-full bg-cover bg-center transition group-hover:scale-105"
                     role="img"
                     style={{

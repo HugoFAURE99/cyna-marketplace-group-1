@@ -1,17 +1,24 @@
 // Cart link with an optional item-count badge.
-import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
+import { Link } from "@/i18n/navigation";
 
 type CartButtonProps = {
   count?: number;
 };
 
-export default function CartButton({ count = 0 }: CartButtonProps) {
+export default async function CartButton({ count = 0 }: CartButtonProps) {
+  const t = await getTranslations("header");
   const hasItems = count > 0;
 
   return (
     <Link
-      aria-label={hasItems ? `Cart, ${count} items` : "Cart"}
+      aria-label={
+        hasItems
+          ? `${t("cartLabel")}, ${t("cartItems", { count })}`
+          : t("cartLabel")
+      }
       className="relative inline-flex size-10 items-center justify-center rounded-md text-slate-950 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
       href="/cart"
     >

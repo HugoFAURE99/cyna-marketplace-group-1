@@ -1,4 +1,6 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+
+import { Link } from "@/i18n/navigation";
 import {
   Table,
   TableBody,
@@ -7,22 +9,29 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { getProducts } from "@/app/(admin)/admin/_actions/product.actions";
+import type { getProducts } from "@/app/[locale]/(admin)/admin/_actions/product.actions";
 import DeleteProductButton from "@/components/admin/ProductsTable/DeleteProductButton";
 
 type Product = Awaited<ReturnType<typeof getProducts>>[number];
 
-export default function ProductsTable({ products }: { products: Product[] }) {
+export default async function ProductsTable({
+  products,
+}: {
+  products: Product[];
+}) {
+  const t = await getTranslations("admin.products.table");
+  const tActions = await getTranslations("admin.actions");
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Nom</TableHead>
-          <TableHead>Catégorie</TableHead>
-          <TableHead>Statut</TableHead>
-          <TableHead>Prix</TableHead>
-          <TableHead>Stripe ID</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead>{t("name")}</TableHead>
+          <TableHead>{t("category")}</TableHead>
+          <TableHead>{t("status")}</TableHead>
+          <TableHead>{t("price")}</TableHead>
+          <TableHead>{t("stripeId")}</TableHead>
+          <TableHead>{t("actions")}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -31,12 +40,9 @@ export default function ProductsTable({ products }: { products: Product[] }) {
           return (
             <TableRow key={product.id_produit}>
               <TableCell>{product.nom_pro}</TableCell>
+              <TableCell>{product.categorie?.cat_nom || "—"}</TableCell>
               <TableCell>
-                {(product.categorie as { cat_nom: string } | null)?.cat_nom ??
-                  "—"}
-              </TableCell>
-              <TableCell>
-                {product.statut_produit ? "Actif" : "Inactif"}
+                {product.statut_produit ? t("active") : t("inactive")}
               </TableCell>
               <TableCell>
                 {tarif
@@ -47,7 +53,7 @@ export default function ProductsTable({ products }: { products: Product[] }) {
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Link href={`/admin/products/${product.id_produit}`}>
-                    Modifier
+                    {tActions("edit")}
                   </Link>
                   <DeleteProductButton
                     productId={product.id_produit}

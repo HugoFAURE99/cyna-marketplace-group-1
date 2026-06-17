@@ -1,5 +1,4 @@
 // "Why CYNA" intro block; renders nothing when no content is configured.
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import type { HomeIntroContent } from "@/lib/home/public-home";
@@ -37,13 +36,13 @@ export default function HomeIntro({ content }: HomeIntroProps) {
         </p>
       )}
       {content.linkLabel && (
-        <Link
+        <a
           className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-purple-700 transition hover:text-purple-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
           href="#top-products"
         >
           {content.linkLabel}
           <ArrowRight aria-hidden="true" className="size-4" />
-        </Link>
+        </a>
       )}
     </section>
   );

@@ -124,27 +124,50 @@ export type Database = {
       };
       categorie: {
         Row: {
-          cat_description: string | null;
-          cat_nom: string;
           id_categorie: number;
           lien_image_cat: string | null;
           ordre_affichage: number | null;
         };
         Insert: {
-          cat_description?: string | null;
-          cat_nom: string;
           id_categorie?: number;
           lien_image_cat?: string | null;
           ordre_affichage?: number | null;
         };
         Update: {
-          cat_description?: string | null;
-          cat_nom?: string;
           id_categorie?: number;
           lien_image_cat?: string | null;
           ordre_affichage?: number | null;
         };
         Relationships: [];
+      };
+      categorie_traduction: {
+        Row: {
+          cat_description: string | null;
+          cat_nom: string;
+          id_categorie: number;
+          langue: Database["public"]["Enums"]["langue"];
+        };
+        Insert: {
+          cat_description?: string | null;
+          cat_nom: string;
+          id_categorie: number;
+          langue: Database["public"]["Enums"]["langue"];
+        };
+        Update: {
+          cat_description?: string | null;
+          cat_nom?: string;
+          id_categorie?: number;
+          langue?: Database["public"]["Enums"]["langue"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "categorie_traduction_id_categorie_fkey";
+            columns: ["id_categorie"];
+            isOneToOne: false;
+            referencedRelation: "categorie";
+            referencedColumns: ["id_categorie"];
+          },
+        ];
       };
       code_promo: {
         Row: {
@@ -218,27 +241,50 @@ export type Database = {
       };
       image_carrousel: {
         Row: {
-          description_image: string | null;
           est_actif: boolean;
           id_image: number;
           lien_image_caroussel: string;
+        };
+        Insert: {
+          est_actif?: boolean;
+          id_image?: number;
+          lien_image_caroussel: string;
+        };
+        Update: {
+          est_actif?: boolean;
+          id_image?: number;
+          lien_image_caroussel?: string;
+        };
+        Relationships: [];
+      };
+      image_carrousel_traduction: {
+        Row: {
+          description_image: string | null;
+          id_image: number;
+          langue: Database["public"]["Enums"]["langue"];
           titre_image: string;
         };
         Insert: {
           description_image?: string | null;
-          est_actif?: boolean;
-          id_image?: number;
-          lien_image_caroussel: string;
+          id_image: number;
+          langue: Database["public"]["Enums"]["langue"];
           titre_image: string;
         };
         Update: {
           description_image?: string | null;
-          est_actif?: boolean;
           id_image?: number;
-          lien_image_caroussel?: string;
+          langue?: Database["public"]["Enums"]["langue"];
           titre_image?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "image_carrousel_traduction_id_image_fkey";
+            columns: ["id_image"];
+            isOneToOne: false;
+            referencedRelation: "image_carrousel";
+            referencedColumns: ["id_image"];
+          },
+        ];
       };
       image_produit: {
         Row: {
@@ -388,29 +434,23 @@ export type Database = {
         Row: {
           id_prix: number;
           id_produit: number;
-          nom_prix_tarif: string | null;
           prix: number;
           stripe_price_id: string;
           type_facturation: string;
-          unite: string | null;
         };
         Insert: {
           id_prix?: number;
           id_produit: number;
-          nom_prix_tarif?: string | null;
           prix: number;
           stripe_price_id: string;
           type_facturation: string;
-          unite?: string | null;
         };
         Update: {
           id_prix?: number;
           id_produit?: number;
-          nom_prix_tarif?: string | null;
           prix?: number;
           stripe_price_id?: string;
           type_facturation?: string;
-          unite?: string | null;
         };
         Relationships: [
           {
@@ -422,16 +462,42 @@ export type Database = {
           },
         ];
       };
+      prix_tarif_traduction: {
+        Row: {
+          id_prix: number;
+          langue: Database["public"]["Enums"]["langue"];
+          nom_prix_tarif: string | null;
+          unite: string | null;
+        };
+        Insert: {
+          id_prix: number;
+          langue: Database["public"]["Enums"]["langue"];
+          nom_prix_tarif?: string | null;
+          unite?: string | null;
+        };
+        Update: {
+          id_prix?: number;
+          langue?: Database["public"]["Enums"]["langue"];
+          nom_prix_tarif?: string | null;
+          unite?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "prix_tarif_traduction_id_prix_fkey";
+            columns: ["id_prix"];
+            isOneToOne: false;
+            referencedRelation: "prix_tarif";
+            referencedColumns: ["id_prix"];
+          },
+        ];
+      };
       produit: {
         Row: {
           date_ajout: string;
           id_categorie: number;
           id_produit: number;
           mis_avant: boolean;
-          nom_pro: string;
           ordre_priorite: number;
-          pro_carac_technique: string | null;
-          pro_description: string | null;
           quantite_produit: number;
           statut_produit: boolean;
           stripe_product_id: string | null;
@@ -441,10 +507,7 @@ export type Database = {
           id_categorie: number;
           id_produit?: number;
           mis_avant?: boolean;
-          nom_pro: string;
           ordre_priorite?: number;
-          pro_carac_technique?: string | null;
-          pro_description?: string | null;
           quantite_produit?: number;
           statut_produit?: boolean;
           stripe_product_id?: string | null;
@@ -454,10 +517,7 @@ export type Database = {
           id_categorie?: number;
           id_produit?: number;
           mis_avant?: boolean;
-          nom_pro?: string;
           ordre_priorite?: number;
-          pro_carac_technique?: string | null;
-          pro_description?: string | null;
           quantite_produit?: number;
           statut_produit?: boolean;
           stripe_product_id?: string | null;
@@ -469,6 +529,38 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "categorie";
             referencedColumns: ["id_categorie"];
+          },
+        ];
+      };
+      produit_traduction: {
+        Row: {
+          id_produit: number;
+          langue: Database["public"]["Enums"]["langue"];
+          nom_pro: string;
+          pro_carac_technique: string | null;
+          pro_description: string | null;
+        };
+        Insert: {
+          id_produit: number;
+          langue: Database["public"]["Enums"]["langue"];
+          nom_pro: string;
+          pro_carac_technique?: string | null;
+          pro_description?: string | null;
+        };
+        Update: {
+          id_produit?: number;
+          langue?: Database["public"]["Enums"]["langue"];
+          nom_pro?: string;
+          pro_carac_technique?: string | null;
+          pro_description?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "produit_traduction_id_produit_fkey";
+            columns: ["id_produit"];
+            isOneToOne: false;
+            referencedRelation: "produit";
+            referencedColumns: ["id_produit"];
           },
         ];
       };
@@ -506,16 +598,19 @@ export type Database = {
         Row: {
           emplacement_texte: string;
           id_texte: number;
+          langue: Database["public"]["Enums"]["langue"];
           texte: string;
         };
         Insert: {
           emplacement_texte: string;
           id_texte?: number;
+          langue?: Database["public"]["Enums"]["langue"];
           texte: string;
         };
         Update: {
           emplacement_texte?: string;
           id_texte?: number;
+          langue?: Database["public"]["Enums"]["langue"];
           texte?: string;
         };
         Relationships: [];
@@ -599,7 +694,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
-      [_ in never]: never;
+      langue: "fr" | "en";
     };
     CompositeTypes: {
       [_ in never]: never;
@@ -729,6 +824,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      langue: ["fr", "en"],
+    },
   },
 } as const;

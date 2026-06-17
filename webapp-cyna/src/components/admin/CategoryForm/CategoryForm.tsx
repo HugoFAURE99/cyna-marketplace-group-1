@@ -1,35 +1,52 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { z } from "zod";
+
+import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import {
   createCategory,
   updateCategory,
-} from "@/app/(admin)/admin/_actions/category.actions";
+} from "@/app/[locale]/(admin)/admin/_actions/category.actions";
 import styles from "./CategoryForm.module.scss";
 
-const categorySchema = z.object({
-  cat_nom: z.string().min(1, "Le nom est obligatoire"),
-  cat_description: z.string().optional(),
-});
-
-type CategoryFormData = z.infer<typeof categorySchema>;
+type Category = {
+  id_categorie: number;
+  cat_nom_fr: string;
+  cat_description_fr: string;
+  cat_nom_en: string;
+  cat_description_en: string;
+};
 
 export default function CategoryForm({
   category,
 }: {
-  category?: {
-    id_categorie: number;
-    cat_nom: string;
-    cat_description: string | null;
-  };
+  category?: Category;
 } = {}) {
+  const t = useTranslations("admin.categoryForm");
+  const tv = useTranslations("validation");
+  const tAdmin = useTranslations("admin");
   const router = useRouter();
+
+  const categorySchema = useMemo(
+    () =>
+      z.object({
+        cat_nom_fr: z.string().min(1, tv("nameFrRequired")),
+        cat_description_fr: z.string().optional(),
+        cat_nom_en: z.string().optional(),
+        cat_description_en: z.string().optional(),
+      }),
+    [tv],
+  );
+
+  type CategoryFormData = z.infer<typeof categorySchema>;
+
   const {
     register,
     handleSubmit,
@@ -38,8 +55,10 @@ export default function CategoryForm({
     resolver: zodResolver(categorySchema),
     defaultValues: category
       ? {
-          cat_nom: category.cat_nom,
-          cat_description: category.cat_description || "",
+          cat_nom_fr: category.cat_nom_fr,
+          cat_description_fr: category.cat_description_fr || "",
+          cat_nom_en: category.cat_nom_en,
+          cat_description_en: category.cat_description_en || "",
         }
       : undefined,
   });
@@ -53,31 +72,41 @@ export default function CategoryForm({
       }
       router.push("/admin/categories");
     } catch {
-      alert("Erreur lors de la modification");
+      alert(tAdmin("saveError"));
     }
   };
 
   return (
     <div className={styles.form}>
       <div className={styles.field}>
-        <Label htmlFor="cat_nom">Nom de la catégorie</Label>
-        <Input id="cat_nom" {...register("cat_nom")} />
-        {errors.cat_nom && (
-          <span className={styles.error}>{errors.cat_nom.message}</span>
+        <Label htmlFor="cat_nom_fr">{t("nameFr")}</Label>
+        <Input id="cat_nom_fr" {...register("cat_nom_fr")} />
+        {errors.cat_nom_fr && (
+          <span className={styles.error}>{errors.cat_nom_fr.message}</span>
         )}
       </div>
 
       <div className={styles.field}>
-        <Label htmlFor="cat_description">Description</Label>
-        <Input id="cat_description" {...register("cat_description")} />
+        <Label htmlFor="cat_nom_en">{t("nameEn")}</Label>
+        <Input id="cat_nom_en" {...register("cat_nom_en")} />
+      </div>
+
+      <div className={styles.field}>
+        <Label htmlFor="cat_description_fr">{t("descriptionFr")}</Label>
+        <Input id="cat_description_fr" {...register("cat_description_fr")} />
+      </div>
+
+      <div className={styles.field}>
+        <Label htmlFor="cat_description_en">{t("descriptionEn")}</Label>
+        <Input id="cat_description_en" {...register("cat_description_en")} />
       </div>
 
       <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting}>
         {isSubmitting
-          ? "Modification..."
+          ? t("submitting")
           : category
-            ? "Modifier"
-            : "Créer la catégorie"}
+            ? t("submitUpdate")
+            : t("submitCreate")}
       </Button>
     </div>
   );

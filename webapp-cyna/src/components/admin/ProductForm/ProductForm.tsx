@@ -1,9 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { z } from "zod";
+
+import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -17,7 +20,7 @@ import {
 import {
   createProduct,
   updateProduct,
-} from "@/app/(admin)/admin/_actions/product.actions";
+} from "@/app/[locale]/(admin)/admin/_actions/product.actions";
 import styles from "./ProductForm.module.scss";
 
 type Category = {
@@ -27,9 +30,6 @@ type Category = {
 
 type Product = {
   id_produit: number;
-  nom_pro: string;
-  pro_description: string;
-  pro_carac_technique: string | null;
   id_categorie: number;
   prix_tarif: {
     id_prix: number;
@@ -37,22 +37,13 @@ type Product = {
     stripe_price_id: string;
     type_facturation: string;
   }[];
+  nom_pro_fr: string;
+  pro_description_fr: string;
+  pro_carac_technique_fr: string;
+  nom_pro_en: string;
+  pro_description_en: string;
+  pro_carac_technique_en: string;
 };
-
-const productSchema = z.object({
-  nom_pro: z.string().min(1, "Le nom est obligatoire"),
-  pro_description: z.string().min(1, "La description est obligatoire"),
-  pro_carac_technique: z.string().optional(),
-  id_categorie: z.number({ error: "La catégorie est obligatoire" }),
-  prix: z
-    .number({ error: "Le prix est obligatoire" })
-    .positive("Le prix doit être supérieur à 0"),
-  type_facturation: z.enum(["mensuel", "annuel", "unique"], {
-    error: "Le type de facturation est obligatoire",
-  }),
-});
-
-type ProductFormData = z.infer<typeof productSchema>;
 
 export default function ProductForm({
   categories,
@@ -61,8 +52,33 @@ export default function ProductForm({
   categories: Category[];
   product?: Product;
 }) {
+  const t = useTranslations("admin.productForm");
+  const tv = useTranslations("validation");
+  const tAdmin = useTranslations("admin");
   const router = useRouter();
   const tarif = product?.prix_tarif?.[0];
+
+  const productSchema = useMemo(
+    () =>
+      z.object({
+        nom_pro_fr: z.string().min(1, tv("nameFrRequired")),
+        pro_description_fr: z.string().min(1, tv("descriptionFrRequired")),
+        pro_carac_technique_fr: z.string().optional(),
+        nom_pro_en: z.string().optional(),
+        pro_description_en: z.string().optional(),
+        pro_carac_technique_en: z.string().optional(),
+        id_categorie: z.number({ error: tv("categoryRequired") }),
+        prix: z
+          .number({ error: tv("pricePositive") })
+          .positive(tv("pricePositive")),
+        type_facturation: z.enum(["mensuel", "annuel", "unique"], {
+          error: tv("billingRequired"),
+        }),
+      }),
+    [tv],
+  );
+
+  type ProductFormData = z.infer<typeof productSchema>;
 
   const {
     register,
@@ -73,9 +89,12 @@ export default function ProductForm({
     resolver: zodResolver(productSchema),
     defaultValues: product
       ? {
-          nom_pro: product.nom_pro,
-          pro_description: product.pro_description,
-          pro_carac_technique: product.pro_carac_technique ?? "",
+          nom_pro_fr: product.nom_pro_fr,
+          pro_description_fr: product.pro_description_fr,
+          pro_carac_technique_fr: product.pro_carac_technique_fr ?? "",
+          nom_pro_en: product.nom_pro_en,
+          pro_description_en: product.pro_description_en,
+          pro_carac_technique_en: product.pro_carac_technique_en ?? "",
           id_categorie: product.id_categorie,
           prix: tarif ? tarif.prix / 100 : undefined,
           type_facturation:
@@ -93,39 +112,58 @@ export default function ProductForm({
       }
       router.push("/admin/products");
     } catch {
-      alert(
-        product
-          ? "Erreur lors de la modification"
-          : "Erreur lors de la création",
-      );
+      alert(tAdmin("saveError"));
     }
   };
 
   return (
     <div className={styles.form}>
       <div className={styles.field}>
-        <Label htmlFor="nom_pro">Nom du produit</Label>
-        <Input id="nom_pro" {...register("nom_pro")} />
-        {errors.nom_pro && (
-          <span className={styles.error}>{errors.nom_pro.message}</span>
+        <Label htmlFor="nom_pro_fr">{t("nameFr")}</Label>
+        <Input id="nom_pro_fr" {...register("nom_pro_fr")} />
+        {errors.nom_pro_fr && (
+          <span className={styles.error}>{errors.nom_pro_fr.message}</span>
         )}
       </div>
 
       <div className={styles.field}>
-        <Label htmlFor="pro_description">Description</Label>
-        <Input id="pro_description" {...register("pro_description")} />
-        {errors.pro_description && (
-          <span className={styles.error}>{errors.pro_description.message}</span>
+        <Label htmlFor="nom_pro_en">{t("nameEn")}</Label>
+        <Input id="nom_pro_en" {...register("nom_pro_en")} />
+      </div>
+
+      <div className={styles.field}>
+        <Label htmlFor="pro_description_fr">{t("descriptionFr")}</Label>
+        <Input id="pro_description_fr" {...register("pro_description_fr")} />
+        {errors.pro_description_fr && (
+          <span className={styles.error}>
+            {errors.pro_description_fr.message}
+          </span>
         )}
       </div>
 
       <div className={styles.field}>
-        <Label htmlFor="pro_carac_technique">Caractéristiques techniques</Label>
-        <Input id="pro_carac_technique" {...register("pro_carac_technique")} />
+        <Label htmlFor="pro_description_en">{t("descriptionEn")}</Label>
+        <Input id="pro_description_en" {...register("pro_description_en")} />
       </div>
 
       <div className={styles.field}>
-        <Label htmlFor="prix">Prix (€)</Label>
+        <Label htmlFor="pro_carac_technique_fr">{t("specsFr")}</Label>
+        <Input
+          id="pro_carac_technique_fr"
+          {...register("pro_carac_technique_fr")}
+        />
+      </div>
+
+      <div className={styles.field}>
+        <Label htmlFor="pro_carac_technique_en">{t("specsEn")}</Label>
+        <Input
+          id="pro_carac_technique_en"
+          {...register("pro_carac_technique_en")}
+        />
+      </div>
+
+      <div className={styles.field}>
+        <Label htmlFor="prix">{t("price")}</Label>
         <Input
           id="prix"
           type="number"
@@ -138,7 +176,7 @@ export default function ProductForm({
       </div>
 
       <div className={styles.field}>
-        <Label>Facturation</Label>
+        <Label>{t("billing")}</Label>
         <Select
           defaultValue={tarif?.type_facturation}
           onValueChange={(value) =>
@@ -149,12 +187,12 @@ export default function ProductForm({
           }
         >
           <SelectTrigger>
-            <SelectValue placeholder="Choisir un type de facturation" />
+            <SelectValue placeholder={t("chooseBilling")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="mensuel">Mensuel</SelectItem>
-            <SelectItem value="annuel">Annuel</SelectItem>
-            <SelectItem value="unique">Paiement unique</SelectItem>
+            <SelectItem value="mensuel">{t("monthly")}</SelectItem>
+            <SelectItem value="annuel">{t("annual")}</SelectItem>
+            <SelectItem value="unique">{t("oneTime")}</SelectItem>
           </SelectContent>
         </Select>
         {errors.type_facturation && (
@@ -165,13 +203,13 @@ export default function ProductForm({
       </div>
 
       <div className={styles.field}>
-        <Label>Catégorie</Label>
+        <Label>{t("category")}</Label>
         <Select
           defaultValue={product ? String(product.id_categorie) : undefined}
           onValueChange={(value) => setValue("id_categorie", Number(value))}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Choisir une catégorie" />
+            <SelectValue placeholder={t("chooseCategory")} />
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
@@ -191,12 +229,10 @@ export default function ProductForm({
 
       <Button onClick={handleSubmit(onSubmit)} disabled={isSubmitting}>
         {isSubmitting
-          ? product
-            ? "Modification..."
-            : "Création..."
+          ? t("submitting")
           : product
-            ? "Modifier le produit"
-            : "Créer le produit"}
+            ? t("submitUpdate")
+            : t("submitCreate")}
       </Button>
     </div>
   );
