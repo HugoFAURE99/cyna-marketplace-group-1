@@ -1,75 +1,76 @@
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
+import { createServerClient } from "@supabase/ssr";
+import createMiddleware from "next-intl/middleware";
+import type { NextRequest } from "next/server";
+import { routing } from "@/i18n/routing";
+
+const handleI18nRouting = createMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
-  // 1. On crée une réponse par défaut qui dit "laisse passer la requête"
-  let supabaseResponse = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  })
+  // Run next-intl first so locale redirects/rewrites are preserved.
+  const response = handleI18nRouting(request);
 
-  // 2. On initialise un client Supabase exclusif au proxy
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
-          // Si Supabase génère un nouveau token, on le met d'abord dans la requête en cours...
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+        setAll(cookiesToSet, headersToSet) {
+          // Keep refreshed auth cookies available to the current request.
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
 
-          // ... puis on l'attache à la réponse qui sera envoyée au navigateur de l'utilisateur
-          supabaseResponse = NextResponse.next({
-            request,
-          })
+          // Forward refreshed auth cookies and cache headers to the browser.
           cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+            response.cookies.set(name, value, options),
+          );
+          Object.entries(headersToSet).forEach(([key, value]) =>
+            response.headers.set(key, value),
+          );
         },
       },
-    }
-  )
+    },
+  );
 
-  // 3. On appelle getUser(). 
-  // Même si on ne bloque personne pour l'instant, ça permet de tester que la session se rafraîchit bien.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Refresh the Supabase session when needed, even while routes stay public.
+  await supabase.auth.getUser();
 
   /* =========================================================================
-     4. REDIRECTIONS SÉCURISÉES 
-     -> Commentaire à enlever dès que le système de login est prêt.
-     =========================================================================
-  
-  const url = request.nextUrl.clone()
-  const isProtectedRoute = url.pathname.startsWith('/dashboard') || url.pathname.startsWith('/admin')
-  const isAuthRoute = url.pathname.startsWith('/login') || url.pathname.startsWith('/register')
+     Future protected-route redirects
 
-  // Règle A : L'utilisateur n'est PAS connecté et veut voir une zone protégée
+     When login gating is ready, replace the refresh-only getUser() call above
+     with the destructuring call below, then uncomment the route checks.
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const url = request.nextUrl.clone();
+  const isProtectedRoute =
+    url.pathname.startsWith("/dashboard") || url.pathname.startsWith("/admin");
+  const isAuthRoute =
+    url.pathname.startsWith("/login") || url.pathname.startsWith("/register");
+
+  // Redirect anonymous users away from protected sections.
   if (!user && isProtectedRoute) {
-    url.pathname = '/login'
-    return NextResponse.redirect(url)
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
   }
 
-  // Règle B : L'utilisateur EST connecté et essaie d'aller sur la page de login ou register
+  // Redirect signed-in users away from login and registration screens.
   if (user && isAuthRoute) {
-    url.pathname = '/'
-    return NextResponse.redirect(url)
+    url.pathname = "/";
+    return NextResponse.redirect(url);
   }
-  
+
   ========================================================================= */
 
-  // 5. On renvoie la réponse 
-  return supabaseResponse
+  return response;
 }
 
-// 6. Configuration de Next.js
 export const config = {
-  matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
-}
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)"],
+};
