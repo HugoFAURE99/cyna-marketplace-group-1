@@ -1,0 +1,190 @@
+{
+  "metadata": {
+    "title": "CYNA",
+    "description": "Enterprise cybersecurity marketplace for modern businesses."
+  },
+  "common": {
+    "appName": "CYNA",
+    "languageSwitcher": "Change language",
+    "french": "French",
+    "english": "English"
+  },
+  "header": {
+    "homeAriaLabel": "CYNA home",
+    "searchPlaceholder": "Search products",
+    "searchButton": "Search",
+    "cartLabel": "Cart",
+    "cartItems": "{count, plural, =0 {No items} one {# item} other {# items}}"
+  },
+  "menu": {
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "information": "Information",
+    "logIn": "Log In",
+    "signUp": "Sign Up",
+    "termsOfUse": "Terms of Use",
+    "legalNotices": "Legal Notices",
+    "contact": "Contact",
+    "aboutCyna": "About CYNA"
+  },
+  "footer": {
+    "description": "Enterprise cybersecurity marketplace for modern businesses.",
+    "company": "Company",
+    "legal": "Legal",
+    "followUs": "Follow Us",
+    "aboutCyna": "About CYNA",
+    "contact": "Contact",
+    "termsOfUse": "Terms of Use",
+    "legalNotices": "Legal Notices",
+    "copyright": "© {year} CYNA. All rights reserved."
+  },
+  "home": {
+    "categoriesEyebrow": "Categories",
+    "browseByCategory": "Browse by Category",
+    "servicesEyebrow": "Services",
+    "topProducts": "Top Products",
+    "carouselEmpty": "Carousel content is not configured yet.",
+    "exploreServices": "Explore Services",
+    "noProducts": "No public products are available yet.",
+    "noCategories": "No public categories are available yet.",
+    "categoryImageAlt": "{name} category image",
+    "productImageAlt": "{name} image",
+    "carouselPrevious": "Previous slide",
+    "carouselNext": "Next slide",
+    "carouselGoToSlide": "Show slide {number}"
+  },
+  "product": {
+    "technicalSpecifications": "Technical Specifications",
+    "pricing": "Pricing",
+    "numberOfUsers": "Number of Users",
+    "subscribeNow": "Subscribe Now",
+    "similarServices": "Similar Services",
+    "notFound": "Product not found",
+    "pricingUnavailable": "Pricing unavailable",
+    "imageAlt": "{name} image",
+    "users": "{count, plural, one {# user} other {# users}}",
+    "billing": {
+      "mensuel": "Monthly",
+      "annuel": "Annual",
+      "unique": "One-time"
+    },
+    "perMonth": "/mo",
+    "perYear": "/yr"
+  },
+  "auth": {
+    "login": {
+      "title": "Log In",
+      "subtitle": "Login to your account",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Login",
+      "noAccount": "Don't have an account?",
+      "createAccount": "Create an account"
+    },
+    "register": {
+      "title": "Register",
+      "subtitle": "Create a new account",
+      "username": "Username",
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Create Account"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "submit": "Reset Password"
+    }
+  },
+  "admin": {
+    "nav": {
+      "backoffice": "Back office",
+      "products": "Products",
+      "categories": "Categories"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "saveError": "Something went wrong. Please try again.",
+    "dashboard": {
+      "title": "Back office",
+      "subtitle": "Manage products"
+    },
+    "products": {
+      "title": "Products",
+      "add": "Add a product",
+      "new": "New product",
+      "edit": "Edit product",
+      "table": {
+        "name": "Name",
+        "category": "Category",
+        "status": "Status",
+        "price": "Price",
+        "stripeId": "Stripe ID",
+        "actions": "Actions",
+        "active": "Active",
+        "inactive": "Inactive"
+      }
+    },
+    "categories": {
+      "title": "Categories",
+      "add": "Add a category",
+      "new": "New category",
+      "edit": "Edit category",
+      "table": {
+        "name": "Name",
+        "description": "Description",
+        "actions": "Actions"
+      }
+    },
+    "productForm": {
+      "nameFr": "Product name (French)",
+      "nameEn": "Product name (English)",
+      "descriptionFr": "Description (French)",
+      "descriptionEn": "Description (English)",
+      "specsFr": "Technical characteristics (French)",
+      "specsEn": "Technical characteristics (English)",
+      "price": "Price (€)",
+      "billing": "Billing",
+      "chooseBilling": "Choose a billing type",
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "oneTime": "One-time payment",
+      "category": "Category",
+      "chooseCategory": "Choose a category",
+      "submitCreate": "Create product",
+      "submitUpdate": "Edit product",
+      "submitting": "Saving..."
+    },
+    "categoryForm": {
+      "nameFr": "Category name (French)",
+      "nameEn": "Category name (English)",
+      "descriptionFr": "Description (French)",
+      "descriptionEn": "Description (English)",
+      "submitCreate": "Create category",
+      "submitUpdate": "Edit",
+      "submitting": "Saving..."
+    },
+    "delete": {
+      "title": "Confirm deletion",
+      "productMessage": "Delete the product \"{name}\"? This action is permanent.",
+      "categoryMessage": "Delete the category \"{name}\"? This action is permanent.",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "deleting": "Deleting...",
+      "productError": "Deletion failed. Please try again.",
+      "categoryError": "Could not delete this category. It may be used by products."
+    }
+  },
+  "validation": {
+    "nameFrRequired": "The French name is required",
+    "descriptionFrRequired": "The French description is required",
+    "pricePositive": "Price must be greater than 0",
+    "categoryRequired": "Category is required",
+    "billingRequired": "Billing type is required"
+  }
+}

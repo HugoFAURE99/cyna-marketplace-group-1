@@ -1,25 +1,17 @@
+import { getTranslations } from "next-intl/server";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldGroup,
-  FieldLabel,
-  FieldSet,
-} from "@/components/ui/field";
+import { Card, CardContent } from "@/components/ui/card";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-export function ResetPasswordForm({
+export async function ResetPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const t = await getTranslations("auth.resetPassword");
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -27,13 +19,15 @@ export function ResetPasswordForm({
           <form>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="password">Password *</FieldLabel>
+                <FieldLabel htmlFor="password">{t("password")} *</FieldLabel>
                 <Input id="password" type="password" required />
-                <FieldLabel htmlFor="password">Confirm Password *</FieldLabel>
+                <FieldLabel htmlFor="confirmPassword">
+                  {t("confirmPassword")} *
+                </FieldLabel>
                 <Input id="confirmPassword" type="password" required />
               </Field>
               <Field>
-                <Button type="submit">Reset Password</Button>
+                <Button type="submit">{t("submit")}</Button>
               </Field>
             </FieldGroup>
           </form>

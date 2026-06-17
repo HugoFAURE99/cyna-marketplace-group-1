@@ -1,3 +1,6 @@
+import { Package, Layers } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+
 import {
   Sidebar,
   SidebarContent,
@@ -8,41 +11,38 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { Package, Layers } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
 
 const menuItems = [
-  {
-    label: "Produits",
-    href: "/admin/products",
-    icon: Package,
-  },
-  {
-    label: "Catégories",
-    href: "/admin/categories",
-    icon: Layers,
-  },
-];
+  { labelKey: "products", href: "/admin/products", icon: Package },
+  { labelKey: "categories", href: "/admin/categories", icon: Layers },
+] as const;
 
-export function AdminSidebar() {
+export async function AdminSidebar() {
+  const t = await getTranslations("admin.nav");
+
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Backoffice</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("backoffice")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton render={<Link href={item.href} />}>
                     <item.icon />
-                    <span>{item.label}</span>
+                    <span>{t(item.labelKey)}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+        <div className="mt-auto p-3">
+          <LanguageSwitcher />
+        </div>
       </SidebarContent>
     </Sidebar>
   );

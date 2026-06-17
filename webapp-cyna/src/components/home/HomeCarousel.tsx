@@ -3,7 +3,7 @@
 // Hero carousel: manual prev/next + dot controls, no autoplay.
 
 import { useState } from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -14,6 +14,7 @@ type HomeCarouselProps = {
 };
 
 export default function HomeCarousel({ slides }: HomeCarouselProps) {
+  const t = useTranslations("home");
   const [selectedIndex, setSelectedIndex] = useState(0);
   // Clamp the index in case the slide list shrinks.
   const safeIndex = selectedIndex < slides.length ? selectedIndex : 0;
@@ -37,7 +38,7 @@ export default function HomeCarousel({ slides }: HomeCarouselProps) {
               CYNA
             </p>
             <h1 className="mt-3 text-3xl font-bold tracking-normal sm:text-4xl">
-              Carousel content is not configured yet.
+              {t("carouselEmpty")}
             </h1>
           </div>
         </div>
@@ -77,19 +78,19 @@ export default function HomeCarousel({ slides }: HomeCarouselProps) {
               {currentSlide.description_image}
             </p>
           )}
-          <Link
+          <a
             className="mt-8 inline-flex h-11 items-center justify-center rounded-md bg-purple-700 px-6 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             href="#top-products"
           >
-            Explore Services
-          </Link>
+            {t("exploreServices")}
+          </a>
         </div>
       </div>
 
       {hasMultipleSlides && (
         <>
           <button
-            aria-label="Previous hero slide"
+            aria-label={t("carouselPrevious")}
             className="absolute left-3 top-1/2 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-950 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:left-4 sm:inline-flex"
             onClick={goToPrevious}
             type="button"
@@ -97,7 +98,7 @@ export default function HomeCarousel({ slides }: HomeCarouselProps) {
             <ChevronLeft aria-hidden="true" />
           </button>
           <button
-            aria-label="Next hero slide"
+            aria-label={t("carouselNext")}
             className="absolute right-3 top-1/2 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-950 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-4 sm:inline-flex"
             onClick={goToNext}
             type="button"
@@ -107,7 +108,7 @@ export default function HomeCarousel({ slides }: HomeCarouselProps) {
           <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 gap-2">
             {slides.map((slide, index) => (
               <button
-                aria-label={`Show hero slide ${index + 1}`}
+                aria-label={t("carouselGoToSlide", { number: index + 1 })}
                 aria-pressed={safeIndex === index}
                 className={cn(
                   "h-2 rounded-full transition",

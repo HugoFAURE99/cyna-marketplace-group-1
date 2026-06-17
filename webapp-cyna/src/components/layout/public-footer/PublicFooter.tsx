@@ -1,15 +1,17 @@
 // Public site footer: company/legal link columns, socials, and copyright.
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+
+import { Link } from "@/i18n/navigation";
 
 const companyLinks = [
-  { href: "/about", label: "About Us" },
-  { href: "/contact", label: "Contact" },
-];
+  { href: "/about", labelKey: "aboutCyna" },
+  { href: "/contact", labelKey: "contact" },
+] as const;
 
 const legalLinks = [
-  { href: "/legal", label: "Legal Notices" },
-  { href: "/terms", label: "Terms of Use" },
-];
+  { href: "/legal", labelKey: "legalNotices" },
+  { href: "/terms", labelKey: "termsOfUse" },
+] as const;
 
 const socialLinks = [
   { href: "https://facebook.com", icon: FacebookIcon, label: "Facebook" },
@@ -18,7 +20,18 @@ const socialLinks = [
   { href: "https://instagram.com", icon: InstagramIcon, label: "Instagram" },
 ];
 
-export default function PublicFooter() {
+export default async function PublicFooter() {
+  const t = await getTranslations("footer");
+
+  const companyItems = companyLinks.map((link) => ({
+    href: link.href,
+    label: t(link.labelKey),
+  }));
+  const legalItems = legalLinks.map((link) => ({
+    href: link.href,
+    label: t(link.labelKey),
+  }));
+
   return (
     <footer className="bg-[#2b0958] text-white">
       <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
@@ -26,15 +39,15 @@ export default function PublicFooter() {
           <div>
             <h2 className="text-base font-bold">CYNA</h2>
             <p className="mt-5 max-w-xs text-sm leading-6 text-white/55">
-              Enterprise cybersecurity solutions for modern businesses.
+              {t("description")}
             </p>
           </div>
 
-          <FooterLinkGroup links={companyLinks} title="Company" />
-          <FooterLinkGroup links={legalLinks} title="Legal" />
+          <FooterLinkGroup links={companyItems} title={t("company")} />
+          <FooterLinkGroup links={legalItems} title={t("legal")} />
 
           <div>
-            <h2 className="text-base font-bold">Follow Us</h2>
+            <h2 className="text-base font-bold">{t("followUs")}</h2>
             <div className="mt-5 flex flex-wrap gap-3">
               {socialLinks.map((link) => (
                 <a
@@ -53,7 +66,7 @@ export default function PublicFooter() {
         </div>
 
         <div className="mt-10 border-t border-white/15 pt-8 text-center text-sm text-white/45">
-          &copy; 2026 CYNA. All rights reserved.
+          {t("copyright", { year: new Date().getFullYear() })}
         </div>
       </div>
     </footer>

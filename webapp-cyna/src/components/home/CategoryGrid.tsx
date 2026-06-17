@@ -1,22 +1,25 @@
 // "Browse by Category" grid of image-backed category tiles.
-import Link from "next/link";
 import { ImageOff } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 
+import { Link } from "@/i18n/navigation";
 import type { HomeCategory } from "@/lib/home/public-home";
 
 type CategoryGridProps = {
   categories: HomeCategory[];
 };
 
-export default function CategoryGrid({ categories }: CategoryGridProps) {
+export default async function CategoryGrid({ categories }: CategoryGridProps) {
+  const t = await getTranslations("home");
+
   return (
     <section aria-labelledby="home-categories" className="space-y-6">
       <div>
         <p className="text-sm font-semibold uppercase tracking-normal text-purple-700">
-          Categories
+          {t("categoriesEyebrow")}
         </p>
         <h2 id="home-categories" className="text-2xl font-bold text-slate-950">
-          Browse by Category
+          {t("browseByCategory")}
         </h2>
       </div>
 
@@ -30,7 +33,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
             >
               {category.lien_image_cat ? (
                 <div
-                  aria-label={`${category.cat_nom} category image`}
+                  aria-label={t("categoryImageAlt", { name: category.cat_nom })}
                   className="absolute inset-0 bg-cover bg-center transition duration-300 group-hover:scale-105"
                   role="img"
                   style={{
@@ -53,7 +56,7 @@ export default function CategoryGrid({ categories }: CategoryGridProps) {
         </div>
       ) : (
         <div className="rounded-md border border-dashed border-slate-300 bg-white p-6 text-sm text-slate-500">
-          No public categories are available yet.
+          {t("noCategories")}
         </div>
       )}
     </section>

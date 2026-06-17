@@ -1,12 +1,9 @@
+import { getTranslations } from "next-intl/server";
+
 import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
@@ -15,10 +12,12 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-export function LoginForm({
+export async function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const t = await getTranslations("auth.login");
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -26,7 +25,7 @@ export function LoginForm({
           <form>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Email *</FieldLabel>
+                <FieldLabel htmlFor="email">{t("email")} *</FieldLabel>
                 <Input
                   id="email"
                   type="email"
@@ -35,23 +34,24 @@ export function LoginForm({
                 />
               </Field>
               <Field>
-                <FieldLabel htmlFor="password">Password *</FieldLabel>
+                <FieldLabel htmlFor="password">{t("password")} *</FieldLabel>
                 <Input id="password" type="password" required />
                 <div className="flex items-center">
                   <div className="ml-auto flex items-center gap-4">
-                    <a
-                      href="#"
+                    <Link
+                      href="/reset-password"
                       className="inline-block text-sm underline-offset-4 hover:underline"
                     >
-                      Forgot your password?
-                    </a>
+                      {t("forgotPassword")}
+                    </Link>
                   </div>
                 </div>
               </Field>
               <Field>
-                <Button type="submit">Login</Button>
+                <Button type="submit">{t("submit")}</Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a href="#">Create an account</a>
+                  {t("noAccount")}{" "}
+                  <Link href="/register">{t("createAccount")}</Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>

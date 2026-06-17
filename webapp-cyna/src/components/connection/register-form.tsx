@@ -1,25 +1,22 @@
+import { getTranslations } from "next-intl/server";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
-  FieldDescription,
   FieldGroup,
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 
-export function RegisterForm({
+export async function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const t = await getTranslations("auth.register");
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -27,7 +24,7 @@ export function RegisterForm({
           <form>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor="email">Username *</FieldLabel>
+                <FieldLabel htmlFor="username">{t("username")} *</FieldLabel>
                 <Input
                   id="username"
                   type="text"
@@ -36,7 +33,7 @@ export function RegisterForm({
                 />
               </Field>
               <Field>
-                <FieldLabel>Email *</FieldLabel>
+                <FieldLabel htmlFor="email">{t("email")} *</FieldLabel>
                 <div className="flex items-center">
                   <Input
                     id="email"
@@ -48,14 +45,16 @@ export function RegisterForm({
               </Field>
               <Field>
                 <FieldSet className="border rounded-lg p-5">
-                  <FieldLabel htmlFor="password">Password *</FieldLabel>
+                  <FieldLabel htmlFor="password">{t("password")} *</FieldLabel>
                   <Input id="password" type="password" required />
-                  <FieldLabel htmlFor="password">Confirm Password *</FieldLabel>
+                  <FieldLabel htmlFor="confirmPassword">
+                    {t("confirmPassword")} *
+                  </FieldLabel>
                   <Input id="confirmPassword" type="password" required />
                 </FieldSet>
               </Field>
               <Field>
-                <Button type="submit">Create Account</Button>
+                <Button type="submit">{t("submit")}</Button>
               </Field>
             </FieldGroup>
           </form>
