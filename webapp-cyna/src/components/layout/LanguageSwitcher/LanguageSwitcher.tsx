@@ -16,7 +16,7 @@ export default function LanguageSwitcher() {
   return (
     <div
       aria-label={t("languageSwitcher")}
-      className="flex items-center gap-1.5 text-xs font-medium"
+      className="ml-1.5 flex items-center gap-1.5 text-xs font-medium"
       role="group"
     >
       {routing.locales.map((loc, index) => (
@@ -29,7 +29,7 @@ export default function LanguageSwitcher() {
           <button
             aria-current={loc === locale ? "true" : undefined}
             className={cn(
-              "uppercase transition-colors",
+              "cursor-pointer uppercase transition-colors",
               loc === locale
                 ? "font-semibold text-slate-900"
                 : "text-slate-400 hover:text-slate-700",
