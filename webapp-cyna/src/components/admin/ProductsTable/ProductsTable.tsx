@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import Link from "next/link";
 import {
   Table,
   TableBody,
@@ -6,11 +6,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import type { getProducts } from '@/app/(admin)/admin/_actions/product.actions'
-import DeleteProductButton from '@/components/admin/ProductsTable/DeleteProductButton'
+} from "@/components/ui/table";
+import type { getProducts } from "@/app/(admin)/admin/_actions/product.actions";
+import DeleteProductButton from "@/components/admin/ProductsTable/DeleteProductButton";
 
-type Product = Awaited<ReturnType<typeof getProducts>>[number]
+type Product = Awaited<ReturnType<typeof getProducts>>[number];
 
 export default function ProductsTable({ products }: { products: Product[] }) {
   return (
@@ -27,29 +27,38 @@ export default function ProductsTable({ products }: { products: Product[] }) {
       </TableHeader>
       <TableBody>
         {products.map((product) => {
-          const tarif = product.prix_tarif?.[0]
+          const tarif = product.prix_tarif?.[0];
           return (
-          <TableRow key={product.id_produit}>
-            <TableCell>{product.nom_pro}</TableCell>
-            <TableCell>{(product.categorie as { cat_nom: string } | null)?.cat_nom ?? '—'}</TableCell>
-            <TableCell>{product.statut_produit ? 'Actif' : 'Inactif'}</TableCell>
-            <TableCell>{tarif ? `${(tarif.prix / 100).toFixed(2)} € / ${tarif.type_facturation}` : '—'}</TableCell>
-            <TableCell>{tarif?.stripe_price_id ?? '—'}</TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Link href={`/admin/products/${product.id_produit}`}>
-                  Modifier
-                </Link>
-                <DeleteProductButton
-                  productId={product.id_produit}
-                  productName={product.nom_pro}
-                />
-              </div>
-            </TableCell>
-          </TableRow>
-          )
+            <TableRow key={product.id_produit}>
+              <TableCell>{product.nom_pro}</TableCell>
+              <TableCell>
+                {(product.categorie as { cat_nom: string } | null)?.cat_nom ??
+                  "—"}
+              </TableCell>
+              <TableCell>
+                {product.statut_produit ? "Actif" : "Inactif"}
+              </TableCell>
+              <TableCell>
+                {tarif
+                  ? `${(tarif.prix / 100).toFixed(2)} € / ${tarif.type_facturation}`
+                  : "—"}
+              </TableCell>
+              <TableCell>{tarif?.stripe_price_id ?? "—"}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Link href={`/admin/products/${product.id_produit}`}>
+                    Modifier
+                  </Link>
+                  <DeleteProductButton
+                    productId={product.id_produit}
+                    productName={product.nom_pro}
+                  />
+                </div>
+              </TableCell>
+            </TableRow>
+          );
         })}
       </TableBody>
     </Table>
-  )
+  );
 }

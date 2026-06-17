@@ -43,3 +43,6 @@ next-env.d.ts
 
 # fichiers temp supabase
 /supabase/.temp/
+
+# tasks vscode
+.vscode
