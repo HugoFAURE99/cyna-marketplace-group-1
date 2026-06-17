@@ -7,80 +7,90 @@ import { createServerClient } from '@/lib/supabase/server-client'
 // ============================================================================
 // 1. CONNEXION (LOGIN)
 // ============================================================================
-export async function login(formData: FormData) {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
+export async function login(
+  _prevState: any,
+  formData: FormData
+): Promise<{ error?: string; errorKey?: string } | null> {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
 
   if (!email || !password) {
-    return { error: "L'email et le mot de passe sont requis." }
+    return { errorKey: "errorMissingFields" };
   }
 
-  const supabase = await createServerClient()
-  const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const supabase = await createServerClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    return { error: "Identifiants incorrects." }
+    return { errorKey: "errorInvalidCredentials" };
   }
 
-  // Redirection simple vers l'accueil
-  redirect('/')
+  redirect('/');
 }
 
 // ============================================================================
 // 2. INSCRIPTION (REGISTER)
 // ============================================================================
-export async function register(formData: FormData) {
-  const email = formData.get('email') as string
-  const password = formData.get('password') as string
-  const nomComplet = formData.get('nom_complet') as string
+export async function register(
+  _prevState: any,
+  formData: FormData
+): Promise<{ error?: string; errorKey?: string } | null> {
+  const email = formData.get('email') as string;
+  const password = formData.get('password') as string;
+  const confirmPassword = formData.get('confirmPassword') as string;
+  const username = formData.get('username') as string;
 
-  if (!email || !password || !nomComplet) {
-    return { error: "Tous les champs sont requis." }
+  if (!email || !password || !username || !confirmPassword) {
+    return { errorKey: "errorMissingFields" };
   }
 
-  const supabaseAdmin = createAdminClient()
+  if (password !== confirmPassword) {
+    return { errorKey: "errorMismatch" };
+  }
 
-  // 1. Création du compte en silence (sans auto-login)
+  /* ==========================================================================
+     SÉCURITÉ MOT DE PASSE (DÉSACTIVÉ EN DEV - À RÉACTIVER EN PROD)
+     ==========================================================================
+  if (password.length < 8) {
+    return { errorKey: "errorTooShort" };
+  }
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
+  if (!passwordRegex.test(password)) {
+    return { errorKey: "errorComplexity" };
+  }
+  ========================================================================== */
+
+  const supabaseAdmin = createAdminClient();
+
   const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
     email,
     password,
     email_confirm: true
-  })
+  });
 
   if (authError) {
-    return { error: authError.message }
+    return { error: authError.message };
   }
 
-  // 2. Création du profil en BDD
   if (authData.user) {
     const { error: dbError } = await supabaseAdmin
       .from('utilisateur')
       .insert({
         id_compte: authData.user.id,
         adresse_mail: email,
-        nom_complet: nomComplet,
+        nom_complet: username,
         role: 'client',
         is_actif: true,
         token_connexion_stripe: 'non_configure',
-      })
+      });
 
     if (dbError) {
-      await supabaseAdmin.auth.admin.deleteUser(authData.user.id)
-      return { error: `Erreur base de données: ${dbError.message}` }
+      await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      return { error: `Erreur base de données: ${dbError.message}` };
     }
   }
 
-  // 3. Redirection vers la page login avec un message de succès
-  const message = encodeURIComponent("Compte créé avec succès ! Veuillez vous connecter.")
-  redirect(`/login?message=${message}`)
-
-
-
-  // --- Avec Confirmation email d'inscription ---
-  // on le renvoie vers la page de login 
-  // avec un message dans l'URL pour lui dire d'aller lire ses mails.
-
-  // redirect('/login?message=Inscription réussie ! Vérifiez votre boîte mail pour confirmer votre compte.')
+  redirect(`/login?message=registerSuccess`);
 }
 
 // ============================================================================
@@ -92,20 +102,21 @@ export async function logout() {
   redirect('/')
 }
 
-
 // ============================================================================
 // 4. MOT DE PASSE OUBLIÉ (Envoi de l'email)
 // ============================================================================
-export async function resetPassword(formData: FormData) {
+export async function resetPassword(
+  _prevState: any,
+  formData: FormData
+): Promise<{ error?: string; errorKey?: string; successKey?: string } | null> {
   const email = formData.get('email') as string
 
   if (!email) {
-    return { error: "L'adresse email est requise." }
+    return { errorKey: "errorMissingFields" }
   }
 
   const supabase = await createServerClient()
 
-  // : On passe par le  callback/route pour créer la session depuis le code dans le lien
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/update-password`,
   })
@@ -114,35 +125,38 @@ export async function resetPassword(formData: FormData) {
     return { error: error.message }
   }
 
-  //  On renvoie le texte exact à afficher sur UI
-  return {
-    success: "Un e-mail de réinitialisation a été envoyé. Veuillez vérifier votre boîte de réception (et vos spams !)."
-  }
+  // Renvoie une clé de succès pour l'afficher en vert sur le composant
+  return { successKey: "resetEmailSent" }
 }
 
 // ============================================================================
 // 5. MISE À JOUR DU MOT DE PASSE (Après le form)
 // ============================================================================
-export async function updatePassword(formData: FormData) {
+export async function updatePassword(
+  _prevState: any,
+  formData: FormData
+): Promise<{ error?: string; errorKey?: string } | null> {
   const password = formData.get('password') as string
-  const confirmPassword = formData.get('confirm_password') as string
+  const confirmPassword = formData.get('confirmPassword') as string // J'ai camelCase pour matcher ton registerForm
 
-  if (!password || password !== confirmPassword) {
-    return { error: "Les mots de passe ne correspondent pas ou sont vides." }
+  if (!password || !confirmPassword) {
+    return { errorKey: "errorMissingFields" }
+  }
+
+  if (password !== confirmPassword) {
+    return { errorKey: "errorMismatch" }
   }
 
   const supabase = await createServerClient()
 
-  // Cette fonction met à jour l'utilisateur ACTUELLEMENT authentifié.
-  // (Le clic sur le lien dans l'email connecte temporairement l'utilisateur 
-  // pour lui permettre de changer son mot de passe).
   const { error } = await supabase.auth.updateUser({
     password: password
   })
 
   if (error) {
-    return { error: "Erreur lors de la modification du mot de passe." }
+    return { errorKey: "errorUpdateFailed" }
   }
 
-  redirect('/login?message=Mot de passe mis à jour avec succès')
+  // Redirection avec une clé traduisible
+  redirect('/login?message=updatePasswordSuccess')
 }

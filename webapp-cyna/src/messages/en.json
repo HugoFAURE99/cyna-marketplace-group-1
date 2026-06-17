@@ -81,7 +81,11 @@
       "forgotPassword": "Forgot your password?",
       "submit": "Login",
       "noAccount": "Don't have an account?",
-      "createAccount": "Create an account"
+      "createAccount": "Create an account",
+
+      "registerSuccess": "Account created successfully! Please log in.",
+      "errorInvalidCredentials": "Invalid email or password.",
+      "errorMissingFields": "All are necessary"
     },
     "register": {
       "title": "Register",
@@ -90,7 +94,12 @@
       "email": "Email",
       "password": "Password",
       "confirmPassword": "Confirm Password",
-      "submit": "Create Account"
+      "submit": "Create Account",
+      "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.",
+      "errorMismatch": "Passwords do not match.",
+      "errorTooShort": "Password must be at least 8 characters long.",
+      "errorMissingFields": "All fields are required.",
+      "errorComplexity": "Password must contain at least one uppercase, one lowercase, one number, and one special character."
     },
     "resetPassword": {
       "title": "Reset Password",

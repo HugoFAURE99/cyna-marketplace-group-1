@@ -81,7 +81,11 @@
       "forgotPassword": "Mot de passe oublié ?",
       "submit": "Se connecter",
       "noAccount": "Vous n'avez pas de compte ?",
-      "createAccount": "Créer un compte"
+      "createAccount": "Créer un compte",
+
+      "registerSuccess": "Compte créé avec succès ! Veuillez vous connecter.",
+      "errorInvalidCredentials": "Email ou mot de passe incorrect.",
+      "errorMissingFields": "Tous les champs sont requis."
     },
     "register": {
       "title": "Inscription",
@@ -90,7 +94,12 @@
       "email": "E-mail",
       "password": "Mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
-      "submit": "Créer un compte"
+      "submit": "Créer un compte",
+      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.",
+      "errorMismatch": "Les mots de passe ne correspondent pas.",
+      "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+      "errorMissingFields": "Tous les champs sont requis.",
+      "errorComplexity": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial."
     },
     "resetPassword": {
       "title": "Réinitialiser le mot de passe",
