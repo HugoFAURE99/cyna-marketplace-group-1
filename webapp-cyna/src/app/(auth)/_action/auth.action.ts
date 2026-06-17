@@ -120,7 +120,7 @@ export async function resetPassword(formData: FormData) {
 }
 
 // ============================================================================
-// 5. MISE À JOUR DU MOT DE PASSE (Après clic sur le lien)
+// 5. MISE À JOUR DU MOT DE PASSE (Après le form)
 // ============================================================================
 export async function updatePassword(formData: FormData) {
   const password = formData.get('password') as string
