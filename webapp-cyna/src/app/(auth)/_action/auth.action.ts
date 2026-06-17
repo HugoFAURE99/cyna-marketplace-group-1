@@ -104,20 +104,19 @@ export async function resetPassword(formData: FormData) {
 
   const supabase = await createServerClient()
 
-  // On demande à Supabase d'envoyer l'email de réinitialisation.
-  // redirectTo est CRUCIAL : c'est la page sur laquelle l'utilisateur va atterrir
-  // après avoir cliqué sur le lien dans son email.
+  // : On passe par le  callback/route pour créer la session depuis le code dans le lien
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/update-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/update-password`,
   })
 
   if (error) {
     return { error: error.message }
   }
 
-  // On ne redirige pas, on renvoie juste un succès pour afficher un message
-  // du type "Vérifiez votre boîte mail" sur ton formulaire.
-  return { success: true }
+  //  On renvoie le texte exact à afficher sur UI
+  return {
+    success: "Un e-mail de réinitialisation a été envoyé. Veuillez vérifier votre boîte de réception (et vos spams !)."
+  }
 }
 
 // ============================================================================
