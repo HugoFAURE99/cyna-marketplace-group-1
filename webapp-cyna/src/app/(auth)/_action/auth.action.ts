@@ -40,10 +40,12 @@ export async function register(
   const confirmPassword = formData.get('confirmPassword') as string;
   const username = formData.get('username') as string;
 
+  // 1. Vérification des champs vides
   if (!email || !password || !username || !confirmPassword) {
     return { errorKey: "errorMissingFields" };
   }
 
+  // 2. Vérification de correspondance des mots de passe
   if (password !== confirmPassword) {
     return { errorKey: "errorMismatch" };
   }
@@ -51,27 +53,39 @@ export async function register(
   /* ==========================================================================
      SÉCURITÉ MOT DE PASSE (DÉSACTIVÉ EN DEV - À RÉACTIVER EN PROD)
      ==========================================================================
+
+  // 3. Vérification de la longueur minimale (8 caractères)
   if (password.length < 8) {
     return { errorKey: "errorTooShort" };
   }
+
+  // 4. Vérification de la complexité (Majuscule, minuscule, chiffre, caractère spécial)
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/;
   if (!passwordRegex.test(password)) {
     return { errorKey: "errorComplexity" };
   }
   ========================================================================== */
 
-  const supabaseAdmin = createAdminClient();
+  // On crée les deux clients
+  const supabase = await createServerClient(); // Pour l'inscription (déclenche l'email)
+  const supabaseAdmin = createAdminClient();   // Pour forcer l'écriture en BDD
 
-  const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+  // 5. Création du compte (C'est ça qui envoie l'e-mail de confirmation)
+  const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
-    email_confirm: true
+    options: {
+      //l'URL où Supabase redirige après le clic sur l'e-mail
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
+    }
   });
 
   if (authError) {
+    // Erreur provenant de Supabase (ex: email déjà pris)
     return { error: authError.message };
   }
 
+  // 6. Création du profil en BDD (Toujours avec Admin pour contourner RLS)
   if (authData.user) {
     const { error: dbError } = await supabaseAdmin
       .from('utilisateur')
@@ -85,12 +99,14 @@ export async function register(
       });
 
     if (dbError) {
+      // En cas d'erreur BDD, on supprime le compte Auth pour garder la cohérence
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       return { error: `Erreur base de données: ${dbError.message}` };
     }
   }
 
-  redirect(`/login?message=registerSuccess`);
+  // 7. Redirection vers la page login avec un message indiquant d'aller voir ses e-mails
+  redirect(`/login?message=checkEmail`);
 }
 
 // ============================================================================
@@ -118,7 +134,7 @@ export async function resetPassword(
   const supabase = await createServerClient()
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/update-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?next=/update-password`,
   })
 
   if (error) {

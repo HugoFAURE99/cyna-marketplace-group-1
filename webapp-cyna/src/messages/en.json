@@ -85,6 +85,7 @@
 
       "registerSuccess": "Account created successfully! Please log in.",
       "errorInvalidCredentials": "Invalid email or password.",
+      "checkEmail": "Registration successful! Please check your inbox to confirm your email.",
       "errorMissingFields": "All are necessary"
     },
     "register": {
