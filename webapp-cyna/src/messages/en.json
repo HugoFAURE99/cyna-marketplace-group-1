@@ -100,6 +100,7 @@
       "errorMismatch": "Passwords do not match.",
       "errorTooShort": "Password must be at least 8 characters long.",
       "errorMissingFields": "All fields are required.",
+      "errorEmailTaken": "This email address is already in use",
       "errorComplexity": "Password must contain at least one uppercase, one lowercase, one number, and one special character."
     },
     "resetPassword": {

@@ -70,6 +70,17 @@ export async function register(
   const supabase = await createServerClient(); // Pour l'inscription (déclenche l'email)
   const supabaseAdmin = createAdminClient();   // Pour forcer l'écriture en BDD
 
+  const { data: existingUser } = await supabaseAdmin
+    .from('utilisateur')
+    .select('adresse_mail')
+    .eq('adresse_mail', email)
+    .maybeSingle(); // maybeSingle() évite de lever une erreur si on ne trouve rien
+
+  if (existingUser) {
+    // L'email existe déjà, on coupe tout et on renvoie notre nouvelle erreur
+    return { errorKey: "errorEmailTaken" };
+  }
+
   // 5. Création du compte (C'est ça qui envoie l'e-mail de confirmation)
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,

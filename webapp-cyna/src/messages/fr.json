@@ -100,6 +100,7 @@
       "errorMismatch": "Les mots de passe ne correspondent pas.",
       "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
       "errorMissingFields": "Tous les champs sont requis.",
+      "errorEmailTaken": "Cette adresse e-mail est déjà utilisée.",
       "errorComplexity": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial."
     },
     "resetPassword": {
