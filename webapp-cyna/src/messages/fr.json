@@ -103,10 +103,17 @@
       "errorComplexity": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial."
     },
     "resetPassword": {
-      "title": "Réinitialiser le mot de passe",
-      "password": "Mot de passe",
+      "title": "Mot de passe oublié",
+      "email": "Adresse email",
+      "submit": "Envoyer le lien",
+      "resetEmailSent": "Un e-mail de réinitialisation a été envoyé. Vérifiez votre boîte de réception (et vos spams !)."
+    },
+    "updatePassword": {
+      "title": "Nouveau mot de passe",
+      "newPassword": "Nouveau mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
-      "submit": "Réinitialiser le mot de passe"
+      "submit": "Mettre à jour le mot de passe",
+      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial."
     }
   },
   "admin": {

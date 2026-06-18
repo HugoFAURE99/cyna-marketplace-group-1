@@ -103,10 +103,17 @@
       "errorComplexity": "Password must contain at least one uppercase, one lowercase, one number, and one special character."
     },
     "resetPassword": {
-      "title": "Reset Password",
-      "password": "Password",
+      "title": "Forgot Password",
+      "email": "Email address",
+      "submit": "Send reset link",
+      "resetEmailSent": "A reset email has been sent. Please check your inbox (and spam folder!)."
+    },
+    "updatePassword": {
+      "title": "New Password",
+      "newPassword": "New password",
       "confirmPassword": "Confirm Password",
-      "submit": "Reset Password"
+      "submit": "Update Password",
+      "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character."
     }
   },
   "admin": {
