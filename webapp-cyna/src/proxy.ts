@@ -1,9 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import createMiddleware from "next-intl/middleware";
-import type { NextRequest } from "next/server";
+
+import { type NextRequest, NextResponse } from "next/server";
 import { routing } from "@/i18n/routing";
 
 const handleI18nRouting = createMiddleware(routing);
+
 
 export async function proxy(request: NextRequest) {
   // Run next-intl first so locale redirects/rewrites are preserved.
@@ -35,39 +37,30 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  // Refresh the Supabase session when needed, even while routes stay public.
-  await supabase.auth.getUser();
-
-  /* =========================================================================
-     Future protected-route redirects
-
-     When login gating is ready, replace the refresh-only getUser() call above
-     with the destructuring call below, then uncomment the route checks.
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const url = request.nextUrl.clone();
-  const isProtectedRoute =
-    url.pathname.startsWith("/dashboard") || url.pathname.startsWith("/admin");
-  const isAuthRoute =
-    url.pathname.startsWith("/login") || url.pathname.startsWith("/register");
 
-  // Redirect anonymous users away from protected sections.
-  if (!user && isProtectedRoute) {
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
-
-  // Redirect signed-in users away from login and registration screens.
-  if (user && isAuthRoute) {
-    url.pathname = "/";
-    return NextResponse.redirect(url);
-  }
-
-  ========================================================================= */
-
+  // 3. Utilisation de regex pour ne pas bloquer sur le /fr ou /en de next-intl
+  const isProtectedRoute = /^\/(fr|en)\/admin/.test(url.pathname);
+  const isAuthRoute = /^\/(fr|en)\/(login|register)/.test(url.pathname);
+  /*
+    // Redirect anonymous users away from protected sections.
+    if (!user && isProtectedRoute) {
+      const locale = url.pathname.split('/')[1] || 'fr'; // Récupère la langue en cours
+      url.pathname = `/${locale}/login`;
+      return NextResponse.redirect(url);
+    }
+  
+    // Redirect signed-in users away from login and registration screens.
+    if (user && isAuthRoute) {
+      const locale = url.pathname.split('/')[1] || 'fr';
+      url.pathname = `/${locale}/`;
+      return NextResponse.redirect(url); 
+    }
+  */
   return response;
 }
 

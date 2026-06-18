@@ -81,7 +81,12 @@
       "forgotPassword": "Mot de passe oublié ?",
       "submit": "Se connecter",
       "noAccount": "Vous n'avez pas de compte ?",
-      "createAccount": "Créer un compte"
+      "createAccount": "Créer un compte",
+
+      "registerSuccess": "Compte créé avec succès ! Veuillez vous connecter.",
+      "errorInvalidCredentials": "Email ou mot de passe incorrect.",
+      "checkEmail": "Inscription réussie ! Veuillez vérifier votre boîte de réception pour confirmer votre e-mail.",
+      "errorMissingFields": "Tous les champs sont requis."
     },
     "register": {
       "title": "Inscription",
@@ -90,13 +95,26 @@
       "email": "E-mail",
       "password": "Mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
-      "submit": "Créer un compte"
+      "submit": "Créer un compte",
+      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.",
+      "errorMismatch": "Les mots de passe ne correspondent pas.",
+      "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+      "errorMissingFields": "Tous les champs sont requis.",
+      "errorEmailTaken": "Cette adresse e-mail est déjà utilisée.",
+      "errorComplexity": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial."
     },
     "resetPassword": {
-      "title": "Réinitialiser le mot de passe",
-      "password": "Mot de passe",
+      "title": "Mot de passe oublié",
+      "email": "Adresse email",
+      "submit": "Envoyer le lien",
+      "resetEmailSent": "Un e-mail de réinitialisation a été envoyé. Vérifiez votre boîte de réception (et vos spams !)."
+    },
+    "updatePassword": {
+      "title": "Nouveau mot de passe",
+      "newPassword": "Nouveau mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
-      "submit": "Réinitialiser le mot de passe"
+      "submit": "Mettre à jour le mot de passe",
+      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial."
     }
   },
   "admin": {

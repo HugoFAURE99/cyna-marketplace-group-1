@@ -1,8 +1,5 @@
 "use client";
 
-// Slide-in menu drawer (auth actions + info links) built on the shared Sheet.
-// The Sheet gives slide animation, click-outside/Escape close, and focus trap.
-
 import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -10,6 +7,7 @@ import {
   FileText,
   Info,
   LogIn,
+  LogOut, // <-- 1. Nouvel icône ajouté
   Mail,
   Menu,
   Scale,
@@ -26,6 +24,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
+// 2. Import de ton action de déconnexion
+import { logout } from "@/app/(auth)/_action/auth.action";
+
 const informationLinks = [
   { href: "/terms", icon: FileText, labelKey: "termsOfUse" },
   { href: "/legal", icon: Scale, labelKey: "legalNotices" },
@@ -33,10 +34,14 @@ const informationLinks = [
   { href: "/about", icon: Info, labelKey: "aboutCyna" },
 ] as const;
 
-export default function PublicMenuSheet() {
+// 3. On ajoute la propriété "isLoggedIn"
+export default function PublicMenuSheet({
+  isLoggedIn,
+}: {
+  isLoggedIn?: boolean;
+}) {
   const t = useTranslations("menu");
   const tHeader = useTranslations("header");
-  // Controlled so navigating a link can close the drawer.
   const [open, setOpen] = useState(false);
   const closeMenu = () => setOpen(false);
 
@@ -56,7 +61,6 @@ export default function PublicMenuSheet() {
       >
         <SheetTitle className="sr-only">{t("menu")}</SheetTitle>
 
-        {/* Close button floats just outside the panel's top-left corner. */}
         <SheetClose
           aria-label={t("closeMenu")}
           className="absolute -left-12 top-4 inline-flex size-10 items-center justify-center rounded-full bg-white text-slate-700 shadow-md transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
@@ -64,25 +68,40 @@ export default function PublicMenuSheet() {
           <X aria-hidden="true" className="size-6" />
         </SheetClose>
 
-        {/* Actions + navigation, flush to the top of the panel. */}
         <div className="flex-1 overflow-y-auto px-6 pt-6 pb-6">
+          {/* 4. LA LOGIQUE DES BOUTONS EST ICI */}
           <div className="space-y-2">
-            <Link
-              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-4 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
-              href="/login"
-              onClick={closeMenu}
-            >
-              <LogIn aria-hidden="true" className="size-4" />
-              {t("logIn")}
-            </Link>
-            <Link
-              className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md border border-purple-700 bg-white px-4 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
-              href="/register"
-              onClick={closeMenu}
-            >
-              <UserPlus aria-hidden="true" className="size-4" />
-              {t("signUp")}
-            </Link>
+            {isLoggedIn ? (
+              <form action={logout}>
+                <button
+                  type="submit"
+                  onClick={closeMenu}
+                  className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-4 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
+                >
+                  <LogOut aria-hidden="true" className="size-4" />
+                  Se déconnecter
+                </button>
+              </form>
+            ) : (
+              <>
+                <Link
+                  className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-4 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
+                  href="/login"
+                  onClick={closeMenu}
+                >
+                  <LogIn aria-hidden="true" className="size-4" />
+                  {t("logIn")}
+                </Link>
+                <Link
+                  className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md border border-purple-700 bg-white px-4 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
+                  href="/register"
+                  onClick={closeMenu}
+                >
+                  <UserPlus aria-hidden="true" className="size-4" />
+                  {t("signUp")}
+                </Link>
+              </>
+            )}
           </div>
 
           <nav aria-label={t("information")} className="mt-7">
@@ -109,7 +128,6 @@ export default function PublicMenuSheet() {
           </nav>
         </div>
 
-        {/* Brand pinned to the bottom of the drawer. */}
         <div className="mt-auto border-t border-slate-100 px-6 py-5">
           <Link
             aria-label={tHeader("homeAriaLabel")}

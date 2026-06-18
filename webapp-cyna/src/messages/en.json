@@ -81,7 +81,12 @@
       "forgotPassword": "Forgot your password?",
       "submit": "Login",
       "noAccount": "Don't have an account?",
-      "createAccount": "Create an account"
+      "createAccount": "Create an account",
+
+      "registerSuccess": "Account created successfully! Please log in.",
+      "errorInvalidCredentials": "Invalid email or password.",
+      "checkEmail": "Registration successful! Please check your inbox to confirm your email.",
+      "errorMissingFields": "All are necessary"
     },
     "register": {
       "title": "Register",
@@ -90,13 +95,26 @@
       "email": "Email",
       "password": "Password",
       "confirmPassword": "Confirm Password",
-      "submit": "Create Account"
+      "submit": "Create Account",
+      "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.",
+      "errorMismatch": "Passwords do not match.",
+      "errorTooShort": "Password must be at least 8 characters long.",
+      "errorMissingFields": "All fields are required.",
+      "errorEmailTaken": "This email address is already in use",
+      "errorComplexity": "Password must contain at least one uppercase, one lowercase, one number, and one special character."
     },
     "resetPassword": {
-      "title": "Reset Password",
-      "password": "Password",
+      "title": "Forgot Password",
+      "email": "Email address",
+      "submit": "Send reset link",
+      "resetEmailSent": "A reset email has been sent. Please check your inbox (and spam folder!)."
+    },
+    "updatePassword": {
+      "title": "New Password",
+      "newPassword": "New password",
       "confirmPassword": "Confirm Password",
-      "submit": "Reset Password"
+      "submit": "Update Password",
+      "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character."
     }
   },
   "admin": {
