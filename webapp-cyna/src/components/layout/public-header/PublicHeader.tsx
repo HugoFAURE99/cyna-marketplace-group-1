@@ -8,6 +8,9 @@ import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitc
 import PublicMenuSheet from "@/components/layout/public-header/PublicMenuSheet";
 import SearchForm from "@/components/layout/public-header/SearchForm";
 
+// 1. On importe le client Supabase serveur
+import { createServerClient } from "@/lib/supabase/server-client";
+
 type PublicHeaderProps = {
   cartCount?: number;
 };
@@ -16,6 +19,12 @@ export default async function PublicHeader({
   cartCount = 0,
 }: PublicHeaderProps) {
   const t = await getTranslations("header");
+
+  // 2. On récupère la session de l'utilisateur actuel
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200 bg-white shadow-sm">
@@ -49,7 +58,9 @@ export default async function PublicHeader({
 
         <div className="flex shrink-0 items-center gap-3">
           <CartButton count={cartCount} />
-          <PublicMenuSheet />
+
+          {/* 3. On transmet l'état (true si user existe, false sinon) */}
+          <PublicMenuSheet isLoggedIn={!!user} />
         </div>
       </div>
     </header>
