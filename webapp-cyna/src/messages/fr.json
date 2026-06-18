@@ -186,5 +186,52 @@
     "pricePositive": "Le prix doit être supérieur à 0",
     "categoryRequired": "La catégorie est obligatoire",
     "billingRequired": "Le type de facturation est obligatoire"
+  },
+  "about": {
+    "title": "A propos de CYNA",
+    "article": "Fondée en 2021 à la suite d'interventions d'urgence face à des cyberattaques majeures, Cyna est une entreprise française spécialisée dans la cybersécurité managée qui conçoit et opère des solutions souveraines de pointe, telles que le SOC, l'EDR et le XDR.",
+    "article2": "Historiquement commercialisés via un réseau de distribution direct, ses services entrent aujourd'hui dans une nouvelle ère grâce au lancement d'une plateforme e-commerce innovante destinée à simplifier l'accès à ses abonnements à l'échelle internationale.",
+    "article3": "Pensées pour répondre avec pragmatisme aux besoins des PME, des ETI et des prestataires de services (MSP), les solutions de Cyna reposent sur une infrastructure hautement sécurisée, un hébergement des données exclusivement basé en France, et une cellule d'experts d'élite assurant une surveillance proactive continue 24h/24 et 7j/7."
+  },
+  "contact": {
+    "title": "Nous Contacter",
+    "landline": "Téléphone fixe",
+    "mobile": "Téléphone portable",
+    "email": "Adresse Email"
+  },
+  "legal": {
+    "legal_title": "Mentions Légales",
+    "legal_paragraph": "Conformément aux dispositions de l'article 6 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN), il est précisé aux utilisateurs du site internet l'identité des différents intervenants dans le cadre de sa réalisation et de son suivi :",
+    "webedit_title": "Édition du site",
+    "webedit_ul1": "Propriétaire du site",
+    "webedit_ul2": "Forme juridique",
+    "webedit_ul3": "Adresse du siège social",
+    "webedit_ul4": "Numéro d'immatriculation (SIRET)",
+    "webedit_ul5": "Directeur de la publication",
+    "hosting_title": "Hébergement",
+    "hosting_paragraph": "Conformément aux exigences de souveraineté numérique et de protection des données critiques spécifiées pour l'ensemble de nos solutions de sécurité SaaS, le site internet ainsi que ses bases de données sont exclusivement hébergés sur le territoire français.",
+    "hosting_referent": "Hébergeur",
+    "hosting_email_ref": "Adresse de l'hébergeur",
+    "intelprop_title": "Propriété intellectuelle et contrefaçons",
+    "intelprop_paragraph1": "CYNA-IT est propriétaire des droits de propriété intellectuelle ou détient les droits d'usage sur tous les éléments accessibles sur le site internet, notamment les marques, textes, images, graphismes, logos, vidéos, architectures logicielles, icônes.",
+    "intelprop_paragraph2": "Toute reproduction, représentation, modification, publication, adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite, sauf autorisation écrite préalable de l'entreprise.",
+    "intelprop_paragraph3": "Toute exploitation non autorisée du site ou de l'un quelconque des éléments qu'il contains sera considérée comme constitutive d'une contrefaçon et poursuivie conformément aux dispositions des articles L.335-2 et suivants du Code de Propriété Intellectuelle."
+  },
+  "terms": {
+    "title": "Conditions Générales d'Utilisation",
+    "subtitle1": "Objet et acceptation des conditions",
+    "paragraph1": "Le présent document a pour objet de définir les conditions d'accès et d'utilisation de la plateforme e-commerce de CYNA-IT. L’accès au catalogue et la souscription à nos services SaaS impliquent l'acceptation pleine et sans réserve de ces conditions par l'utilisateur.",
+    "subtitle2": "Accès aux services SaaS et création de compte",
+    "paragraph2": "L'accès à certaines fonctionnalités, notamment l'achat d'abonnements, la gestion du panier et l'historique des commandes, nécessite la création d'un compte utilisateur sécurisé. L'utilisateur s'engage à fournir des informations exactes, à maintenir la confidentialité de ses identifiants de connexion et à signaler toute utilisation frauduleuse de son compte.",
+    "subtitle3": "Propriété intellectuelle",
+    "paragraph3": "L'ensemble des contenus, marques, logos, graphismes, codes sources et architectures des solutions logicielles (SOC, EDR, XDR) présents sur le site sont la propriété exclusive de CYNA-IT. Toute reproduction, modification ou distribution non autorisée de ces éléments est strictement interdite et fera l'objet de poursuites.",
+    "subtitle4": "Commandes, abonnements et paiements",
+    "paragraph4": "Les modalités de tarification, de facturation et de renouvellement automatique des services SaaS sont détaillées lors du processus de validation du panier. Les transactions financières sont traitées de manière chiffrée via des passerelles de paiement sécurisées et certifiées.",
+    "subtitle5": "Disponibilité de la plateforme",
+    "paragraph5": "CYNA-IT met en œuvre tous les moyens nécessaires pour assurer un accès continu à sa plateforme e-commerce et à ses outils d'assistance comme le Chatbot. Toutefois, l'entreprise se réserve le droit de suspendre temporairement l'accès au site pour des raisons de maintenance technique ou de mise à jour, sans que cela n'ouvre droit à une indemnisation.",
+    "subtitle6": "Responsabilité et garanties",
+    "paragraph6": "L'utilisateur est seul responsable de l'utilisation qu'il fait des informations fournies sur le site et de la sécurité de son propre matériel informatique. CYNA-IT ne pourra être tenue responsable des dommages indirects, des pertes de données ou des interruptions de service causés par un événement de force majeure ou un dysfonctionnement du réseau Internet.",
+    "subtitle7": "Modification des conditions et droit applicable",
+    "paragraph7": "CYNA-IT met en œuvre tous les moyens nécessaires pour assurer un accès continu à sa plateforme e-commerce et à ses outils d'assistance comme le Chatbot. Toutefois, l'entreprise se réserve le droit de suspendre temporairement l'accès au site pour des raisons de maintenance technique ou de mise à jour, sans que cela n'ouvre droit à une indemnisation."
   }
 }
