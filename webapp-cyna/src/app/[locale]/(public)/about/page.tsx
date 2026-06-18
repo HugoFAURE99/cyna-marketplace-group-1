@@ -13,14 +13,14 @@ export default async function About({
 
   return (
     <>
-      <div className="flex justify-center mt-10">
+      <div className="flex justify-center my-10">
         <div className="p-5">
           <h1 className="text-3xl font-bold text-purple-800 mb-10">
             {t("title")}
           </h1>
-          <p className="w-200 text-base/7">{t("article")}</p>
-          <p className="w-200 text-base/7 my-4">{t("article2")}</p>
-          <p className="w-200 text-base/7">{t("article3")}</p>
+          <p className="w-200 text-lg">{t("article")}</p>
+          <p className="w-200 text-lg my-10">{t("article2")}</p>
+          <p className="w-200 text-lg">{t("article3")}</p>
         </div>
       </div>
     </>
