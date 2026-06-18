@@ -106,8 +106,10 @@
       "categories": "Catégories"
     },
     "actions": {
+      "view": "Voir",
       "edit": "Modifier",
-      "delete": "Supprimer"
+      "delete": "Supprimer",
+      "back": "Retour"
     },
     "saveError": "Une erreur est survenue. Réessaie.",
     "dashboard": {
@@ -119,12 +121,14 @@
       "add": "Ajouter un produit",
       "new": "Nouveau produit",
       "edit": "Modifier le produit",
+      "detail": "Détails du produit",
       "table": {
+        "image": "Image",
         "name": "Nom",
         "category": "Catégorie",
         "status": "Statut",
-        "price": "Prix",
-        "stripeId": "Stripe ID",
+        "priceMonthly": "Mensuel",
+        "priceAnnual": "Annuel",
         "actions": "Actions",
         "active": "Actif",
         "inactive": "Inactif"
@@ -135,39 +139,70 @@
       "add": "Ajouter une catégorie",
       "new": "Nouvelle catégorie",
       "edit": "Modifier la catégorie",
+      "detail": "Détails de la catégorie",
       "table": {
+        "image": "Image",
         "name": "Nom",
         "description": "Description",
         "actions": "Actions"
       }
     },
     "productForm": {
-      "nameFr": "Nom du produit (français)",
-      "nameEn": "Nom du produit (anglais)",
-      "descriptionFr": "Description (français)",
-      "descriptionEn": "Description (anglais)",
-      "specsFr": "Caractéristiques techniques (français)",
-      "specsEn": "Caractéristiques techniques (anglais)",
+      "nameGroup": "Nom",
+      "descriptionGroup": "Description",
+      "specsGroup": "Caractéristiques techniques",
+      "defaultLang": "Français (par défaut)",
+      "lang": "{code}",
+      "addTranslation": "Ajouter traduction {code}",
       "price": "Prix (€)",
       "billing": "Facturation",
-      "chooseBilling": "Choisir un type de facturation",
       "monthly": "Mensuel",
       "annual": "Annuel",
-      "oneTime": "Paiement unique",
+      "priceMonthly": "Prix mensuel (€)",
+      "priceAnnual": "Prix annuel (€)",
       "category": "Catégorie",
       "chooseCategory": "Choisir une catégorie",
+      "status": "Statut du produit",
+      "statusHint": "Les produits actifs sont visibles par les clients",
       "submitCreate": "Créer le produit",
       "submitUpdate": "Modifier le produit",
-      "submitting": "Enregistrement..."
+      "submitting": "Enregistrement...",
+      "cancel": "Annuler",
+      "images": "Images du produit",
+      "imagesDragOrClick": "Cliquez ou glissez-déposez des images",
+      "imagesDropHere": "Déposez les images ici",
+      "imagesHint": "JPG, PNG ou WebP (max 2 Mo par image, max 10 images)",
+      "imagesCount": "{current}/{max} images",
+      "imagesMax": "Nombre maximum d'images atteint",
+      "noImages": "Aucune image"
     },
     "categoryForm": {
-      "nameFr": "Nom de la catégorie (français)",
-      "nameEn": "Nom de la catégorie (anglais)",
-      "descriptionFr": "Description (français)",
-      "descriptionEn": "Description (anglais)",
+      "editTitle": "Modifier la catégorie",
+      "createTitle": "Créer une catégorie",
+      "nameGroup": "Nom",
+      "descriptionGroup": "Description",
+      "defaultLang": "Français (par défaut)",
+      "lang": "{code}",
+      "addTranslation": "Ajouter traduction {code}",
+      "image": "Image de la catégorie",
+      "dropHere": "Déposez l'image ici",
+      "dragOrClick": "Cliquez ou glissez-déposez une image",
+      "imageHint": "JPG, PNG ou WebP (max 2 Mo)",
       "submitCreate": "Créer la catégorie",
       "submitUpdate": "Modifier",
-      "submitting": "Enregistrement..."
+      "submitting": "Enregistrement...",
+      "cancel": "Annuler",
+      "noImage": "Aucune image"
+    },
+    "bulk": {
+      "selected": "{count} sélectionné(s)",
+      "deleteSelected": "Supprimer la sélection",
+      "activateSelected": "Activer",
+      "deactivateSelected": "Désactiver",
+      "confirmTitle": "Confirmer la suppression groupée",
+      "confirmProducts": "Supprimer {count} produit(s) ? Cette action est définitive.",
+      "confirmCategories": "Supprimer {count} catégorie(s) ? Cette action est définitive.",
+      "error": "Certains éléments n'ont pas pu être supprimés."
     },
     "delete": {
       "title": "Confirmer la suppression",

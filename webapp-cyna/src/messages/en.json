@@ -106,8 +106,10 @@
       "categories": "Categories"
     },
     "actions": {
+      "view": "View",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "back": "Back"
     },
     "saveError": "Something went wrong. Please try again.",
     "dashboard": {
@@ -119,12 +121,14 @@
       "add": "Add a product",
       "new": "New product",
       "edit": "Edit product",
+      "detail": "Product details",
       "table": {
+        "image": "Image",
         "name": "Name",
         "category": "Category",
         "status": "Status",
-        "price": "Price",
-        "stripeId": "Stripe ID",
+        "priceMonthly": "Monthly",
+        "priceAnnual": "Annual",
         "actions": "Actions",
         "active": "Active",
         "inactive": "Inactive"
@@ -135,39 +139,69 @@
       "add": "Add a category",
       "new": "New category",
       "edit": "Edit category",
+      "detail": "Category details",
       "table": {
+        "image": "Image",
         "name": "Name",
         "description": "Description",
         "actions": "Actions"
       }
     },
     "productForm": {
-      "nameFr": "Product name (French)",
-      "nameEn": "Product name (English)",
-      "descriptionFr": "Description (French)",
-      "descriptionEn": "Description (English)",
-      "specsFr": "Technical characteristics (French)",
-      "specsEn": "Technical characteristics (English)",
-      "price": "Price (€)",
+      "nameGroup": "Name",
+      "descriptionGroup": "Description",
+      "specsGroup": "Technical characteristics",
+      "defaultLang": "French (default)",
+      "lang": "{code}",
+      "addTranslation": "Add {code} translation",
       "billing": "Billing",
-      "chooseBilling": "Choose a billing type",
       "monthly": "Monthly",
       "annual": "Annual",
-      "oneTime": "One-time payment",
+      "priceMonthly": "Monthly price (€)",
+      "priceAnnual": "Annual price (€)",
       "category": "Category",
       "chooseCategory": "Choose a category",
+      "status": "Product status",
+      "statusHint": "Active products are visible to customers",
       "submitCreate": "Create product",
       "submitUpdate": "Edit product",
-      "submitting": "Saving..."
+      "submitting": "Saving...",
+      "cancel": "Cancel",
+      "images": "Product images",
+      "imagesDragOrClick": "Click or drag & drop images",
+      "imagesDropHere": "Drop images here",
+      "imagesHint": "JPG, PNG or WebP (max 2MB per image, max 10 images)",
+      "imagesCount": "{current}/{max} images",
+      "imagesMax": "Maximum number of images reached",
+      "noImages": "No images"
     },
     "categoryForm": {
-      "nameFr": "Category name (French)",
-      "nameEn": "Category name (English)",
-      "descriptionFr": "Description (French)",
-      "descriptionEn": "Description (English)",
+      "editTitle": "Edit category",
+      "createTitle": "Create a new category",
+      "nameGroup": "Name",
+      "descriptionGroup": "Description",
+      "defaultLang": "French (default)",
+      "lang": "{code}",
+      "addTranslation": "Add {code} translation",
+      "image": "Category image",
+      "dropHere": "Drop the image here",
+      "dragOrClick": "Click or drag & drop an image",
+      "imageHint": "JPG, PNG or WebP (max 2MB)",
       "submitCreate": "Create category",
       "submitUpdate": "Edit",
-      "submitting": "Saving..."
+      "submitting": "Saving...",
+      "cancel": "Cancel",
+      "noImage": "No image"
+    },
+    "bulk": {
+      "selected": "{count} selected",
+      "deleteSelected": "Delete selected",
+      "activateSelected": "Activate",
+      "deactivateSelected": "Deactivate",
+      "confirmTitle": "Confirm bulk deletion",
+      "confirmProducts": "Delete {count} product(s)? This action is permanent.",
+      "confirmCategories": "Delete {count} category(ies)? This action is permanent.",
+      "error": "Some items could not be deleted."
     },
     "delete": {
       "title": "Confirm deletion",
