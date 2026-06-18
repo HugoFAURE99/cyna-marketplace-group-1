@@ -46,21 +46,21 @@ export async function proxy(request: NextRequest) {
   // 3. Utilisation de regex pour ne pas bloquer sur le /fr ou /en de next-intl
   const isProtectedRoute = /^\/(fr|en)\/admin/.test(url.pathname);
   const isAuthRoute = /^\/(fr|en)\/(login|register)/.test(url.pathname);
-
-  // Redirect anonymous users away from protected sections.
-  if (!user && isProtectedRoute) {
-    const locale = url.pathname.split('/')[1] || 'fr'; // Récupère la langue en cours
-    url.pathname = `/${locale}/login`;
-    return NextResponse.redirect(url); // Plus d'erreur ici !
-  }
-
-  // Redirect signed-in users away from login and registration screens.
-  if (user && isAuthRoute) {
-    const locale = url.pathname.split('/')[1] || 'fr';
-    url.pathname = `/${locale}/`;
-    return NextResponse.redirect(url); // Plus d'erreur ici !
-  }
-
+  /*
+    // Redirect anonymous users away from protected sections.
+    if (!user && isProtectedRoute) {
+      const locale = url.pathname.split('/')[1] || 'fr'; // Récupère la langue en cours
+      url.pathname = `/${locale}/login`;
+      return NextResponse.redirect(url);
+    }
+  
+    // Redirect signed-in users away from login and registration screens.
+    if (user && isAuthRoute) {
+      const locale = url.pathname.split('/')[1] || 'fr';
+      url.pathname = `/${locale}/`;
+      return NextResponse.redirect(url); 
+    }
+  */
   return response;
 }
 
