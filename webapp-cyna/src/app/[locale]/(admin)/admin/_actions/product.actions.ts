@@ -6,11 +6,15 @@ import { stripe } from "@/lib/stripe";
 import { pickTranslation, type Locale } from "@/lib/i18n/translations";
 import { routing } from "@/i18n/routing";
 import type { TablesInsert } from "@/types/database.types";
+import sharp from "sharp";
+import { v4 as uuidv4 } from "uuid";
 
 const DEFAULT_LOCALE = routing.defaultLocale;
 
 // Translatable text is captured per locale by the admin form; everything else
 // (price, billing, category, Stripe ids) is language-neutral.
+type BillingType = "mensuel" | "annuel";
+
 type ProductFormData = {
   nom_pro_fr: string;
   pro_description_fr: string;
@@ -19,9 +23,16 @@ type ProductFormData = {
   pro_description_en?: string;
   pro_carac_technique_en?: string;
   id_categorie: number;
-  prix: number;
-  type_facturation: "mensuel" | "annuel" | "unique";
+  prix_mensuel?: number;
+  prix_annuel?: number;
+  billings: BillingType[];
+  statut_produit?: boolean;
 };
+
+function getPrixForBilling(formData: ProductFormData, billing: BillingType) {
+  const prix = billing === "mensuel" ? formData.prix_mensuel : formData.prix_annuel;
+  return Math.round((prix ?? 0) * 100);
+}
 
 function buildTranslationRows(
   id_produit: number,
@@ -50,19 +61,67 @@ function buildTranslationRows(
   return rows;
 }
 
-function stripePriceArgs(
-  prixCentimes: number,
-  type: ProductFormData["type_facturation"],
-) {
-  if (type === "unique") {
-    return { currency: "eur", unit_amount: prixCentimes } as const;
-  }
-
+function stripePriceArgs(prixCentimes: number, type: BillingType) {
   return {
     currency: "eur",
     unit_amount: prixCentimes,
     recurring: { interval: type === "annuel" ? "year" : "month" },
   } as const;
+}
+
+// ── Product image helpers ──────────────────────────────────────────
+
+async function uploadProductImage(
+  productId: number,
+  file: File,
+): Promise<{ url: string }> {
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(
+      "Format de fichier non supporté. Utilisez JPG, PNG ou WebP.",
+    );
+  }
+  const maxSize = 2 * 1024 * 1024;
+  if (file.size > maxSize) {
+    throw new Error("L'image doit faire moins de 2MB.");
+  }
+
+  const arrayBuffer = await file.arrayBuffer();
+  const buffer = Buffer.from(arrayBuffer);
+  const webpBuffer = await sharp(buffer)
+    .webp({ quality: 80, effort: 6 })
+    .toBuffer();
+
+  const filename = `${uuidv4()}.webp`;
+  const supabase = createAdminClient();
+
+  const { error: uploadError } = await supabase.storage
+    .from("product-images")
+    .upload(`${productId}/${filename}`, webpBuffer, {
+      contentType: "image/webp",
+      upsert: false,
+    });
+
+  if (uploadError) {
+    throw new Error(`Erreur d'upload : ${uploadError.message}`);
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from("product-images")
+    .getPublicUrl(`${productId}/${filename}`);
+
+  return { url: publicUrlData.publicUrl };
+}
+
+async function deleteProductImage(productId: number, filename: string) {
+  const supabase = createAdminClient();
+  const { error } = await supabase.storage
+    .from("product-images")
+    .remove([`${productId}/${filename}`]);
+
+  if (error) {
+    throw new Error(`Erreur suppression image : ${error.message}`);
+  }
 }
 
 export async function getCategories(locale: Locale = DEFAULT_LOCALE) {
@@ -83,29 +142,25 @@ export async function getCategories(locale: Locale = DEFAULT_LOCALE) {
     .sort((a, b) => a.cat_nom.localeCompare(b.cat_nom, locale));
 }
 
-export async function createProduct(formData: ProductFormData) {
+export async function createProduct(
+  formData: ProductFormData,
+  imageFiles?: File[],
+) {
   // 1. Produit Stripe (langue par défaut = fr).
   const stripeProduct = await stripe.products.create({
     name: formData.nom_pro_fr,
     description: formData.pro_description_fr,
   });
 
-  // 2. Tarif Stripe (montant en centimes) — récurrent sauf paiement unique.
-  const prixCentimes = Math.round(formData.prix * 100);
-  const stripePrice = await stripe.prices.create({
-    product: stripeProduct.id,
-    ...stripePriceArgs(prixCentimes, formData.type_facturation),
-  });
-
   const supabase = createAdminClient();
 
-  // 3. Ligne produit en base (colonnes neutres uniquement).
+  // 2. Ligne produit en base.
   const { data: produit, error: produitError } = await supabase
     .from("produit")
     .insert({
       id_categorie: formData.id_categorie,
       stripe_product_id: stripeProduct.id,
-      statut_produit: false,
+      statut_produit: formData.statut_produit ?? false,
     })
     .select("id_produit")
     .single();
@@ -115,7 +170,7 @@ export async function createProduct(formData: ProductFormData) {
     throw new Error(`Erreur création produit : ${produitError.message}`);
   }
 
-  // 4. Traductions (fr toujours, en si fourni).
+  // 3. Traductions (fr toujours, en si fourni).
   const { error: traductionError } = await supabase
     .from("produit_traduction")
     .insert(buildTranslationRows(produit.id_produit, formData));
@@ -128,19 +183,53 @@ export async function createProduct(formData: ProductFormData) {
     );
   }
 
-  // 5. Tarif en base (porte le stripe_price_id).
-  const { error: prixError } = await supabase.from("prix_tarif").insert({
-    id_produit: produit.id_produit,
-    prix: prixCentimes,
-    stripe_price_id: stripePrice.id,
-    type_facturation: formData.type_facturation,
-  });
+  // 4. Créer les Stripe Prices en parallèle, puis insérer en base.
+  const stripePrices = await Promise.all(
+    formData.billings.map((billing) =>
+      stripe.prices
+        .create({
+          product: stripeProduct.id,
+          ...stripePriceArgs(getPrixForBilling(formData, billing), billing),
+        })
+        .then((sp) => ({ billing, stripePrice: sp })),
+    ),
+  );
 
-  if (prixError) {
-    // Supprimer le produit retire aussi ses traductions (FK on delete cascade).
-    await supabase.from("produit").delete().eq("id_produit", produit.id_produit);
-    await stripe.products.update(stripeProduct.id, { active: false });
-    throw new Error(`Erreur création tarif : ${prixError.message}`);
+  for (const { billing, stripePrice } of stripePrices) {
+    const { error: prixError } = await supabase.from("prix_tarif").insert({
+      id_produit: produit.id_produit,
+      prix: getPrixForBilling(formData, billing),
+      stripe_price_id: stripePrice.id,
+      type_facturation: billing,
+    });
+
+    if (prixError) {
+      await supabase
+        .from("produit")
+        .delete()
+        .eq("id_produit", produit.id_produit);
+      await stripe.products.update(stripeProduct.id, { active: false });
+      throw new Error(`Erreur création tarif : ${prixError.message}`);
+    }
+  }
+
+  // 5. Upload product images if provided.
+  if (imageFiles && imageFiles.length > 0) {
+    try {
+      const uploadResults = await Promise.all(
+        imageFiles.map((file) => uploadProductImage(produit.id_produit, file)),
+      );
+
+      const imageRows = uploadResults.map((result, index) => ({
+        id_produit: produit.id_produit,
+        lien_image_produit: result.url,
+        ordre_affichage: index,
+      }));
+
+      await supabase.from("image_produit").insert(imageRows);
+    } catch (error) {
+      console.error("Erreur upload images produit:", error);
+    }
   }
 
   revalidatePath("/[locale]/admin/products", "page");
@@ -170,6 +259,10 @@ export async function getProducts(locale: Locale = DEFAULT_LOCALE) {
         prix,
         stripe_price_id,
         type_facturation
+      ),
+      image_produit (
+        lien_image_produit,
+        ordre_affichage
       )
     `,
     )
@@ -179,19 +272,25 @@ export async function getProducts(locale: Locale = DEFAULT_LOCALE) {
     throw new Error(`Erreur chargement produits : ${error.message}`);
   }
 
-  return (data ?? []).map((product) => ({
-    id_produit: product.id_produit,
-    statut_produit: product.statut_produit,
-    nom_pro: pickTranslation(product.produit_traduction, locale)?.nom_pro ?? "",
-    categorie: product.categorie
-      ? {
-          cat_nom:
-            pickTranslation(product.categorie.categorie_traduction, locale)
-              ?.cat_nom ?? "",
-        }
-      : null,
-    prix_tarif: product.prix_tarif,
-  }));
+  return (data ?? []).map((product) => {
+    const sortedImages = [...(product.image_produit ?? [])].sort(
+      (a, b) => (a.ordre_affichage ?? 0) - (b.ordre_affichage ?? 0),
+    );
+    return {
+      id_produit: product.id_produit,
+      statut_produit: product.statut_produit,
+      nom_pro: pickTranslation(product.produit_traduction, locale)?.nom_pro ?? "",
+      categorie: product.categorie
+        ? {
+            cat_nom:
+              pickTranslation(product.categorie.categorie_traduction, locale)
+                ?.cat_nom ?? "",
+          }
+        : null,
+      prix_tarif: product.prix_tarif,
+      image: sortedImages[0]?.lien_image_produit ?? null,
+    };
+  });
 }
 
 export async function getProductById(id: number) {
@@ -215,6 +314,11 @@ export async function getProductById(id: number) {
         prix,
         stripe_price_id,
         type_facturation
+      ),
+      image_produit (
+        id_image,
+        lien_image_produit,
+        ordre_affichage
       )
     `,
     )
@@ -228,11 +332,16 @@ export async function getProductById(id: number) {
   const fr = data.produit_traduction.find((row) => row.langue === "fr");
   const en = data.produit_traduction.find((row) => row.langue === "en");
 
-  // Flatten to the fr/en fields the form edits.
+  const sortedImages = [...(data.image_produit ?? [])].sort(
+    (a, b) => (a.ordre_affichage ?? 0) - (b.ordre_affichage ?? 0),
+  );
+
   return {
     id_produit: data.id_produit,
     id_categorie: data.id_categorie,
+    statut_produit: data.statut_produit,
     prix_tarif: data.prix_tarif,
+    image_produit: sortedImages,
     nom_pro_fr: fr?.nom_pro ?? "",
     pro_description_fr: fr?.pro_description ?? "",
     pro_carac_technique_fr: fr?.pro_carac_technique ?? "",
@@ -242,7 +351,12 @@ export async function getProductById(id: number) {
   };
 }
 
-export async function updateProduct(id: number, formData: ProductFormData) {
+export async function updateProduct(
+  id: number,
+  formData: ProductFormData,
+  imageFiles?: File[],
+  removedImageIds?: number[],
+) {
   const supabase = createAdminClient();
 
   const { data: existing, error: existingError } = await supabase
@@ -265,7 +379,10 @@ export async function updateProduct(id: number, formData: ProductFormData) {
 
   const { error: produitError } = await supabase
     .from("produit")
-    .update({ id_categorie: formData.id_categorie })
+    .update({
+      id_categorie: formData.id_categorie,
+      statut_produit: formData.statut_produit ?? false,
+    })
     .eq("id_produit", id);
 
   if (produitError) {
@@ -311,36 +428,138 @@ export async function updateProduct(id: number, formData: ProductFormData) {
       .eq("langue", "en");
   }
 
-  // Tarif : nouveau prix Stripe seulement si le prix ou la facturation change.
-  const prixCentimes = Math.round(formData.prix * 100);
-  const { data: existingTarif } = await supabase
+  // Tarifs : reconcilier les lignes existantes avec la sélection.
+  const { data: existingTarifs } = await supabase
     .from("prix_tarif")
-    .select("id_prix, prix, type_facturation")
-    .eq("id_produit", id)
-    .single();
+    .select("id_prix, prix, type_facturation, stripe_price_id")
+    .eq("id_produit", id);
 
-  if (
-    existingTarif &&
-    (existingTarif.prix !== prixCentimes ||
-      existingTarif.type_facturation !== formData.type_facturation)
-  ) {
-    const stripePrice = await stripe.prices.create({
-      product: existing.stripe_product_id!,
-      ...stripePriceArgs(prixCentimes, formData.type_facturation),
-    });
+  const existingByType = new Map(
+    (existingTarifs ?? []).map((t) => [t.type_facturation, t]),
+  );
 
-    const { error: prixError } = await supabase
-      .from("prix_tarif")
-      .update({
-        prix: prixCentimes,
-        stripe_price_id: stripePrice.id,
-        type_facturation: formData.type_facturation,
-      })
-      .eq("id_prix", existingTarif.id_prix);
+  // Supprimer les tarifs qui ne sont plus sélectionnés (en parallèle).
+  const toRemove = [...existingByType.entries()].filter(
+    ([type]) => !formData.billings.includes(type as BillingType),
+  );
+  await Promise.all(
+    toRemove.map(async ([, tarif]) => {
+      if (tarif.stripe_price_id) {
+        await stripe.prices.update(tarif.stripe_price_id, { active: false });
+      }
+      await supabase.from("prix_tarif").delete().eq("id_prix", tarif.id_prix);
+    }),
+  );
 
-    if (prixError) {
-      throw new Error(`Erreur mise à jour tarif : ${prixError.message}`);
+  // Ajouter ou mettre à jour les tarifs sélectionnés (Stripe en parallèle).
+  const toUpsert = formData.billings
+    .map((billing) => {
+      const prixCentimes = getPrixForBilling(formData, billing);
+      const existing_tarif = existingByType.get(billing);
+      if (!existing_tarif) return { billing, prixCentimes, mode: "create" as const };
+      if (existing_tarif.prix !== prixCentimes)
+        return { billing, prixCentimes, mode: "update" as const, id_prix: existing_tarif.id_prix };
+      return null;
+    })
+    .filter((x) => x !== null);
+
+  const newStripePrices = await Promise.all(
+    toUpsert.map((item) =>
+      stripe.prices
+        .create({
+          product: existing.stripe_product_id!,
+          ...stripePriceArgs(item.prixCentimes, item.billing),
+        })
+        .then((sp) => ({ ...item, stripe_price_id: sp.id })),
+    ),
+  );
+
+  for (const item of newStripePrices) {
+    if (item.mode === "create") {
+      await supabase.from("prix_tarif").insert({
+        id_produit: id,
+        prix: item.prixCentimes,
+        stripe_price_id: item.stripe_price_id,
+        type_facturation: item.billing,
+      });
+    } else {
+      await supabase
+        .from("prix_tarif")
+        .update({ prix: item.prixCentimes, stripe_price_id: item.stripe_price_id })
+        .eq("id_prix", item.id_prix!);
     }
+  }
+
+  // ── Handle product images ──────────────────────────────────────
+  // Delete removed images
+  if (removedImageIds && removedImageIds.length > 0) {
+    const { data: imagesToRemove } = await supabase
+      .from("image_produit")
+      .select("id_image, lien_image_produit")
+      .in("id_image", removedImageIds);
+
+    if (imagesToRemove) {
+      await Promise.all(
+        imagesToRemove.map(async (img) => {
+          const urlParts = img.lien_image_produit.split("/");
+          const filename = urlParts[urlParts.length - 1];
+          try {
+            await deleteProductImage(id, filename);
+          } catch {}
+          await supabase
+            .from("image_produit")
+            .delete()
+            .eq("id_image", img.id_image);
+        }),
+      );
+    }
+  }
+
+  // Upload new images
+  if (imageFiles && imageFiles.length > 0) {
+    // Find the max existing ordre_affichage
+    const { data: existingImages } = await supabase
+      .from("image_produit")
+      .select("ordre_affichage")
+      .eq("id_produit", id)
+      .order("ordre_affichage", { ascending: false })
+      .limit(1);
+
+    const maxOrder =
+      existingImages && existingImages.length > 0
+        ? (existingImages[0].ordre_affichage ?? -1) + 1
+        : 0;
+
+    try {
+      const uploadResults = await Promise.all(
+        imageFiles.map((file) => uploadProductImage(id, file)),
+      );
+
+      const imageRows = uploadResults.map((result, index) => ({
+        id_produit: id,
+        lien_image_produit: result.url,
+        ordre_affichage: maxOrder + index,
+      }));
+
+      await supabase.from("image_produit").insert(imageRows);
+    } catch (error) {
+      console.error("Erreur upload images produit:", error);
+    }
+  }
+
+  revalidatePath("/[locale]/admin/products", "page");
+}
+
+export async function toggleProductStatus(id: number, active: boolean) {
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("produit")
+    .update({ statut_produit: active })
+    .eq("id_produit", id);
+
+  if (error) {
+    throw new Error(`Erreur mise à jour statut : ${error.message}`);
   }
 
   revalidatePath("/[locale]/admin/products", "page");
@@ -371,6 +590,42 @@ export async function deleteProduct(productId: number) {
   // Archive le produit Stripe (ses tarifs deviennent inutilisables du même coup).
   if (produit?.stripe_product_id) {
     await stripe.products.update(produit.stripe_product_id, { active: false });
+  }
+
+  revalidatePath("/[locale]/admin/products", "page");
+}
+
+export async function deleteProducts(ids: number[]) {
+  const results = await Promise.allSettled(ids.map((id) => deleteProduct(id)));
+
+  const failures = results.filter((r) => r.status === "rejected");
+  if (failures.length > 0) {
+    throw new Error(
+      `${failures.length} produit(s) n'ont pas pu être supprimés.`,
+    );
+  }
+}
+
+export async function bulkToggleProductStatus(ids: number[], active: boolean) {
+  const supabase = createAdminClient();
+
+  const results = await Promise.allSettled(
+    ids.map((id) =>
+      supabase
+        .from("produit")
+        .update({ statut_produit: active })
+        .eq("id_produit", id)
+        .then(({ error }) => {
+          if (error) throw error;
+        }),
+    ),
+  );
+
+  const failures = results.filter((r) => r.status === "rejected");
+  if (failures.length > 0) {
+    throw new Error(
+      `${failures.length} produit(s) n'ont pas pu être mis à jour.`,
+    );
   }
 
   revalidatePath("/[locale]/admin/products", "page");

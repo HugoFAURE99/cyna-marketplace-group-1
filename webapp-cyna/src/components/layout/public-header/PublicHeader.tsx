@@ -14,6 +14,12 @@ export default async function PublicHeader() {
   const t = await getTranslations("header");
   const cartCount = await getCartCount();
 
+  // 2. On récupère la session de l'utilisateur actuel
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200 bg-white shadow-sm">
       {/* logo | search | actions. Search is centered in the flex-1 track between
@@ -46,7 +52,9 @@ export default async function PublicHeader() {
         <div className="flex shrink-0 items-center gap-3">
           <LanguageSwitcher />
           <CartButton count={cartCount} />
-          <PublicMenuSheet />
+
+          {/* 3. On transmet l'état (true si user existe, false sinon) */}
+          <PublicMenuSheet isLoggedIn={!!user} />
         </div>
       </div>
 
