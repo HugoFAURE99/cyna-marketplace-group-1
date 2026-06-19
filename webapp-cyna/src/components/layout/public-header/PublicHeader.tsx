@@ -9,6 +9,7 @@ import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitc
 import PublicMenuSheet from "@/components/layout/public-header/PublicMenuSheet";
 import SearchAutocomplete from "@/components/layout/public-header/SearchAutocomplete";
 import { getCartCount } from "@/lib/cart/cart";
+import { createServerClient } from "@/lib/supabase/server-client";
 
 export default async function PublicHeader() {
   const t = await getTranslations("header");
