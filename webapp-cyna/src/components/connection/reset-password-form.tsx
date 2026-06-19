@@ -4,10 +4,17 @@ import { useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { AuthMessage } from "@/components/connection/auth-message";
 
 import { resetPassword } from "@/app/(auth)/_action/auth.action";
 
@@ -39,16 +46,18 @@ export function ResetPasswordForm({
             <FieldGroup>
               {/* Message de succès */}
               {state?.successKey && (
-                <div className="p-3 text-sm text-green-700 bg-green-100 rounded-md text-center">
-                  {t(state.successKey as any)}
-                </div>
+                <AuthMessage variant="info">
+                  {t(state.successKey as Parameters<typeof t>[0])}
+                </AuthMessage>
               )}
 
               {/* Message d'erreur */}
               {(state?.errorKey || state?.error) && (
-                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-md text-center">
-                  {state?.errorKey ? t(state.errorKey as any) : state?.error}
-                </div>
+                <AuthMessage variant="error">
+                  {state?.errorKey
+                    ? t(state.errorKey as Parameters<typeof t>[0])
+                    : state?.error}
+                </AuthMessage>
               )}
 
               {/* On masque le champ email si le succès est là, c'est plus propre UX */}
@@ -65,12 +74,21 @@ export function ResetPasswordForm({
                     />
                   </Field>
                   <Field>
-                    <Button type="submit" disabled={isPending}>
-                      {isPending ? "Envoi..." : t("submit")}
+                    <Button variant="brand" type="submit" disabled={isPending}>
+                      {isPending ? t("loading") : t("submit")}
                     </Button>
                   </Field>
                 </>
               )}
+
+              <FieldDescription className="text-center">
+                <Link
+                  href="/login"
+                  className="font-medium text-purple-700 underline-offset-4 hover:underline"
+                >
+                  {t("backToLogin")}
+                </Link>
+              </FieldDescription>
             </FieldGroup>
           </form>
         </CardContent>

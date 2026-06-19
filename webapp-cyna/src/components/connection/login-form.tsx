@@ -14,6 +14,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { AuthMessage } from "@/components/connection/auth-message";
 
 import { login } from "@/app/(auth)/_action/auth.action";
 
@@ -45,9 +46,11 @@ export function LoginForm({
             <FieldGroup>
               {/* 3. Affichage de l'erreur traduite OU de l'erreur brute système */}
               {(state?.errorKey || state?.error) && (
-                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-md text-center">
-                  {state?.errorKey ? t(state.errorKey as any) : state?.error}
-                </div>
+                <AuthMessage variant="error">
+                  {state?.errorKey
+                    ? t(state.errorKey as Parameters<typeof t>[0])
+                    : state?.error}
+                </AuthMessage>
               )}
 
               <Field>
@@ -68,7 +71,7 @@ export function LoginForm({
                   <div className="ml-auto flex items-center gap-4">
                     <Link
                       href="/reset-password"
-                      className="inline-block text-sm underline-offset-4 hover:underline"
+                      className="inline-block text-sm font-medium text-purple-700 underline-offset-4 hover:underline"
                     >
                       {t("forgotPassword")}
                     </Link>
@@ -77,13 +80,18 @@ export function LoginForm({
               </Field>
 
               <Field>
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? "Connexion..." : t("submit")}
+                <Button variant="brand" type="submit" disabled={isPending}>
+                  {isPending ? t("loading") : t("submit")}
                 </Button>
 
                 <FieldDescription className="text-center">
                   {t("noAccount")}{" "}
-                  <Link href="/register">{t("createAccount")}</Link>
+                  <Link
+                    href="/register"
+                    className="font-medium text-purple-700 underline-offset-4 hover:underline"
+                  >
+                    {t("createAccount")}
+                  </Link>
                 </FieldDescription>
               </Field>
             </FieldGroup>
