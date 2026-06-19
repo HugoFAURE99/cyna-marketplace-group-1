@@ -3,6 +3,11 @@ import "server-only";
 
 import { createPublicClient } from "@/lib/supabase/public";
 import { pickTranslation, type Locale } from "@/lib/i18n/translations";
+import {
+  compareBySearchOrder,
+  sortImages,
+  sortTariffs,
+} from "@/lib/products/public-catalog";
 import type { Tables } from "@/types/database.types";
 
 // Language-neutral product fields that stay on the base row.
@@ -11,7 +16,9 @@ type ProductNeutral = Pick<
   | "date_ajout"
   | "id_categorie"
   | "id_produit"
+  | "is_priorite"
   | "ordre_priorite"
+  | "quantite_produit"
   | "statut_produit"
 >;
 
@@ -47,7 +54,7 @@ export type PublicProductDetail = ProductNeutral & {
 
 export type SimilarProduct = Pick<
   ProductNeutral,
-  "date_ajout" | "id_produit" | "ordre_priorite"
+  "date_ajout" | "id_produit" | "is_priorite" | "ordre_priorite" | "quantite_produit"
 > & {
   nom_pro: string;
   category: PublicProductCategory | null;
@@ -93,7 +100,7 @@ type ProductQueryRow = ProductNeutral & {
 
 type SimilarProductQueryRow = Pick<
   ProductNeutral,
-  "date_ajout" | "id_produit" | "ordre_priorite"
+  "date_ajout" | "id_produit" | "is_priorite" | "ordre_priorite" | "quantite_produit"
 > & {
   produit_traduction: ProduitTraductionRow[] | null;
   categorie: CategoryQueryRow | null;
@@ -104,7 +111,9 @@ const PRODUCT_SELECT = `
   date_ajout,
   id_categorie,
   id_produit,
+  is_priorite,
   ordre_priorite,
+  quantite_produit,
   statut_produit,
   produit_traduction (
     langue,
@@ -141,7 +150,9 @@ const PRODUCT_SELECT = `
 const SIMILAR_PRODUCT_SELECT = `
   date_ajout,
   id_produit,
+  is_priorite,
   ordre_priorite,
+  quantite_produit,
   produit_traduction (
     langue,
     nom_pro,
@@ -162,12 +173,6 @@ const SIMILAR_PRODUCT_SELECT = `
     ordre_affichage
   )
 `;
-
-const BILLING_ORDER: Record<string, number> = {
-  mensuel: 0,
-  annuel: 1,
-  unique: 2,
-};
 
 // Specs are stored as one ";"-separated string; split into a trimmed list.
 export function parseProductSpecs(value: string | null) {
@@ -199,8 +204,9 @@ export async function getPublicProductById(productId: number, locale: Locale) {
   return normalizeProduct(data as unknown as ProductQueryRow, locale);
 }
 
-export async function getFeaturedSimilarProducts(
+export async function getSimilarProducts(
   currentProductId: number,
+  categoryId: number,
   locale: Locale,
 ) {
   const supabase = createPublicClient();
@@ -208,19 +214,19 @@ export async function getFeaturedSimilarProducts(
     .from("produit")
     .select(SIMILAR_PRODUCT_SELECT)
     .eq("statut_produit", true)
-    .eq("mis_avant", true)
+    .eq("id_categorie", categoryId)
     .neq("id_produit", currentProductId)
-    .order("ordre_priorite", { ascending: true })
     .order("date_ajout", { ascending: false })
-    .limit(3);
+    .order("id_produit", { ascending: true });
 
   if (error) {
     throw new Error(`Erreur chargement produits similaires : ${error.message}`);
   }
 
-  return ((data ?? []) as unknown as SimilarProductQueryRow[]).map((row) =>
-    normalizeSimilarProduct(row, locale),
-  );
+  return ((data ?? []) as unknown as SimilarProductQueryRow[])
+    .map((row) => normalizeSimilarProduct(row, locale))
+    .sort(compareBySearchOrder)
+    .slice(0, 3);
 }
 
 function resolveCategory(
@@ -267,7 +273,9 @@ function normalizeProduct(
     date_ajout: row.date_ajout,
     id_categorie: row.id_categorie,
     id_produit: row.id_produit,
+    is_priorite: row.is_priorite,
     ordre_priorite: row.ordre_priorite,
+    quantite_produit: row.quantite_produit,
     statut_produit: row.statut_produit,
     nom_pro: translation?.nom_pro ?? "",
     pro_description: translation?.pro_description ?? null,
@@ -290,27 +298,11 @@ function normalizeSimilarProduct(
   return {
     date_ajout: row.date_ajout,
     id_produit: row.id_produit,
+    is_priorite: row.is_priorite,
     ordre_priorite: row.ordre_priorite,
+    quantite_produit: row.quantite_produit,
     nom_pro: translation?.nom_pro ?? "",
     category: resolveCategory(row.categorie, locale),
     images: sortImages(row.image_produit ?? []),
   };
-}
-
-function sortImages(images: PublicProductImage[]) {
-  return [...images].sort((a, b) => {
-    const aOrder = a.ordre_affichage ?? Number.MAX_SAFE_INTEGER;
-    const bOrder = b.ordre_affichage ?? Number.MAX_SAFE_INTEGER;
-
-    return aOrder - bOrder || a.id_image - b.id_image;
-  });
-}
-
-function sortTariffs(tariffs: PublicProductTariff[]) {
-  return [...tariffs].sort((a, b) => {
-    const aOrder = BILLING_ORDER[a.type_facturation] ?? Number.MAX_SAFE_INTEGER;
-    const bOrder = BILLING_ORDER[b.type_facturation] ?? Number.MAX_SAFE_INTEGER;
-
-    return aOrder - bOrder || a.id_prix - b.id_prix;
-  });
 }

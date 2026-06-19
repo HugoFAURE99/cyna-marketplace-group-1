@@ -4,21 +4,15 @@ import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import CartButton from "@/components/layout/public-header/CartButton";
+import CategoryNavBar from "@/components/layout/public-header/CategoryNavBar";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
 import PublicMenuSheet from "@/components/layout/public-header/PublicMenuSheet";
-import SearchForm from "@/components/layout/public-header/SearchForm";
+import SearchAutocomplete from "@/components/layout/public-header/SearchAutocomplete";
+import { getCartCount } from "@/lib/cart/cart";
 
-// 1. On importe le client Supabase serveur
-import { createServerClient } from "@/lib/supabase/server-client";
-
-type PublicHeaderProps = {
-  cartCount?: number;
-};
-
-export default async function PublicHeader({
-  cartCount = 0,
-}: PublicHeaderProps) {
+export default async function PublicHeader() {
   const t = await getTranslations("header");
+  const cartCount = await getCartCount();
 
   // 2. On récupère la session de l'utilisateur actuel
   const supabase = await createServerClient();
@@ -47,22 +41,24 @@ export default async function PublicHeader({
               width={118}
             />
           </Link>
-          <LanguageSwitcher />
         </div>
 
         <div className="hidden min-w-0 flex-1 md:block">
           <div className="mx-auto w-full max-w-[600px]">
-            <SearchForm />
+            <SearchAutocomplete />
           </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
+          <LanguageSwitcher />
           <CartButton count={cartCount} />
 
           {/* 3. On transmet l'état (true si user existe, false sinon) */}
           <PublicMenuSheet isLoggedIn={!!user} />
         </div>
       </div>
+
+      <CategoryNavBar />
     </header>
   );
 }

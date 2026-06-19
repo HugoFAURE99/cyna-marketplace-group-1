@@ -1,31 +1,52 @@
 "use client";
 
-// Pricing card: pick a tariff + user count to compute a total.
+// Pricing card: pick a tariff + license user count to compute a total.
 // Subscribe is disabled until checkout is wired up.
 
-import { useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+  type KeyboardEvent,
+} from "react";
+import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useRepeatingPress } from "@/hooks/use-repeating-press";
+import { addToCart } from "@/lib/cart/cart.actions";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  DEFAULT_LICENSE_USERS,
+  MAX_LICENSE_USERS,
+  MIN_LICENSE_USERS,
+} from "@/lib/cart/cart-constants";
 import { cn } from "@/lib/utils";
 import { formatPriceCents } from "@/lib/i18n/format";
 import type { PublicProductTariff } from "@/lib/products/public-products";
 
 type ProductPricingCardProps = {
+  productId: number;
+  isUnavailable: boolean;
   tariffs: PublicProductTariff[];
 };
 
-const USER_OPTIONS = Array.from({ length: 10 }, (_, index) => index + 1);
-const DEFAULT_USER_COUNT = 5;
+function clampUserCount(value: number, fallback: number) {
+  if (!Number.isFinite(value)) {
+    return fallback;
+  }
+
+  return Math.min(
+    MAX_LICENSE_USERS,
+    Math.max(MIN_LICENSE_USERS, Math.trunc(value)),
+  );
+}
 
 export default function ProductPricingCard({
+  productId,
+  isUnavailable,
   tariffs,
 }: ProductPricingCardProps) {
   const t = useTranslations("product");
@@ -33,7 +54,19 @@ export default function ProductPricingCard({
   const [selectedTariffId, setSelectedTariffId] = useState(
     tariffs[0]?.id_prix ?? null,
   );
-  const [userCount, setUserCount] = useState(DEFAULT_USER_COUNT);
+  const [userCount, setUserCount] = useState(DEFAULT_LICENSE_USERS);
+  const [userInput, setUserInput] = useState(String(DEFAULT_LICENSE_USERS));
+  const [isPending, startTransition] = useTransition();
+  const [justAdded, setJustAdded] = useState(false);
+
+  // Briefly flip the button to a confirmation state after a successful add.
+  useEffect(() => {
+    if (!justAdded) {
+      return;
+    }
+    const timer = setTimeout(() => setJustAdded(false), 2000);
+    return () => clearTimeout(timer);
+  }, [justAdded]);
 
   const selectedTariff = useMemo(
     () =>
@@ -64,8 +97,49 @@ export default function ProductPricingCard({
   const tariffLabel = (tariff: PublicProductTariff) =>
     tariff.nom_prix_tarif ?? billingLabel(tariff.type_facturation);
 
-  // Total = unit price × number of users.
+  // Total = unit price x number of users.
   const totalCents = selectedTariff ? selectedTariff.prix * userCount : 0;
+
+  const commitUserCount = (value = Number(userInput)) => {
+    const next = clampUserCount(value, userCount);
+    setUserCount(next);
+    setUserInput(String(next));
+  };
+
+  const stepUserCount = useCallback((delta: number) => {
+    setUserCount((current) => {
+      const next = clampUserCount(current + delta, current);
+      setUserInput(String(next));
+      return next;
+    });
+  }, []);
+
+  const decreasePress = useRepeatingPress(() => stepUserCount(-1));
+  const increasePress = useRepeatingPress(() => stepUserCount(1));
+
+  const handleStepKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    delta: number,
+  ) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      stepUserCount(delta);
+    }
+  };
+
+  const handleAddToCart = () => {
+    if (!selectedTariff) {
+      return;
+    }
+    startTransition(async () => {
+      await addToCart({
+        productId,
+        tariffId: selectedTariff.id_prix,
+        licenseUserCount: userCount,
+      });
+      setJustAdded(true);
+    });
+  };
 
   return (
     <section className="rounded-lg bg-white p-6 shadow-xs ring-1 ring-black/10">
@@ -110,21 +184,56 @@ export default function ProductPricingCard({
           >
             {t("numberOfUsers")}
           </label>
-          <Select
-            onValueChange={(value) => setUserCount(Number(value))}
-            value={String(userCount)}
-          >
-            <SelectTrigger className="mt-2 h-11 w-full" id="product-user-count">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {USER_OPTIONS.map((count) => (
-                <SelectItem key={count} value={String(count)}>
-                  {t("users", { count })}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="mt-2 flex h-11 w-full max-w-[220px] items-center overflow-hidden rounded-md border border-input bg-white shadow-xs">
+            <button
+              aria-label={t("decreaseUsers")}
+              className="inline-flex h-full w-11 items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={userCount <= MIN_LICENSE_USERS}
+              onKeyDown={(event) => handleStepKeyDown(event, -1)}
+              type="button"
+              {...decreasePress}
+            >
+              <Minus aria-hidden="true" className="size-4" />
+            </button>
+            <Input
+              aria-label={t("numberOfUsers")}
+              className="h-10 rounded-none border-0 px-1 text-center shadow-none focus-visible:border-transparent focus-visible:ring-0"
+              id="product-user-count"
+              inputMode="numeric"
+              max={MAX_LICENSE_USERS}
+              min={MIN_LICENSE_USERS}
+              onBlur={() => commitUserCount()}
+              onChange={(event) => {
+                setUserInput(event.target.value);
+                const parsed = Number(event.target.value);
+                if (Number.isFinite(parsed)) {
+                  setUserCount(clampUserCount(parsed, DEFAULT_LICENSE_USERS));
+                }
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  commitUserCount();
+                }
+              }}
+              pattern="[0-9]*"
+              type="text"
+              value={userInput}
+            />
+            <button
+              aria-label={t("increaseUsers")}
+              className="inline-flex h-full w-11 items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={userCount >= MAX_LICENSE_USERS}
+              onKeyDown={(event) => handleStepKeyDown(event, 1)}
+              type="button"
+              {...increasePress}
+            >
+              <Plus aria-hidden="true" className="size-4" />
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-slate-500">
+            {t("users", { count: userCount })}
+          </p>
 
           <p className="mt-5 text-3xl font-bold text-slate-950">
             {formatPriceCents(totalCents, locale)}
@@ -135,13 +244,34 @@ export default function ProductPricingCard({
         <p className="text-sm text-slate-600">{t("pricingUnavailable")}</p>
       )}
 
-      <Button
-        className="mt-5 h-12 w-full bg-purple-700 text-base font-semibold text-white hover:bg-purple-700 disabled:opacity-100"
-        disabled
-        type="button"
-      >
-        {t("subscribeNow")}
-      </Button>
+      {isUnavailable ? (
+        <Button
+          className="mt-5 h-12 w-full bg-slate-200 text-base font-semibold text-slate-500 hover:bg-slate-200 disabled:opacity-100"
+          disabled
+          type="button"
+        >
+          {t("currentlyUnavailable")}
+        </Button>
+      ) : (
+        <Button
+          className="mt-5 h-12 w-full bg-purple-700 text-base font-semibold text-white transition hover:bg-purple-800 disabled:opacity-70"
+          disabled={!selectedTariff || isPending}
+          onClick={handleAddToCart}
+          type="button"
+        >
+          {justAdded ? (
+            <>
+              <Check aria-hidden="true" className="size-5" />
+              {t("addedToCart")}
+            </>
+          ) : (
+            <>
+              <ShoppingCart aria-hidden="true" className="size-5" />
+              {t("addToCart")}
+            </>
+          )}
+        </Button>
+      )}
     </section>
   );
 }

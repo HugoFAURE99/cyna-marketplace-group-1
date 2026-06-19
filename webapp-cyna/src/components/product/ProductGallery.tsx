@@ -101,10 +101,10 @@ export default function ProductGallery({
               aria-label={`Show image ${index + 1}`}
               aria-pressed={safeSelectedIndex === index}
               className={cn(
-                "h-20 w-20 shrink-0 rounded-lg border bg-cover bg-center transition",
+                "h-20 w-20 shrink-0 rounded-lg border bg-cover bg-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2",
                 safeSelectedIndex === index
-                  ? "border-purple-700 ring-2 ring-purple-700"
-                  : "border-transparent hover:border-purple-300",
+                  ? "border-transparent shadow-md shadow-slate-900/20"
+                  : "border-transparent shadow-sm hover:border-slate-200 hover:shadow-md",
               )}
               key={image.id}
               onClick={() => setSelectedIndex(index)}
