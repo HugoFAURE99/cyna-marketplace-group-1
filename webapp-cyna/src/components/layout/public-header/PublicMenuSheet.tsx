@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import {
+  CircleUserRound,
   FileText,
   Info,
   LogIn,
@@ -37,8 +38,10 @@ const informationLinks = [
 // 3. On ajoute la propriété "isLoggedIn"
 export default function PublicMenuSheet({
   isLoggedIn,
+  userName,
 }: {
   isLoggedIn?: boolean;
+  userName?: string | null;
 }) {
   const t = useTranslations("menu");
   const tHeader = useTranslations("header");
@@ -72,16 +75,32 @@ export default function PublicMenuSheet({
           {/* 4. LA LOGIQUE DES BOUTONS EST ICI */}
           <div className="space-y-2">
             {isLoggedIn ? (
-              <form action={logout}>
-                <button
-                  type="submit"
-                  onClick={closeMenu}
-                  className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-4 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
-                >
-                  <LogOut aria-hidden="true" className="size-4" />
-                  Se déconnecter
-                </button>
-              </form>
+              <>
+                {/* Rappel de l'état connecté */}
+                <div className="flex items-center gap-2 rounded-md bg-purple-50 px-3 py-2.5 text-sm text-slate-700">
+                  <CircleUserRound
+                    aria-hidden="true"
+                    className="size-5 shrink-0 text-purple-700"
+                  />
+                  <span className="min-w-0 truncate">
+                    {t("connectedAs")}{" "}
+                    <span className="font-semibold text-slate-900">
+                      {userName}
+                    </span>
+                  </span>
+                </div>
+
+                <form action={logout}>
+                  <button
+                    type="submit"
+                    onClick={closeMenu}
+                    className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-red-800 px-4 text-sm font-semibold text-white transition hover:bg-red-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-800"
+                  >
+                    <LogOut aria-hidden="true" className="size-4" />
+                    {t("logOut")}
+                  </button>
+                </form>
+              </>
             ) : (
               <>
                 <Link

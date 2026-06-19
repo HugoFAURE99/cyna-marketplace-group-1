@@ -14,7 +14,10 @@
     "searchPlaceholder": "Rechercher des produits",
     "searchButton": "Rechercher",
     "cartLabel": "Panier",
-    "cartItems": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}"
+    "cartItems": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
+    "categoriesNav": "Catégories de produits",
+    "allProducts": "Tous les produits",
+    "logIn": "Connexion"
   },
   "menu": {
     "menu": "Menu",
@@ -23,6 +26,8 @@
     "information": "Informations",
     "logIn": "Connexion",
     "signUp": "Inscription",
+    "logOut": "Se déconnecter",
+    "connectedAs": "Connecté en tant que",
     "termsOfUse": "Conditions d'utilisation",
     "legalNotices": "Mentions légales",
     "contact": "Contact",
@@ -45,7 +50,8 @@
     "servicesEyebrow": "Services",
     "topProducts": "Meilleurs produits",
     "carouselEmpty": "Le contenu du carrousel n'est pas encore configuré.",
-    "exploreServices": "Découvrir les services",
+    "exploreServices": "Découvrir les meilleurs produits",
+    "browseAllProducts": "Parcourir tous les produits",
     "noProducts": "Aucun produit public n'est disponible pour le moment.",
     "noCategories": "Aucune catégorie publique n'est disponible pour le moment.",
     "categoryImageAlt": "Image de la catégorie {name}",
@@ -55,6 +61,7 @@
     "carouselGoToSlide": "Afficher la diapositive {number}"
   },
   "product": {
+    "overview": "Aperçu",
     "technicalSpecifications": "Spécifications techniques",
     "pricing": "Tarifs",
     "numberOfUsers": "Nombre d'utilisateurs",
@@ -64,13 +71,69 @@
     "pricingUnavailable": "Tarif indisponible",
     "imageAlt": "Image de {name}",
     "users": "{count, plural, one {# utilisateur} other {# utilisateurs}}",
+    "unavailable": "Indisponible",
+    "quantityAvailable": "{count, plural, =0 {Rupture de stock} one {# en stock} other {# en stock}}",
     "billing": {
       "mensuel": "Mensuel",
       "annuel": "Annuel",
       "unique": "Paiement unique"
     },
     "perMonth": "/mois",
-    "perYear": "/an"
+    "perYear": "/an",
+    "addToCart": "Ajouter au panier",
+    "addedToCart": "Ajouté au panier",
+    "currentlyUnavailable": "Actuellement indisponible",
+    "decreaseUsers": "Réduire le nombre d'utilisateurs",
+    "increaseUsers": "Augmenter le nombre d'utilisateurs",
+    "contactSalesAria": "Contacter le service commercial à propos de ce produit",
+    "contactSalesInfo": "En rupture de stock — contactez notre équipe commerciale pour commander : {phone}"
+  },
+  "category": {
+    "notFound": "Catégorie introuvable",
+    "empty": "Aucun produit dans cette catégorie pour le moment."
+  },
+  "cart": {
+    "title": "Panier",
+    "empty": "Votre panier est vide.",
+    "emptyHint": "Parcourez nos produits pour commencer.",
+    "browseProducts": "Parcourir les produits",
+    "quantity": "Quantité",
+    "licenseUsers": "Utilisateurs de la licence",
+    "decreaseLicenseUsers": "Réduire le nombre d'utilisateurs de la licence",
+    "increaseLicenseUsers": "Augmenter le nombre d'utilisateurs de la licence",
+    "billingPeriod": "Facturation",
+    "unit": "Prix unitaire",
+    "remove": "Retirer {name}",
+    "subtotal": "Sous-total",
+    "proceedToCheckout": "Passer à la caisse",
+    "checkoutComingSoon": "Le paiement arrive bientôt.",
+    "saveCartPrompt": "<login>Connectez-vous</login> ou <register>créez un compte</register> pour sauvegarder votre panier"
+  },
+  "search": {
+    "title": "Recherche",
+    "browseTitle": "Parcourir les produits",
+    "resultsFor": "Résultats pour « {query} »",
+    "prompt": "Saisissez un terme pour rechercher des produits.",
+    "noResults": "Aucun produit ne correspond à votre recherche.",
+    "noResultsHint": "Essayez une autre recherche ou ajustez vos filtres — voir les suggestions ci-dessous.",
+    "resultCount": "{count, plural, =0 {Aucun résultat} one {# résultat} other {# résultats}}",
+    "filters": "Filtres",
+    "category": "Catégorie",
+    "allCategories": "Toutes les catégories",
+    "technicalCharacteristics": "Caractéristiques techniques",
+    "priceRange": "Fourchette de prix (€)",
+    "minPrice": "Min",
+    "maxPrice": "Max",
+    "inStockOnly": "En stock uniquement",
+    "clearFilters": "Réinitialiser",
+    "suggestions": "Vous pourriez aussi aimer",
+    "viewAllResults": "Voir tous les résultats",
+    "pagination": "Pages de résultats de recherche",
+    "previousPage": "Précédent",
+    "nextPage": "Suivant",
+    "goToPage": "Aller à la page {page}",
+    "currentPage": "Page {page}, page actuelle",
+    "searching": "Recherche…"
   },
   "auth": {
     "login": {
@@ -80,12 +143,15 @@
       "password": "Mot de passe",
       "forgotPassword": "Mot de passe oublié ?",
       "submit": "Se connecter",
+      "loading": "Connexion...",
       "noAccount": "Vous n'avez pas de compte ?",
       "createAccount": "Créer un compte",
 
       "registerSuccess": "Compte créé avec succès ! Veuillez vous connecter.",
       "errorInvalidCredentials": "Email ou mot de passe incorrect.",
       "checkEmail": "Inscription réussie ! Veuillez vérifier votre boîte de réception pour confirmer votre e-mail.",
+      "updatePasswordSuccess": "Votre mot de passe a été mis à jour. Vous pouvez maintenant vous connecter.",
+      "invalidLink": "Ce lien est invalide ou a expiré. Veuillez réessayer.",
       "errorMissingFields": "Tous les champs sont requis."
     },
     "register": {
@@ -96,6 +162,9 @@
       "password": "Mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
       "submit": "Créer un compte",
+      "loading": "Création du compte...",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "logIn": "Se connecter",
       "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.",
       "errorMismatch": "Les mots de passe ne correspondent pas.",
       "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
@@ -105,16 +174,25 @@
     },
     "resetPassword": {
       "title": "Mot de passe oublié",
+      "subtitle": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.",
       "email": "Adresse email",
       "submit": "Envoyer le lien",
-      "resetEmailSent": "Un e-mail de réinitialisation a été envoyé. Vérifiez votre boîte de réception (et vos spams !)."
+      "loading": "Envoi...",
+      "backToLogin": "Retour à la connexion",
+      "resetEmailSent": "Un e-mail de réinitialisation a été envoyé. Vérifiez votre boîte de réception (et vos spams !).",
+      "errorMissingFields": "Veuillez saisir votre adresse e-mail."
     },
     "updatePassword": {
       "title": "Nouveau mot de passe",
+      "subtitle": "Choisissez un nouveau mot de passe pour votre compte.",
       "newPassword": "Nouveau mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
       "submit": "Mettre à jour le mot de passe",
-      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial."
+      "loading": "Mise à jour...",
+      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.",
+      "errorMissingFields": "Tous les champs sont requis.",
+      "errorMismatch": "Les mots de passe ne correspondent pas.",
+      "errorUpdateFailed": "Impossible de mettre à jour votre mot de passe. Le lien a peut-être expiré."
     }
   },
   "admin": {

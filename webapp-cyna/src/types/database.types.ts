@@ -122,6 +122,47 @@ export type Database = {
           },
         ];
       };
+      caracteristique_technique: {
+        Row: {
+          date_creation: string;
+          id_caracteristique: number;
+        };
+        Insert: {
+          date_creation?: string;
+          id_caracteristique?: number;
+        };
+        Update: {
+          date_creation?: string;
+          id_caracteristique?: number;
+        };
+        Relationships: [];
+      };
+      caracteristique_technique_traduction: {
+        Row: {
+          id_caracteristique: number;
+          langue: Database["public"]["Enums"]["langue"];
+          nom_caracteristique: string;
+        };
+        Insert: {
+          id_caracteristique: number;
+          langue: Database["public"]["Enums"]["langue"];
+          nom_caracteristique: string;
+        };
+        Update: {
+          id_caracteristique?: number;
+          langue?: Database["public"]["Enums"]["langue"];
+          nom_caracteristique?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "caracteristique_technique_traduction_id_caracteristique_fkey";
+            columns: ["id_caracteristique"];
+            isOneToOne: false;
+            referencedRelation: "caracteristique_technique";
+            referencedColumns: ["id_caracteristique"];
+          },
+        ];
+      };
       categorie: {
         Row: {
           id_categorie: number;
@@ -535,6 +576,39 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "categorie";
             referencedColumns: ["id_categorie"];
+          },
+        ];
+      };
+      produit_caracteristique_technique: {
+        Row: {
+          id_caracteristique: number;
+          id_produit: number;
+          ordre_affichage: number;
+        };
+        Insert: {
+          id_caracteristique: number;
+          id_produit: number;
+          ordre_affichage?: number;
+        };
+        Update: {
+          id_caracteristique?: number;
+          id_produit?: number;
+          ordre_affichage?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "produit_caracteristique_technique_id_caracteristique_fkey";
+            columns: ["id_caracteristique"];
+            isOneToOne: false;
+            referencedRelation: "caracteristique_technique";
+            referencedColumns: ["id_caracteristique"];
+          },
+          {
+            foreignKeyName: "produit_caracteristique_technique_id_produit_fkey";
+            columns: ["id_produit"];
+            isOneToOne: false;
+            referencedRelation: "produit";
+            referencedColumns: ["id_produit"];
           },
         ];
       };

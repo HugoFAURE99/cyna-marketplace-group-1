@@ -566,6 +566,7 @@ export default function ProductForm({
             {categories.map((cat) => (
               <SelectItem
                 key={cat.id_categorie}
+                label={cat.cat_nom}
                 value={String(cat.id_categorie)}
               >
                 {cat.cat_nom}

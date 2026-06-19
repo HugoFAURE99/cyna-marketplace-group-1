@@ -1,7 +1,13 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { LoginForm } from "@/components/connection/login-form";
+import { AuthMessage } from "@/components/connection/auth-message";
 import type { Locale } from "@/lib/i18n/translations";
+
+// Query-param keys the auth flow may redirect here with. We map them to
+// translated copy so the user never sees a raw key like "checkEmail".
+const MESSAGE_KEYS = ["checkEmail", "updatePasswordSuccess"] as const;
+const ERROR_KEYS = ["invalidLink"] as const;
 
 export default async function Login({
   params,
@@ -19,34 +25,31 @@ export default async function Login({
   const message = resolvedSearchParams.message;
   const error = resolvedSearchParams.error;
 
-  return (
-    <>
-      <div className="flex justify-center mt-5">
-        <div className="w-50"></div>
-        <div>
-          <div className="my-10 text-center">
-            <h1 className="text-3xl font-bold mb-5">{t("title")}</h1>
-            <p>{t("subtitle")}</p>
-          </div>
-          {/* Affichage du message de succès venant de l'inscription */}
-          {message && (
-            <div className="mb-4 p-3 text-sm text-green-700 bg-green-100 rounded-md text-center">
-              {message}
-            </div>
-          )}
+  const messageText = MESSAGE_KEYS.includes(message as never)
+    ? t(message as never)
+    : message;
+  const errorText = ERROR_KEYS.includes(error as never)
+    ? t(error as never)
+    : error;
 
-          {/* Affichage d'une erreur venant du callback (ex: lien expiré) */}
-          {error && (
-            <div className="mb-4 p-3 text-sm text-red-700 bg-red-100 rounded-md text-center">
-              {error}
-            </div>
-          )}
-          <div className="h-100 w-100">
-            <LoginForm />
-          </div>
+  return (
+    <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
-        <div className="w-50"></div>
+
+        {/* Message de succès venant de l'inscription / reset (traduit) */}
+        {messageText && <AuthMessage variant="info">{messageText}</AuthMessage>}
+
+        {/* Erreur venant du callback (ex: lien expiré) (traduit) */}
+        {errorText && <AuthMessage variant="error">{errorText}</AuthMessage>}
+
+        <div className="w-full">
+          <LoginForm />
+        </div>
       </div>
-    </>
+    </main>
   );
 }

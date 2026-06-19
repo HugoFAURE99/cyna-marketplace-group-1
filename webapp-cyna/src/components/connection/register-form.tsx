@@ -14,6 +14,8 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { AuthMessage } from "@/components/connection/auth-message";
+import { Link } from "@/i18n/navigation";
 
 import { register } from "@/app/(auth)/_action/auth.action";
 
@@ -43,9 +45,11 @@ export function RegisterForm({
             <FieldGroup>
               {/* Affichage de l'erreur traduite OU de l'erreur brute système */}
               {(state?.errorKey || state?.error) && (
-                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-md text-center">
-                  {state?.errorKey ? t(state.errorKey as any) : state?.error}
-                </div>
+                <AuthMessage variant="error">
+                  {state?.errorKey
+                    ? t(state.errorKey as Parameters<typeof t>[0])
+                    : state?.error}
+                </AuthMessage>
               )}
 
               <Field>
@@ -100,9 +104,19 @@ export function RegisterForm({
               </Field>
 
               <Field>
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? "Création..." : t("submit")}
+                <Button variant="brand" type="submit" disabled={isPending}>
+                  {isPending ? t("loading") : t("submit")}
                 </Button>
+
+                <FieldDescription className="text-center">
+                  {t("haveAccount")}{" "}
+                  <Link
+                    href="/login"
+                    className="font-medium text-purple-700 underline-offset-4 hover:underline"
+                  >
+                    {t("logIn")}
+                  </Link>
+                </FieldDescription>
               </Field>
             </FieldGroup>
           </form>

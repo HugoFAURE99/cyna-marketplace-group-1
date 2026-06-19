@@ -13,15 +13,17 @@ export default async function UpdatePassword({
   const t = await getTranslations("auth.updatePassword");
 
   return (
-    <div className="flex justify-center mt-5">
-      <div>
-        <div className="my-10 text-center">
-          <h1 className="text-3xl font-bold mb-5">{t("title")}</h1>
+    <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-2">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
         </div>
-        <div className="h-100 w-100">
+
+        <div className="w-full">
           <UpdatePasswordForm />
         </div>
       </div>
-    </div>
+    </main>
   );
 }

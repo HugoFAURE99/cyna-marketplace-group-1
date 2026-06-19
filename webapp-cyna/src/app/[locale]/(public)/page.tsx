@@ -32,7 +32,7 @@ export default async function Home({
   ]);
 
   return (
-    <main className="flex-1 bg-purple-50">
+    <main className="flex-1">
       <HomeCarousel slides={slides} />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 py-12 sm:px-6 lg:px-8">
         <HomeIntro content={introContent} />
