@@ -152,7 +152,8 @@
       "checkEmail": "Inscription réussie ! Veuillez vérifier votre boîte de réception pour confirmer votre e-mail.",
       "updatePasswordSuccess": "Votre mot de passe a été mis à jour. Vous pouvez maintenant vous connecter.",
       "invalidLink": "Ce lien est invalide ou a expiré. Veuillez réessayer.",
-      "errorMissingFields": "Tous les champs sont requis."
+      "errorMissingFields": "Tous les champs sont requis.",
+      "errorAccountDisabled": "Votre compte est désactivé, veuillez contacter le support."
     },
     "register": {
       "title": "Inscription",

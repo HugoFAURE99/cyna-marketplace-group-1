@@ -152,7 +152,8 @@
       "checkEmail": "Registration successful! Please check your inbox to confirm your email.",
       "updatePasswordSuccess": "Your password has been updated. You can now log in.",
       "invalidLink": "This link is invalid or has expired. Please try again.",
-      "errorMissingFields": "All fields are required."
+      "errorMissingFields": "All fields are required.",
+      "errorAccountDisabled": "Your account is disabled, please contact support."
     },
     "register": {
       "title": "Register",

@@ -8,9 +8,9 @@ import { createServerClient } from '@/lib/supabase/server-client'
 // 1. CONNEXION (LOGIN)
 // ============================================================================
 export async function login(
-  next: string,       // <-- 1. Reçu en premier argument grâce au .bind() !
-  _prevState: any,    // <-- 2. L'état précédent passe en deuxième position
-  formData: FormData  // <-- 3. Les données du formulaire en troisième position
+  next: string,
+  _prevState: any,
+  formData: FormData
 ): Promise<{ error?: string; errorKey?: string } | null> {
 
   const email = formData.get('email') as string;
@@ -23,13 +23,13 @@ export async function login(
 
   const supabase = await createServerClient(isRememberMe);
 
-  const { error } = await supabase.auth.signInWithPassword({
+  // 1. Authentification : On s'assure d'extraire "data" et de l'appeler "authData"
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
-    // Gestion des erreurs spécifiques
     if (error.message.includes("Email not confirmed")) {
       return { errorKey: "errorUnconfirmed" };
     }
@@ -39,11 +39,28 @@ export async function login(
     return { error: error.message };
   }
 
-  // Sécurité Anti Open-Redirect
+  // 2. Vérification de l'état "actif"
+  if (authData.user) {
+    const { data: userData } = await supabase
+      .from('utilisateur')
+      .select('is_actif')
+      .eq('id_compte', authData.user.id)
+      .single();
+
+    // L'ajout du "?" empêche l'erreur "'userData' is possibly 'null'"
+    if (userData?.is_actif === false) {
+      await supabase.auth.signOut();
+
+
+      return { errorKey: "errorAccountDisabled" };
+    }
+  }
+
+  // 3. Sécurité Anti Open-Redirect
   const isSafeRedirect = next.startsWith('/') && !next.startsWith('//');
   const redirectPath = isSafeRedirect ? next : '/';
 
-  // Redirection magique au bon endroit !
+  // 4. Redirection (Rien ne doit être écrit après cette ligne !)
   redirect(redirectPath);
 }
 
