@@ -8,24 +8,43 @@ import { createServerClient } from '@/lib/supabase/server-client'
 // 1. CONNEXION (LOGIN)
 // ============================================================================
 export async function login(
-  _prevState: any,
-  formData: FormData
+  next: string,       // <-- 1. Reçu en premier argument grâce au .bind() !
+  _prevState: any,    // <-- 2. L'état précédent passe en deuxième position
+  formData: FormData  // <-- 3. Les données du formulaire en troisième position
 ): Promise<{ error?: string; errorKey?: string } | null> {
+
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const isRememberMe = formData.get('remember') === 'on';
 
   if (!email || !password) {
     return { errorKey: "errorMissingFields" };
   }
 
-  const supabase = await createServerClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const supabase = await createServerClient(isRememberMe);
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
   if (error) {
-    return { errorKey: "errorInvalidCredentials" };
+    // Gestion des erreurs spécifiques
+    if (error.message.includes("Email not confirmed")) {
+      return { errorKey: "errorUnconfirmed" };
+    }
+    if (error.message.includes("Invalid login credentials")) {
+      return { errorKey: "errorInvalidCredentials" };
+    }
+    return { error: error.message };
   }
 
-  redirect('/');
+  // Sécurité Anti Open-Redirect
+  const isSafeRedirect = next.startsWith('/') && !next.startsWith('//');
+  const redirectPath = isSafeRedirect ? next : '/';
+
+  // Redirection magique au bon endroit !
+  redirect(redirectPath);
 }
 
 // ============================================================================

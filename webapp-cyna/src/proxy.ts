@@ -50,7 +50,13 @@ export async function proxy(request: NextRequest) {
     // Redirect anonymous users away from protected sections.
     if (!user && isProtectedRoute) {
       const locale = url.pathname.split('/')[1] || 'fr'; // Récupère la langue en cours
+      
+      //On sauvegarde la page où l'utilisateur voulait aller
+      const nextPath = url.pathname;
+      
       url.pathname = `/${locale}/login`;
+      url.searchParams.set('next', nextPath); // Ajoute le paramètre ?next=/fr/admin...
+      
       return NextResponse.redirect(url);
     }
   
