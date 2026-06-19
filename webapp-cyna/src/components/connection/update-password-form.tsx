@@ -14,6 +14,7 @@ import {
   FieldDescription,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { AuthMessage } from "@/components/connection/auth-message";
 
 import { updatePassword } from "@/app/(auth)/_action/auth.action";
 
@@ -43,9 +44,11 @@ export function UpdatePasswordForm({
           <form action={formAction}>
             <FieldGroup>
               {(state?.errorKey || state?.error) && (
-                <div className="p-3 text-sm text-red-700 bg-red-100 rounded-md text-center">
-                  {state?.errorKey ? t(state.errorKey as any) : state?.error}
-                </div>
+                <AuthMessage variant="error">
+                  {state?.errorKey
+                    ? t(state.errorKey as Parameters<typeof t>[0])
+                    : state?.error}
+                </AuthMessage>
               )}
 
               <Field>
@@ -78,8 +81,8 @@ export function UpdatePasswordForm({
               </Field>
 
               <Field>
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? "Mise à jour..." : t("submit")}
+                <Button variant="brand" type="submit" disabled={isPending}>
+                  {isPending ? t("loading") : t("submit")}
                 </Button>
               </Field>
             </FieldGroup>

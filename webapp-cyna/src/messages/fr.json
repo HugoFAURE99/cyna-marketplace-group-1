@@ -16,7 +16,8 @@
     "cartLabel": "Panier",
     "cartItems": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
     "categoriesNav": "Catégories de produits",
-    "allProducts": "Tous les produits"
+    "allProducts": "Tous les produits",
+    "logIn": "Connexion"
   },
   "menu": {
     "menu": "Menu",
@@ -25,6 +26,8 @@
     "information": "Informations",
     "logIn": "Connexion",
     "signUp": "Inscription",
+    "logOut": "Se déconnecter",
+    "connectedAs": "Connecté en tant que",
     "termsOfUse": "Conditions d'utilisation",
     "legalNotices": "Mentions légales",
     "contact": "Contact",
@@ -140,12 +143,15 @@
       "password": "Mot de passe",
       "forgotPassword": "Mot de passe oublié ?",
       "submit": "Se connecter",
+      "loading": "Connexion...",
       "noAccount": "Vous n'avez pas de compte ?",
       "createAccount": "Créer un compte",
 
       "registerSuccess": "Compte créé avec succès ! Veuillez vous connecter.",
       "errorInvalidCredentials": "Email ou mot de passe incorrect.",
       "checkEmail": "Inscription réussie ! Veuillez vérifier votre boîte de réception pour confirmer votre e-mail.",
+      "updatePasswordSuccess": "Votre mot de passe a été mis à jour. Vous pouvez maintenant vous connecter.",
+      "invalidLink": "Ce lien est invalide ou a expiré. Veuillez réessayer.",
       "errorMissingFields": "Tous les champs sont requis."
     },
     "register": {
@@ -156,6 +162,9 @@
       "password": "Mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
       "submit": "Créer un compte",
+      "loading": "Création du compte...",
+      "haveAccount": "Vous avez déjà un compte ?",
+      "logIn": "Se connecter",
       "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.",
       "errorMismatch": "Les mots de passe ne correspondent pas.",
       "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
@@ -165,16 +174,25 @@
     },
     "resetPassword": {
       "title": "Mot de passe oublié",
+      "subtitle": "Saisissez votre e-mail et nous vous enverrons un lien de réinitialisation.",
       "email": "Adresse email",
       "submit": "Envoyer le lien",
-      "resetEmailSent": "Un e-mail de réinitialisation a été envoyé. Vérifiez votre boîte de réception (et vos spams !)."
+      "loading": "Envoi...",
+      "backToLogin": "Retour à la connexion",
+      "resetEmailSent": "Un e-mail de réinitialisation a été envoyé. Vérifiez votre boîte de réception (et vos spams !).",
+      "errorMissingFields": "Veuillez saisir votre adresse e-mail."
     },
     "updatePassword": {
       "title": "Nouveau mot de passe",
+      "subtitle": "Choisissez un nouveau mot de passe pour votre compte.",
       "newPassword": "Nouveau mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
       "submit": "Mettre à jour le mot de passe",
-      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial."
+      "loading": "Mise à jour...",
+      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.",
+      "errorMissingFields": "Tous les champs sont requis.",
+      "errorMismatch": "Les mots de passe ne correspondent pas.",
+      "errorUpdateFailed": "Impossible de mettre à jour votre mot de passe. Le lien a peut-être expiré."
     }
   },
   "admin": {

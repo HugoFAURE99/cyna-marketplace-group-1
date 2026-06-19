@@ -16,7 +16,8 @@
     "cartLabel": "Cart",
     "cartItems": "{count, plural, =0 {No items} one {# item} other {# items}}",
     "categoriesNav": "Product categories",
-    "allProducts": "All products"
+    "allProducts": "All products",
+    "logIn": "Log in"
   },
   "menu": {
     "menu": "Menu",
@@ -25,6 +26,8 @@
     "information": "Information",
     "logIn": "Log In",
     "signUp": "Sign Up",
+    "logOut": "Log out",
+    "connectedAs": "Connected as",
     "termsOfUse": "Terms of Use",
     "legalNotices": "Legal Notices",
     "contact": "Contact",
@@ -140,13 +143,16 @@
       "password": "Password",
       "forgotPassword": "Forgot your password?",
       "submit": "Login",
+      "loading": "Logging in...",
       "noAccount": "Don't have an account?",
       "createAccount": "Create an account",
 
       "registerSuccess": "Account created successfully! Please log in.",
       "errorInvalidCredentials": "Invalid email or password.",
       "checkEmail": "Registration successful! Please check your inbox to confirm your email.",
-      "errorMissingFields": "All are necessary"
+      "updatePasswordSuccess": "Your password has been updated. You can now log in.",
+      "invalidLink": "This link is invalid or has expired. Please try again.",
+      "errorMissingFields": "All fields are required."
     },
     "register": {
       "title": "Register",
@@ -156,6 +162,9 @@
       "password": "Password",
       "confirmPassword": "Confirm Password",
       "submit": "Create Account",
+      "loading": "Creating account...",
+      "haveAccount": "Already have an account?",
+      "logIn": "Log in",
       "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.",
       "errorMismatch": "Passwords do not match.",
       "errorTooShort": "Password must be at least 8 characters long.",
@@ -165,16 +174,25 @@
     },
     "resetPassword": {
       "title": "Forgot Password",
+      "subtitle": "Enter your email and we'll send you a reset link.",
       "email": "Email address",
       "submit": "Send reset link",
-      "resetEmailSent": "A reset email has been sent. Please check your inbox (and spam folder!)."
+      "loading": "Sending...",
+      "backToLogin": "Back to login",
+      "resetEmailSent": "A reset email has been sent. Please check your inbox (and spam folder!).",
+      "errorMissingFields": "Please enter your email address."
     },
     "updatePassword": {
       "title": "New Password",
+      "subtitle": "Choose a new password for your account.",
       "newPassword": "New password",
       "confirmPassword": "Confirm Password",
       "submit": "Update Password",
-      "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character."
+      "loading": "Updating...",
+      "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.",
+      "errorMissingFields": "All fields are required.",
+      "errorMismatch": "Passwords do not match.",
+      "errorUpdateFailed": "Could not update your password. The link may have expired."
     }
   },
   "admin": {

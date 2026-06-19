@@ -20,7 +20,7 @@ export default async function CategoryNavBar() {
       aria-label={t("categoriesNav")}
       className="border-t border-slate-100 bg-white"
     >
-      <div className="mx-auto flex w-full max-w-6xl justify-center px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-7xl justify-center px-4 sm:px-6 lg:px-8">
         <ul className="flex h-11 w-max max-w-full items-center gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <li className="shrink-0">
             <Link className={linkClassName} href="/search">
