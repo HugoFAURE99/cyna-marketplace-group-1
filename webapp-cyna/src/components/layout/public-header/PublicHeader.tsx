@@ -4,18 +4,15 @@ import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 import CartButton from "@/components/layout/public-header/CartButton";
+import CategoryNavBar from "@/components/layout/public-header/CategoryNavBar";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
 import PublicMenuSheet from "@/components/layout/public-header/PublicMenuSheet";
-import SearchForm from "@/components/layout/public-header/SearchForm";
+import SearchAutocomplete from "@/components/layout/public-header/SearchAutocomplete";
+import { getCartCount } from "@/lib/cart/cart";
 
-type PublicHeaderProps = {
-  cartCount?: number;
-};
-
-export default async function PublicHeader({
-  cartCount = 0,
-}: PublicHeaderProps) {
+export default async function PublicHeader() {
   const t = await getTranslations("header");
+  const cartCount = await getCartCount();
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200 bg-white shadow-sm">
@@ -38,20 +35,22 @@ export default async function PublicHeader({
               width={118}
             />
           </Link>
-          <LanguageSwitcher />
         </div>
 
         <div className="hidden min-w-0 flex-1 md:block">
           <div className="mx-auto w-full max-w-[600px]">
-            <SearchForm />
+            <SearchAutocomplete />
           </div>
         </div>
 
         <div className="flex shrink-0 items-center gap-3">
+          <LanguageSwitcher />
           <CartButton count={cartCount} />
           <PublicMenuSheet />
         </div>
       </div>
+
+      <CategoryNavBar />
     </header>
   );
 }

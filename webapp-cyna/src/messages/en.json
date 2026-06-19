@@ -14,7 +14,9 @@
     "searchPlaceholder": "Search products",
     "searchButton": "Search",
     "cartLabel": "Cart",
-    "cartItems": "{count, plural, =0 {No items} one {# item} other {# items}}"
+    "cartItems": "{count, plural, =0 {No items} one {# item} other {# items}}",
+    "categoriesNav": "Product categories",
+    "allProducts": "All products"
   },
   "menu": {
     "menu": "Menu",
@@ -55,6 +57,7 @@
     "carouselGoToSlide": "Show slide {number}"
   },
   "product": {
+    "overview": "Overview",
     "technicalSpecifications": "Technical Specifications",
     "pricing": "Pricing",
     "numberOfUsers": "Number of Users",
@@ -64,13 +67,58 @@
     "pricingUnavailable": "Pricing unavailable",
     "imageAlt": "{name} image",
     "users": "{count, plural, one {# user} other {# users}}",
+    "unavailable": "Unavailable",
+    "quantityAvailable": "{count, plural, =0 {Out of stock} one {# in stock} other {# in stock}}",
     "billing": {
       "mensuel": "Monthly",
       "annuel": "Annual",
       "unique": "One-time"
     },
     "perMonth": "/mo",
-    "perYear": "/yr"
+    "perYear": "/yr",
+    "addToCart": "Add to cart",
+    "addedToCart": "Added to cart",
+    "currentlyUnavailable": "Currently unavailable",
+    "contactSalesAria": "Contact sales about this product",
+    "contactSalesInfo": "Out of stock — contact our sales team to order: {phone}"
+  },
+  "category": {
+    "notFound": "Category not found",
+    "empty": "No products in this category yet."
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty.",
+    "emptyHint": "Browse our products to get started.",
+    "browseProducts": "Browse products",
+    "quantity": "Quantity",
+    "billingPeriod": "Billing",
+    "unit": "Unit price",
+    "remove": "Remove {name}",
+    "subtotal": "Subtotal",
+    "proceedToCheckout": "Proceed to Checkout",
+    "checkoutComingSoon": "Checkout is coming soon.",
+    "saveCartPrompt": "<login>Log in</login> or <register>create an account</register> to save your cart"
+  },
+  "search": {
+    "title": "Search",
+    "browseTitle": "Browse products",
+    "resultsFor": "Results for “{query}”",
+    "prompt": "Enter a search term to find products.",
+    "noResults": "No products match your search.",
+    "noResultsHint": "Try a different search or adjust your filters — see the suggestions below.",
+    "resultCount": "{count, plural, =0 {No results} one {# result} other {# results}}",
+    "filters": "Filters",
+    "category": "Category",
+    "allCategories": "All categories",
+    "priceRange": "Price range (€)",
+    "minPrice": "Min",
+    "maxPrice": "Max",
+    "inStockOnly": "In stock only",
+    "clearFilters": "Clear",
+    "suggestions": "You might also like",
+    "viewAllResults": "See all results",
+    "searching": "Searching…"
   },
   "auth": {
     "login": {

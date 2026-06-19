@@ -3,13 +3,16 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import AvailabilityBadge from "@/components/product/AvailabilityBadge";
+import ContactSalesInfo from "@/components/product/ContactSalesInfo";
 import ProductGallery from "@/components/product/ProductGallery";
 import ProductInfo from "@/components/product/ProductInfo";
 import ProductPricingCard from "@/components/product/ProductPricingCard";
 import SimilarProducts from "@/components/product/SimilarProducts";
+import { Link } from "@/i18n/navigation";
 import {
-  getFeaturedSimilarProducts,
   getPublicProductById,
+  getSimilarProducts,
 } from "@/lib/products/public-products";
 import type { Locale } from "@/lib/i18n/translations";
 
@@ -50,33 +53,68 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const [product, similarProducts] = await Promise.all([
-    getPublicProductById(productId, locale),
-    getFeaturedSimilarProducts(productId, locale),
-  ]);
+  const product = await getPublicProductById(productId, locale);
 
   if (!product) {
     notFound();
   }
 
-  return (
-    <main className="min-h-screen bg-purple-50">
-      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(360px,608px)] lg:items-start">
-          <ProductGallery
-            fallbackImageUrl={product.category?.lien_image_cat ?? null}
-            images={product.images}
-            productName={product.nom_pro}
-          />
+  const similarProducts = await getSimilarProducts(
+    product.id_produit,
+    product.id_categorie,
+    locale,
+  );
 
-          <div className="space-y-6">
+  const t = await getTranslations("product");
+
+  return (
+    <main className="flex-1">
+      <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:gap-10">
+          {/* Main column: gallery + description + specs flow here. */}
+          <div className="space-y-8">
+            <ProductGallery
+              fallbackImageUrl={product.category?.lien_image_cat ?? null}
+              images={product.images}
+              productName={product.nom_pro}
+            />
             <ProductInfo
               description={product.pro_description}
-              name={product.nom_pro}
               specs={product.specs}
             />
-            <ProductPricingCard tariffs={product.tariffs} />
           </div>
+
+          {/* Buy box: stays in view while the details scroll. */}
+          <aside className="space-y-5 lg:sticky lg:top-[132px]">
+            <div className="space-y-2">
+              {product.category && (
+                <Link
+                  className="inline-block text-xs font-semibold uppercase tracking-wide text-purple-700 transition hover:text-purple-900"
+                  href={`/search?category=${product.category.id_categorie}`}
+                >
+                  {product.category.cat_nom}
+                </Link>
+              )}
+              <h1 className="text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
+                {product.nom_pro}
+              </h1>
+              {product.quantite_produit > 0 ? (
+                <p className="text-sm font-medium text-emerald-700">
+                  {t("quantityAvailable", { count: product.quantite_produit })}
+                </p>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <AvailabilityBadge label={t("unavailable")} />
+                  <ContactSalesInfo />
+                </div>
+              )}
+            </div>
+            <ProductPricingCard
+              isUnavailable={product.quantite_produit <= 0}
+              productId={product.id_produit}
+              tariffs={product.tariffs}
+            />
+          </aside>
         </section>
 
         <SimilarProducts products={similarProducts} />

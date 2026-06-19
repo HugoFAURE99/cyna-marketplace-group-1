@@ -19,7 +19,7 @@ export default async function SimilarProducts({
   const t = await getTranslations("product");
 
   return (
-    <section className="mt-20">
+    <section className="mt-16">
       <h2 className="mb-6 text-2xl font-bold text-slate-950">
         {t("similarServices")}
       </h2>

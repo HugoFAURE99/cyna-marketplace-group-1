@@ -496,7 +496,9 @@ export type Database = {
           date_ajout: string;
           id_categorie: number;
           id_produit: number;
+          is_priorite: boolean;
           mis_avant: boolean;
+          mis_avant_ordre: number;
           ordre_priorite: number;
           quantite_produit: number;
           statut_produit: boolean;
@@ -506,7 +508,9 @@ export type Database = {
           date_ajout?: string;
           id_categorie: number;
           id_produit?: number;
+          is_priorite?: boolean;
           mis_avant?: boolean;
+          mis_avant_ordre?: number;
           ordre_priorite?: number;
           quantite_produit?: number;
           statut_produit?: boolean;
@@ -516,7 +520,9 @@ export type Database = {
           date_ajout?: string;
           id_categorie?: number;
           id_produit?: number;
+          is_priorite?: boolean;
           mis_avant?: boolean;
+          mis_avant_ordre?: number;
           ordre_priorite?: number;
           quantite_produit?: number;
           statut_produit?: boolean;

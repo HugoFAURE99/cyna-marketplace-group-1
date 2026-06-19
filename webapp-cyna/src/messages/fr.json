@@ -14,7 +14,9 @@
     "searchPlaceholder": "Rechercher des produits",
     "searchButton": "Rechercher",
     "cartLabel": "Panier",
-    "cartItems": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}"
+    "cartItems": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
+    "categoriesNav": "Catégories de produits",
+    "allProducts": "Tous les produits"
   },
   "menu": {
     "menu": "Menu",
@@ -55,6 +57,7 @@
     "carouselGoToSlide": "Afficher la diapositive {number}"
   },
   "product": {
+    "overview": "Aperçu",
     "technicalSpecifications": "Spécifications techniques",
     "pricing": "Tarifs",
     "numberOfUsers": "Nombre d'utilisateurs",
@@ -64,13 +67,58 @@
     "pricingUnavailable": "Tarif indisponible",
     "imageAlt": "Image de {name}",
     "users": "{count, plural, one {# utilisateur} other {# utilisateurs}}",
+    "unavailable": "Indisponible",
+    "quantityAvailable": "{count, plural, =0 {Rupture de stock} one {# en stock} other {# en stock}}",
     "billing": {
       "mensuel": "Mensuel",
       "annuel": "Annuel",
       "unique": "Paiement unique"
     },
     "perMonth": "/mois",
-    "perYear": "/an"
+    "perYear": "/an",
+    "addToCart": "Ajouter au panier",
+    "addedToCart": "Ajouté au panier",
+    "currentlyUnavailable": "Actuellement indisponible",
+    "contactSalesAria": "Contacter le service commercial à propos de ce produit",
+    "contactSalesInfo": "En rupture de stock — contactez notre équipe commerciale pour commander : {phone}"
+  },
+  "category": {
+    "notFound": "Catégorie introuvable",
+    "empty": "Aucun produit dans cette catégorie pour le moment."
+  },
+  "cart": {
+    "title": "Panier",
+    "empty": "Votre panier est vide.",
+    "emptyHint": "Parcourez nos produits pour commencer.",
+    "browseProducts": "Parcourir les produits",
+    "quantity": "Quantité",
+    "billingPeriod": "Facturation",
+    "unit": "Prix unitaire",
+    "remove": "Retirer {name}",
+    "subtotal": "Sous-total",
+    "proceedToCheckout": "Passer à la caisse",
+    "checkoutComingSoon": "Le paiement arrive bientôt.",
+    "saveCartPrompt": "<login>Connectez-vous</login> ou <register>créez un compte</register> pour sauvegarder votre panier"
+  },
+  "search": {
+    "title": "Recherche",
+    "browseTitle": "Parcourir les produits",
+    "resultsFor": "Résultats pour « {query} »",
+    "prompt": "Saisissez un terme pour rechercher des produits.",
+    "noResults": "Aucun produit ne correspond à votre recherche.",
+    "noResultsHint": "Essayez une autre recherche ou ajustez vos filtres — voir les suggestions ci-dessous.",
+    "resultCount": "{count, plural, =0 {Aucun résultat} one {# résultat} other {# résultats}}",
+    "filters": "Filtres",
+    "category": "Catégorie",
+    "allCategories": "Toutes les catégories",
+    "priceRange": "Fourchette de prix (€)",
+    "minPrice": "Min",
+    "maxPrice": "Max",
+    "inStockOnly": "En stock uniquement",
+    "clearFilters": "Réinitialiser",
+    "suggestions": "Vous pourriez aussi aimer",
+    "viewAllResults": "Voir tous les résultats",
+    "searching": "Recherche…"
   },
   "auth": {
     "login": {

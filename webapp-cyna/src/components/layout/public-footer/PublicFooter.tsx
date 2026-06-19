@@ -1,14 +1,12 @@
-// Public site footer: company/legal link columns, socials, and copyright.
+// Slim public footer: wordmark, inline links, and social icons in one row.
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 
 import { Link } from "@/i18n/navigation";
 
-const companyLinks = [
+const footerLinks = [
   { href: "/about", labelKey: "aboutCyna" },
   { href: "/contact", labelKey: "contact" },
-] as const;
-
-const legalLinks = [
   { href: "/legal", labelKey: "legalNotices" },
   { href: "/terms", labelKey: "termsOfUse" },
 ] as const;
@@ -23,50 +21,43 @@ const socialLinks = [
 export default async function PublicFooter() {
   const t = await getTranslations("footer");
 
-  const companyItems = companyLinks.map((link) => ({
-    href: link.href,
-    label: t(link.labelKey),
-  }));
-  const legalItems = legalLinks.map((link) => ({
-    href: link.href,
-    label: t(link.labelKey),
-  }));
-
   return (
     <footer className="bg-[#2b0958] text-white">
-      <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-          <div>
-            <h2 className="text-base font-bold">CYNA</h2>
-            <p className="mt-5 max-w-xs text-sm leading-6 text-white/55">
-              {t("description")}
-            </p>
-          </div>
+      <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 px-4 py-5 sm:grid sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-6 sm:px-6 lg:px-8">
+        <Image
+          alt="CYNA"
+          className="h-7 w-auto sm:justify-self-start"
+          height={28}
+          priority={false}
+          src="/brand/cyna-logo-full-white.svg"
+          width={103}
+        />
 
-          <FooterLinkGroup links={companyItems} title={t("company")} />
-          <FooterLinkGroup links={legalItems} title={t("legal")} />
+        <nav className="flex min-w-0 flex-wrap items-center justify-center gap-x-5 gap-y-1">
+          {footerLinks.map((link) => (
+            <Link
+              className="text-sm text-white/60 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              href={link.href}
+              key={link.href}
+            >
+              {t(link.labelKey)}
+            </Link>
+          ))}
+        </nav>
 
-          <div>
-            <h2 className="text-base font-bold">{t("followUs")}</h2>
-            <div className="mt-5 flex flex-wrap gap-3">
-              {socialLinks.map((link) => (
-                <a
-                  aria-label={link.label}
-                  className="inline-flex size-8 items-center justify-center rounded-md text-white/55 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                  href={link.href}
-                  key={link.label}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  <link.icon aria-hidden="true" className="size-4" />
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-10 border-t border-white/15 pt-8 text-center text-sm text-white/45">
-          {t("copyright", { year: new Date().getFullYear() })}
+        <div className="flex items-center gap-1 sm:justify-self-end">
+          {socialLinks.map((link) => (
+            <a
+              aria-label={link.label}
+              className="inline-flex size-8 items-center justify-center rounded-md text-white/60 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+              href={link.href}
+              key={link.label}
+              rel="noreferrer"
+              target="_blank"
+            >
+              <link.icon aria-hidden="true" className="size-4" />
+            </a>
+          ))}
         </div>
       </div>
     </footer>
@@ -128,31 +119,5 @@ function InstagramIcon({ className }: { className?: string }) {
       <circle cx="12" cy="12" r="3.2" />
       <path d="M17.4 6.8h.01" />
     </svg>
-  );
-}
-
-function FooterLinkGroup({
-  links,
-  title,
-}: {
-  links: { href: string; label: string }[];
-  title: string;
-}) {
-  return (
-    <div>
-      <h2 className="text-base font-bold">{title}</h2>
-      <ul className="mt-5 space-y-3">
-        {links.map((link) => (
-          <li key={link.href}>
-            <Link
-              className="text-sm text-white/55 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              href={link.href}
-            >
-              {link.label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
   );
 }

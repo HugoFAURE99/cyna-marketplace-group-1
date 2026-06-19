@@ -3,7 +3,8 @@
 // Pricing card: pick a tariff + user count to compute a total.
 // Subscribe is disabled until checkout is wired up.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
+import { Check, ShoppingCart } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -14,11 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { addToCart } from "@/lib/cart/cart.actions";
 import { cn } from "@/lib/utils";
 import { formatPriceCents } from "@/lib/i18n/format";
 import type { PublicProductTariff } from "@/lib/products/public-products";
 
 type ProductPricingCardProps = {
+  productId: number;
+  isUnavailable: boolean;
   tariffs: PublicProductTariff[];
 };
 
@@ -26,6 +30,8 @@ const USER_OPTIONS = Array.from({ length: 10 }, (_, index) => index + 1);
 const DEFAULT_USER_COUNT = 5;
 
 export default function ProductPricingCard({
+  productId,
+  isUnavailable,
   tariffs,
 }: ProductPricingCardProps) {
   const t = useTranslations("product");
@@ -34,6 +40,17 @@ export default function ProductPricingCard({
     tariffs[0]?.id_prix ?? null,
   );
   const [userCount, setUserCount] = useState(DEFAULT_USER_COUNT);
+  const [isPending, startTransition] = useTransition();
+  const [justAdded, setJustAdded] = useState(false);
+
+  // Briefly flip the button to a confirmation state after a successful add.
+  useEffect(() => {
+    if (!justAdded) {
+      return;
+    }
+    const timer = setTimeout(() => setJustAdded(false), 2000);
+    return () => clearTimeout(timer);
+  }, [justAdded]);
 
   const selectedTariff = useMemo(
     () =>
@@ -66,6 +83,20 @@ export default function ProductPricingCard({
 
   // Total = unit price × number of users.
   const totalCents = selectedTariff ? selectedTariff.prix * userCount : 0;
+
+  const handleAddToCart = () => {
+    if (!selectedTariff) {
+      return;
+    }
+    startTransition(async () => {
+      await addToCart({
+        productId,
+        tariffId: selectedTariff.id_prix,
+        quantity: userCount,
+      });
+      setJustAdded(true);
+    });
+  };
 
   return (
     <section className="rounded-lg bg-white p-6 shadow-xs ring-1 ring-black/10">
@@ -135,13 +166,34 @@ export default function ProductPricingCard({
         <p className="text-sm text-slate-600">{t("pricingUnavailable")}</p>
       )}
 
-      <Button
-        className="mt-5 h-12 w-full bg-purple-700 text-base font-semibold text-white hover:bg-purple-700 disabled:opacity-100"
-        disabled
-        type="button"
-      >
-        {t("subscribeNow")}
-      </Button>
+      {isUnavailable ? (
+        <Button
+          className="mt-5 h-12 w-full bg-slate-200 text-base font-semibold text-slate-500 hover:bg-slate-200 disabled:opacity-100"
+          disabled
+          type="button"
+        >
+          {t("currentlyUnavailable")}
+        </Button>
+      ) : (
+        <Button
+          className="mt-5 h-12 w-full bg-purple-700 text-base font-semibold text-white transition hover:bg-purple-800 disabled:opacity-70"
+          disabled={!selectedTariff || isPending}
+          onClick={handleAddToCart}
+          type="button"
+        >
+          {justAdded ? (
+            <>
+              <Check aria-hidden="true" className="size-5" />
+              {t("addedToCart")}
+            </>
+          ) : (
+            <>
+              <ShoppingCart aria-hidden="true" className="size-5" />
+              {t("addToCart")}
+            </>
+          )}
+        </Button>
+      )}
     </section>
   );
 }

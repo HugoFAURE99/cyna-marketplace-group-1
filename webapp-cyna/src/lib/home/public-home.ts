@@ -2,12 +2,14 @@
 // (carousel, intro text, top products, categories).
 import "server-only";
 
-import { createPublicClient } from "@/lib/supabase/public";
 import { pickTranslation, type Locale } from "@/lib/i18n/translations";
-import type {
-  PublicProductImage,
-  PublicProductTariff,
-} from "@/lib/products/public-products";
+import {
+  CATALOG_PRODUCT_SELECT,
+  normalizeCatalogProduct,
+  type CatalogProduct,
+  type CatalogProductQueryRow,
+} from "@/lib/products/public-catalog";
+import { createPublicClient } from "@/lib/supabase/public";
 import type { Tables } from "@/types/database.types";
 
 export type HomeCarouselSlide = {
@@ -31,16 +33,6 @@ export type HomeIntroContent = {
   title?: string;
 };
 
-export type HomeProduct = {
-  date_ajout: string;
-  id_produit: number;
-  nom_pro: string;
-  ordre_priorite: number;
-  category: { cat_nom: string; lien_image_cat: string | null } | null;
-  images: PublicProductImage[];
-  tariffs: PublicProductTariff[];
-};
-
 // Companion (translation) rows embedded alongside their parent.
 type ImageCarrouselTraductionRow = Pick<
   Tables<"image_carrousel_traduction">,
@@ -50,11 +42,6 @@ type ImageCarrouselTraductionRow = Pick<
 type CategorieTraductionRow = Pick<
   Tables<"categorie_traduction">,
   "langue" | "cat_nom" | "cat_description"
->;
-
-type ProduitTraductionRow = Pick<
-  Tables<"produit_traduction">,
-  "langue" | "nom_pro"
 >;
 
 type CarouselQueryRow = Pick<
@@ -69,76 +56,6 @@ type CategoryQueryRow = Pick<
   "id_categorie" | "lien_image_cat" | "ordre_affichage"
 > & {
   categorie_traduction: CategorieTraductionRow[] | null;
-};
-
-type HomeProductQueryRow = Pick<
-  Tables<"produit">,
-  "date_ajout" | "id_produit" | "ordre_priorite"
-> & {
-  produit_traduction: ProduitTraductionRow[] | null;
-  categorie:
-    | (Pick<Tables<"categorie">, "lien_image_cat"> & {
-        categorie_traduction: Pick<
-          Tables<"categorie_traduction">,
-          "langue" | "cat_nom"
-        >[] | null;
-      })
-    | null;
-  image_produit: PublicProductImage[] | null;
-  prix_tarif: HomeTariffQueryRow[] | null;
-};
-
-type HomeTariffQueryRow = Pick<
-  Tables<"prix_tarif">,
-  "id_prix" | "prix" | "stripe_price_id" | "type_facturation"
-> & {
-  prix_tarif_traduction:
-    | Pick<
-        Tables<"prix_tarif_traduction">,
-        "langue" | "nom_prix_tarif" | "unite"
-      >[]
-    | null;
-};
-
-// One query pulls each product with its category, images, and tariffs.
-const HOME_PRODUCT_SELECT = `
-  date_ajout,
-  id_produit,
-  ordre_priorite,
-  produit_traduction (
-    langue,
-    nom_pro
-  ),
-  categorie (
-    lien_image_cat,
-    categorie_traduction (
-      langue,
-      cat_nom
-    )
-  ),
-  image_produit (
-    id_image,
-    lien_image_produit,
-    ordre_affichage
-  ),
-  prix_tarif (
-    id_prix,
-    prix,
-    stripe_price_id,
-    type_facturation,
-    prix_tarif_traduction (
-      langue,
-      nom_prix_tarif,
-      unite
-    )
-  )
-`;
-
-// Sort order for billing types: monthly → yearly → one-time.
-const BILLING_ORDER: Record<string, number> = {
-  mensuel: 0,
-  annuel: 1,
-  unique: 2,
 };
 
 const HOME_INTRO_TEXT_KEYS = {
@@ -270,78 +187,23 @@ export async function getHomeCategories(
 
 export async function getHomeTopProducts(
   locale: Locale,
-): Promise<HomeProduct[]> {
+): Promise<CatalogProduct[]> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("produit")
-    .select(HOME_PRODUCT_SELECT)
+    .select(CATALOG_PRODUCT_SELECT)
     .eq("statut_produit", true)
-    .order("mis_avant", { ascending: false })
-    .order("ordre_priorite", { ascending: true })
+    .eq("mis_avant", true)
+    .order("mis_avant_ordre", { ascending: true })
     .order("date_ajout", { ascending: false })
+    .order("id_produit", { ascending: true })
     .limit(6);
 
   if (error) {
     throw new Error(`Erreur chargement produits publics : ${error.message}`);
   }
 
-  return ((data ?? []) as unknown as HomeProductQueryRow[]).map((product) => {
-    const productTranslation = pickTranslation(
-      product.produit_traduction,
-      locale,
-    );
-    const categoryTranslation = pickTranslation(
-      product.categorie?.categorie_traduction,
-      locale,
-    );
-
-    return {
-      date_ajout: product.date_ajout,
-      id_produit: product.id_produit,
-      nom_pro: productTranslation?.nom_pro ?? "",
-      ordre_priorite: product.ordre_priorite,
-      category: product.categorie
-        ? {
-            cat_nom: categoryTranslation?.cat_nom ?? "",
-            lien_image_cat: product.categorie.lien_image_cat,
-          }
-        : null,
-      images: sortImages(product.image_produit ?? []),
-      tariffs: sortTariffs(
-        (product.prix_tarif ?? []).map((tariff) => {
-          const tariffTranslation = pickTranslation(
-            tariff.prix_tarif_traduction,
-            locale,
-          );
-
-          return {
-            id_prix: tariff.id_prix,
-            nom_prix_tarif: tariffTranslation?.nom_prix_tarif ?? null,
-            prix: tariff.prix,
-            stripe_price_id: tariff.stripe_price_id,
-            type_facturation: tariff.type_facturation,
-            unite: tariffTranslation?.unite ?? null,
-          };
-        }),
-      ),
-    };
-  });
-}
-
-function sortImages(images: PublicProductImage[]) {
-  return [...images].sort((a, b) => {
-    const aOrder = a.ordre_affichage ?? Number.MAX_SAFE_INTEGER;
-    const bOrder = b.ordre_affichage ?? Number.MAX_SAFE_INTEGER;
-
-    return aOrder - bOrder || a.id_image - b.id_image;
-  });
-}
-
-function sortTariffs(tariffs: PublicProductTariff[]) {
-  return [...tariffs].sort((a, b) => {
-    const aOrder = BILLING_ORDER[a.type_facturation] ?? Number.MAX_SAFE_INTEGER;
-    const bOrder = BILLING_ORDER[b.type_facturation] ?? Number.MAX_SAFE_INTEGER;
-
-    return aOrder - bOrder || a.id_prix - b.id_prix;
-  });
+  return ((data ?? []) as unknown as CatalogProductQueryRow[]).map((row) =>
+    normalizeCatalogProduct(row, locale),
+  );
 }

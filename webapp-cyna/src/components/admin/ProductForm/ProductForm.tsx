@@ -57,6 +57,12 @@ export default function ProductForm({
   const tAdmin = useTranslations("admin");
   const router = useRouter();
   const tarif = product?.prix_tarif?.[0];
+  const categoryLabels = new Map(
+    categories.map((category) => [
+      String(category.id_categorie),
+      category.cat_nom,
+    ] as const),
+  );
 
   const productSchema = useMemo(
     () =>
@@ -209,12 +215,17 @@ export default function ProductForm({
           onValueChange={(value) => setValue("id_categorie", Number(value))}
         >
           <SelectTrigger>
-            <SelectValue placeholder={t("chooseCategory")} />
+            <SelectValue placeholder={t("chooseCategory")}>
+              {(value) =>
+                categoryLabels.get(String(value)) ?? t("chooseCategory")
+              }
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {categories.map((cat) => (
               <SelectItem
                 key={cat.id_categorie}
+                label={cat.cat_nom}
                 value={String(cat.id_categorie)}
               >
                 {cat.cat_nom}

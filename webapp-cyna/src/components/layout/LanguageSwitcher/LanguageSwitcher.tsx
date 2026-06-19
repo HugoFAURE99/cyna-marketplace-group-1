@@ -1,46 +1,140 @@
 "use client";
 
-// Subtle "FR / EN" text toggle that swaps the locale on the current path.
+// Minimal language select: the header trigger shows only the current language's
+// flag; clicking it reveals the other available language(s). Switching keeps the
+// current path and query string, only swapping the locale.
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { cn } from "@/lib/utils";
+import type { Locale } from "@/lib/i18n/translations";
+
+type FlagProps = { className?: string };
+
+const FLAGS: Record<string, (props: FlagProps) => ReactElement> = {
+  fr: FranceFlag,
+  en: UnitedKingdomFlag,
+};
+
+const FLAG_CLASS = "h-4 w-6 rounded-[3px] shadow-sm ring-1 ring-black/10";
 
 export default function LanguageSwitcher() {
   const t = useTranslations("common");
   const locale = useLocale();
-  const pathname = usePathname();
   const router = useRouter();
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Close on outside click / Escape.
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setOpen(false);
+      }
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
+  const switchTo = (loc: Locale) => {
+    setOpen(false);
+    if (loc === locale) return;
+    // Preserve the current query string (read at click time, client-side).
+    const queryString =
+      typeof window !== "undefined" ? window.location.search : "";
+    router.replace(`${pathname}${queryString}`, { locale: loc });
+  };
+
+  const CurrentFlag = FLAGS[locale];
+  const otherLocales = routing.locales.filter((loc) => loc !== locale);
 
   return (
-    <div
-      aria-label={t("languageSwitcher")}
-      className="ml-1.5 flex items-center gap-1.5 text-xs font-medium"
-      role="group"
-    >
-      {routing.locales.map((loc, index) => (
-        <span className="flex items-center gap-1.5" key={loc}>
-          {index > 0 && (
-            <span aria-hidden="true" className="text-slate-300">
-              /
-            </span>
-          )}
-          <button
-            aria-current={loc === locale ? "true" : undefined}
-            className={cn(
-              "cursor-pointer uppercase transition-colors",
-              loc === locale
-                ? "font-semibold text-slate-900"
-                : "text-slate-400 hover:text-slate-700",
-            )}
-            onClick={() => router.replace(pathname, { locale: loc })}
-            type="button"
-          >
-            {loc}
-          </button>
-        </span>
-      ))}
+    <div className="relative" ref={containerRef}>
+      <button
+        aria-expanded={open}
+        aria-haspopup="listbox"
+        aria-label={t("languageSwitcher")}
+        className="flex size-9 items-center justify-center rounded-full transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+        onClick={() => setOpen((value) => !value)}
+        type="button"
+      >
+        {CurrentFlag && <CurrentFlag className={FLAG_CLASS} />}
+      </button>
+
+      {open && (
+        <ul
+          className="absolute right-0 z-50 mt-2 w-[5.75rem] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
+          role="listbox"
+        >
+          {otherLocales.map((loc) => {
+            const Flag = FLAGS[loc];
+            return (
+              <li aria-selected={false} key={loc} role="option">
+                <button
+                  className="flex w-full items-center gap-2 px-2.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                  onClick={() => switchTo(loc)}
+                  type="button"
+                >
+                  {Flag && <Flag className={FLAG_CLASS} />}
+                  <span className="uppercase">{loc}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
+  );
+}
+
+function FranceFlag({ className }: FlagProps) {
+  return (
+    <svg
+      className={className}
+      preserveAspectRatio="none"
+      viewBox="0 0 3 2"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect width="3" height="2" fill="#fff" />
+      <rect width="1" height="2" fill="#0055A4" />
+      <rect width="1" height="2" x="2" fill="#EF4135" />
+    </svg>
+  );
+}
+
+function UnitedKingdomFlag({ className }: FlagProps) {
+  return (
+    <svg
+      className={className}
+      preserveAspectRatio="none"
+      viewBox="0 0 60 30"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect width="60" height="30" fill="#012169" />
+      <g stroke="#fff" strokeWidth="6">
+        <path d="M0 0 60 30" />
+        <path d="M60 0 0 30" />
+      </g>
+      <g stroke="#C8102E" strokeWidth="2.5">
+        <path d="M0 0 60 30" />
+        <path d="M60 0 0 30" />
+      </g>
+      <rect x="25" width="10" height="30" fill="#fff" />
+      <rect y="10" width="60" height="10" fill="#fff" />
+      <rect x="27" width="6" height="30" fill="#C8102E" />
+      <rect y="12" width="60" height="6" fill="#C8102E" />
+    </svg>
   );
 }
