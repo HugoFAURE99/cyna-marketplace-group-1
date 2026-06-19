@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { login } from "@/app/(auth)/_action/auth.action";
+import { useSearchParams } from "next/navigation";
 
 // 1. On ajoute errorKey pour gérer les traductions
 type LoginState = {
@@ -35,7 +36,19 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const t = useTranslations("auth.login");
 
-  const [state, formAction, isPending] = useActionState(login, initialState);
+  // 1. On récupère la valeur depuis l'URL
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/";
+
+  // 2. On "graft" (bind) l'argument 'next' à l'action originale.
+  // Le premier paramètre est 'null' pour le contexte (this), le deuxième est notre variable.
+  const loginWithNext = login.bind(null, next);
+
+  // 3. On donne cette action modifiée à useActionState
+  const [state, formAction, isPending] = useActionState(
+    loginWithNext,
+    initialState
+  );
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
