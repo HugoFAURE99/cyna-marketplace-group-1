@@ -103,7 +103,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   {t("quantityAvailable", { count: product.quantite_produit })}
                 </p>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="space-y-2">
                   <AvailabilityBadge label={t("unavailable")} />
                   <ContactSalesInfo />
                 </div>

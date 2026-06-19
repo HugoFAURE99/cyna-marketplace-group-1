@@ -24,7 +24,12 @@ const PRICE_DEBOUNCE_MS = 400;
 
 type SearchFiltersProps = {
   categories: { id_categorie: number; cat_nom: string }[];
+  technicalCharacteristics: {
+    id_caracteristique: number;
+    nom_caracteristique: string;
+  }[];
   categoryId?: number;
+  characteristicIds: number[];
   minPrice?: number;
   maxPrice?: number;
   inStockOnly: boolean;
@@ -32,7 +37,9 @@ type SearchFiltersProps = {
 
 export default function SearchFilters({
   categories,
+  technicalCharacteristics,
   categoryId,
+  characteristicIds,
   minPrice,
   maxPrice,
   inStockOnly,
@@ -57,6 +64,7 @@ export default function SearchFilters({
           params.set(key, value);
         }
       }
+      params.delete("page");
       const next = params.toString();
       if (next === searchParams.toString()) {
         return;
@@ -72,17 +80,25 @@ export default function SearchFilters({
 
   // Debounced commit of the price bounds.
   useEffect(() => {
+    const syncedMin = minPrice?.toString() ?? "";
+    const syncedMax = maxPrice?.toString() ?? "";
+    if (minInput === syncedMin && maxInput === syncedMax) {
+      return;
+    }
+
     const timer = setTimeout(() => {
       commitParams({ min: minInput || undefined, max: maxInput || undefined });
     }, PRICE_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [minInput, maxInput, commitParams]);
+  }, [minInput, maxInput, minPrice, maxPrice, commitParams]);
 
   const hasActiveFilters =
     categoryId !== undefined ||
+    characteristicIds.length > 0 ||
     minPrice !== undefined ||
     maxPrice !== undefined ||
     inStockOnly;
+  const selectedCharacteristicIds = new Set(characteristicIds);
   const categoryLabels = new Map([
     [ALL_CATEGORIES, t("allCategories")],
     ...categories.map(
@@ -95,10 +111,23 @@ export default function SearchFilters({
     setMaxInput("");
     commitParams({
       category: undefined,
+      tech: undefined,
       min: undefined,
       max: undefined,
       instock: undefined,
     });
+  };
+
+  const toggleCharacteristic = (id: number, checked: boolean) => {
+    const nextIds = new Set(characteristicIds);
+    if (checked) {
+      nextIds.add(id);
+    } else {
+      nextIds.delete(id);
+    }
+
+    const nextValue = [...nextIds].sort((a, b) => a - b).join(",");
+    commitParams({ tech: nextValue || undefined });
   };
 
   return (
@@ -154,6 +183,37 @@ export default function SearchFilters({
           </SelectContent>
         </Select>
       </div>
+
+      {technicalCharacteristics.length > 0 && (
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-slate-950">
+            {t("technicalCharacteristics")}
+          </legend>
+          <div className="max-h-40 space-y-2 overflow-y-auto pr-1">
+            {technicalCharacteristics.map((characteristic) => (
+              <label
+                className="flex cursor-pointer items-start gap-2 text-sm text-slate-700"
+                key={characteristic.id_caracteristique}
+              >
+                <input
+                  checked={selectedCharacteristicIds.has(
+                    characteristic.id_caracteristique,
+                  )}
+                  className="mt-0.5 size-4 rounded border-slate-300 accent-purple-700"
+                  onChange={(event) =>
+                    toggleCharacteristic(
+                      characteristic.id_caracteristique,
+                      event.target.checked,
+                    )
+                  }
+                  type="checkbox"
+                />
+                <span>{characteristic.nom_caracteristique}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="filter-price-min">{t("priceRange")}</Label>

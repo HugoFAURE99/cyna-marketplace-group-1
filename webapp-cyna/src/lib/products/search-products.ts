@@ -18,6 +18,7 @@ export const MIN_QUERY_LENGTH = 2;
 export type CatalogFilters = {
   query?: string;
   categoryId?: number;
+  characteristicIds?: number[];
   // Price bounds in euros (UI unit); products store cents.
   minPrice?: number;
   maxPrice?: number;
@@ -47,7 +48,14 @@ export async function searchCatalog(
   filters: CatalogFilters,
   locale: Locale,
 ): Promise<CatalogProduct[]> {
-  const { query, categoryId, minPrice, maxPrice, inStockOnly } = filters;
+  const {
+    query,
+    categoryId,
+    characteristicIds = [],
+    minPrice,
+    maxPrice,
+    inStockOnly,
+  } = filters;
 
   let products = await getCatalogProducts(locale, categoryId);
 
@@ -80,6 +88,27 @@ export async function searchCatalog(
 
   if (inStockOnly) {
     products = products.filter((product) => product.quantite_produit > 0);
+  }
+
+  const selectedCharacteristicIds = [
+    ...new Set(
+      characteristicIds.filter(
+        (id) => Number.isInteger(id) && id > 0,
+      ),
+    ),
+  ];
+  if (selectedCharacteristicIds.length > 0) {
+    products = products.filter((product) => {
+      const productCharacteristicIds = new Set(
+        product.technicalCharacteristics.map(
+          (characteristic) => characteristic.id_caracteristique,
+        ),
+      );
+
+      return selectedCharacteristicIds.every((id) =>
+        productCharacteristicIds.has(id),
+      );
+    });
   }
 
   return products;

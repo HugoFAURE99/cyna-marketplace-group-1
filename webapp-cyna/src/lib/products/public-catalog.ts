@@ -24,8 +24,15 @@ export type CatalogProduct = {
   date_ajout: string;
   quantite_produit: number;
   category: { cat_nom: string; lien_image_cat: string | null } | null;
+  technicalCharacteristics: CatalogTechnicalCharacteristic[];
   images: PublicProductImage[];
   tariffs: PublicProductTariff[];
+};
+
+export type CatalogTechnicalCharacteristic = {
+  id_caracteristique: number;
+  nom_caracteristique: string;
+  ordre_affichage: number;
 };
 
 // Companion (translation) rows embedded alongside their parent.
@@ -35,6 +42,22 @@ type CatalogTariffQueryRow = Pick<
 > & {
   prix_tarif_traduction:
     | Pick<Tables<"prix_tarif_traduction">, "langue" | "nom_prix_tarif" | "unite">[]
+    | null;
+};
+
+type CatalogTechnicalCharacteristicQueryRow = Pick<
+  Tables<"produit_caracteristique_technique">,
+  "ordre_affichage"
+> & {
+  caracteristique_technique:
+    | (Pick<Tables<"caracteristique_technique">, "id_caracteristique"> & {
+        caracteristique_technique_traduction:
+          | Pick<
+              Tables<"caracteristique_technique_traduction">,
+              "langue" | "nom_caracteristique"
+            >[]
+          | null;
+      })
     | null;
 };
 
@@ -60,6 +83,9 @@ export type CatalogProductQueryRow = Pick<
     | null;
   image_produit: PublicProductImage[] | null;
   prix_tarif: CatalogTariffQueryRow[] | null;
+  produit_caracteristique_technique:
+    | CatalogTechnicalCharacteristicQueryRow[]
+    | null;
 };
 
 // One select pulls each product with its category, images, and tariffs.
@@ -89,6 +115,16 @@ export const CATALOG_PRODUCT_SELECT = `
     id_image,
     lien_image_produit,
     ordre_affichage
+  ),
+  produit_caracteristique_technique (
+    ordre_affichage,
+    caracteristique_technique (
+      id_caracteristique,
+      caracteristique_technique_traduction (
+        langue,
+        nom_caracteristique
+      )
+    )
   ),
   prix_tarif (
     id_prix,
@@ -159,6 +195,18 @@ export function sortTariffs(tariffs: PublicProductTariff[]) {
   });
 }
 
+export function sortTechnicalCharacteristics(
+  characteristics: CatalogTechnicalCharacteristic[],
+) {
+  return [...characteristics].sort((a, b) => {
+    return (
+      a.ordre_affichage - b.ordre_affichage ||
+      a.nom_caracteristique.localeCompare(b.nom_caracteristique) ||
+      a.id_caracteristique - b.id_caracteristique
+    );
+  });
+}
+
 export function normalizeCatalogProduct(
   row: CatalogProductQueryRow,
   locale: Locale,
@@ -185,6 +233,32 @@ export function normalizeCatalogProduct(
           lien_image_cat: row.categorie.lien_image_cat,
         }
       : null,
+    technicalCharacteristics: sortTechnicalCharacteristics(
+      (row.produit_caracteristique_technique ?? [])
+        .map((link) => {
+          const characteristic = link.caracteristique_technique;
+          const translation = pickTranslation(
+            characteristic?.caracteristique_technique_traduction,
+            locale,
+          );
+
+          if (!characteristic || !translation?.nom_caracteristique) {
+            return null;
+          }
+
+          return {
+            id_caracteristique: characteristic.id_caracteristique,
+            nom_caracteristique: translation.nom_caracteristique,
+            ordre_affichage: link.ordre_affichage,
+          };
+        })
+        .filter(
+          (
+            characteristic,
+          ): characteristic is CatalogTechnicalCharacteristic =>
+            characteristic !== null,
+        ),
+    ),
     images: sortImages(row.image_produit ?? []),
     tariffs: sortTariffs(
       (row.prix_tarif ?? []).map((tariff) => {
@@ -294,4 +368,48 @@ export async function getCatalogCategories(
       cat_nom: pickTranslation(row.categorie_traduction, locale)?.cat_nom ?? "",
     }))
     .sort((a, b) => a.cat_nom.localeCompare(b.cat_nom, locale));
+}
+
+export async function getCatalogTechnicalCharacteristics(
+  locale: Locale,
+): Promise<
+  Pick<CatalogTechnicalCharacteristic, "id_caracteristique" | "nom_caracteristique">[]
+> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase.from("caracteristique_technique").select(
+    `
+      id_caracteristique,
+      caracteristique_technique_traduction (
+        langue,
+        nom_caracteristique
+      )
+    `,
+  );
+
+  if (error) {
+    throw new Error(
+      `Erreur chargement caracteristiques techniques publiques : ${error.message}`,
+    );
+  }
+
+  type Row = Pick<Tables<"caracteristique_technique">, "id_caracteristique"> & {
+    caracteristique_technique_traduction:
+      | Pick<
+          Tables<"caracteristique_technique_traduction">,
+          "langue" | "nom_caracteristique"
+        >[]
+      | null;
+  };
+
+  return ((data ?? []) as unknown as Row[])
+    .map((row) => ({
+      id_caracteristique: row.id_caracteristique,
+      nom_caracteristique:
+        pickTranslation(row.caracteristique_technique_traduction, locale)
+          ?.nom_caracteristique ?? "",
+    }))
+    .filter((characteristic) => characteristic.nom_caracteristique.length > 0)
+    .sort((a, b) =>
+      a.nom_caracteristique.localeCompare(b.nom_caracteristique, locale),
+    );
 }

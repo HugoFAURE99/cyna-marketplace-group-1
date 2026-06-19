@@ -178,7 +178,7 @@ export default function SearchAutocomplete() {
           onKeyDown={onKeyDown}
           placeholder={t("searchButton")}
           role="combobox"
-          type="search"
+          type="text"
           value={query}
         />
         <button

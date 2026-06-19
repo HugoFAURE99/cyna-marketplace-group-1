@@ -6,6 +6,7 @@ import "server-only";
 
 import { cookies } from "next/headers";
 
+import { MAX_LICENSE_USERS, MIN_LICENSE_USERS } from "@/lib/cart/cart-constants";
 import { type Locale } from "@/lib/i18n/translations";
 import {
   getCatalogProductsByIds,
@@ -14,23 +15,23 @@ import {
 import type { PublicProductTariff } from "@/lib/products/public-products";
 
 export const CART_COOKIE = "cyna_cart";
-export const MAX_QUANTITY = 99;
 // ~30 days, in seconds.
 export const CART_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
 
 // One cart line, keyed by product + tariff (a product can be in the cart under
-// more than one billing period).
+// more than one billing period). The cookie still stores this as `q`, but it
+// represents users covered by one license.
 export type CartLine = {
   productId: number;
   tariffId: number;
-  quantity: number;
+  licenseUserCount: number;
 };
 
 // A cart line enriched with the product data needed to render it.
 export type CartViewItem = {
   productId: number;
   tariffId: number;
-  quantity: number;
+  licenseUserCount: number;
   name: string;
   imageUrl: string | null;
   categoryName: string | null;
@@ -47,15 +48,18 @@ export type CartView = {
   count: number;
 };
 
-export function clampQuantity(value: number) {
+export function clampLicenseUserCount(value: number) {
   if (!Number.isFinite(value)) {
-    return 1;
+    return MIN_LICENSE_USERS;
   }
-  return Math.min(MAX_QUANTITY, Math.max(1, Math.trunc(value)));
+  return Math.min(
+    MAX_LICENSE_USERS,
+    Math.max(MIN_LICENSE_USERS, Math.trunc(value)),
+  );
 }
 
 // Parse + harden the cookie value: tolerate malformed JSON, drop invalid
-// entries, clamp quantities, and merge duplicate product+tariff lines.
+// entries, clamp user counts, and merge duplicate product+tariff lines.
 export function parseCart(raw: string | undefined): CartLine[] {
   if (!raw) {
     return [];
@@ -88,13 +92,15 @@ export function parseCart(raw: string | undefined): CartLine[] {
     }
     const productId = p as number;
     const tariffId = t as number;
-    const quantity = clampQuantity(Number(q));
+    const licenseUserCount = clampLicenseUserCount(Number(q));
     const key = `${productId}:${tariffId}`;
     const existing = byKey.get(key);
     if (existing) {
-      existing.quantity = clampQuantity(existing.quantity + quantity);
+      existing.licenseUserCount = clampLicenseUserCount(
+        existing.licenseUserCount + licenseUserCount,
+      );
     } else {
-      byKey.set(key, { productId, tariffId, quantity });
+      byKey.set(key, { productId, tariffId, licenseUserCount });
     }
   }
 
@@ -107,7 +113,7 @@ export function serializeCart(lines: CartLine[]): string {
     lines.map((line) => ({
       p: line.productId,
       t: line.tariffId,
-      q: line.quantity,
+      q: line.licenseUserCount,
     })),
   );
 }
@@ -117,10 +123,10 @@ export async function readCart(): Promise<CartLine[]> {
   return parseCart(store.get(CART_COOKIE)?.value);
 }
 
-// Total number of units across all lines — drives the header badge.
+// Total number of license lines; drives the header badge.
 export async function getCartCount(): Promise<number> {
   const lines = await readCart();
-  return lines.reduce((total, line) => total + line.quantity, 0);
+  return lines.length;
 }
 
 // Enrich the cookie lines with product data for the cart page. Self-healing:
@@ -154,7 +160,7 @@ export async function getCartView(locale: Locale): Promise<CartView> {
     items.push({
       productId: product.id_produit,
       tariffId: tariff.id_prix,
-      quantity: line.quantity,
+      licenseUserCount: line.licenseUserCount,
       name: product.nom_pro,
       imageUrl:
         product.images[0]?.lien_image_produit ??
@@ -164,7 +170,7 @@ export async function getCartView(locale: Locale): Promise<CartView> {
       tariffs: product.tariffs,
       typeFacturation: tariff.type_facturation,
       unitPriceCents: tariff.prix,
-      lineTotalCents: tariff.prix * line.quantity,
+      lineTotalCents: tariff.prix * line.licenseUserCount,
       isUnavailable: product.quantite_produit <= 0,
     });
   }
@@ -172,6 +178,6 @@ export async function getCartView(locale: Locale): Promise<CartView> {
   return {
     items,
     subtotalCents: items.reduce((total, item) => total + item.lineTotalCents, 0),
-    count: items.reduce((total, item) => total + item.quantity, 0),
+    count: items.length,
   };
 }

@@ -1,19 +1,12 @@
 "use client";
 
-// Small "(i)" affordance shown next to out-of-stock items: a tooltip inviting
-// the shopper to contact sales directly, with a (placeholder) phone number.
-import { Info } from "lucide-react";
+// Visible out-of-stock message with a direct sales contact number.
+import { PhoneCall } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-// Placeholder sales line — not a real number.
+// Placeholder sales line, not a real number.
 const SALES_PHONE = "+33 1 86 76 12 34";
 
 type ContactSalesInfoProps = {
@@ -24,22 +17,17 @@ export default function ContactSalesInfo({ className }: ContactSalesInfoProps) {
   const t = useTranslations("product");
 
   return (
-    <TooltipProvider delay={150}>
-      <Tooltip>
-        <TooltipTrigger
-          aria-label={t("contactSalesAria")}
-          className={cn(
-            "inline-flex size-5 items-center justify-center rounded-full text-slate-400 transition hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700",
-            className,
-          )}
-          type="button"
-        >
-          <Info aria-hidden="true" className="size-4" />
-        </TooltipTrigger>
-        <TooltipContent className="max-w-[260px] text-center leading-relaxed">
-          {t("contactSalesInfo", { phone: SALES_PHONE })}
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
+    <p
+      className={cn(
+        "inline-flex items-start gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm leading-relaxed text-slate-700 ring-1 ring-slate-200",
+        className,
+      )}
+    >
+      <PhoneCall
+        aria-hidden="true"
+        className="mt-0.5 size-4 shrink-0 text-purple-700"
+      />
+      <span>{t("contactSalesInfo", { phone: SALES_PHONE })}</span>
+    </p>
   );
 }

@@ -10,7 +10,7 @@ import { cookies } from "next/headers";
 import {
   CART_COOKIE,
   CART_COOKIE_MAX_AGE,
-  clampQuantity,
+  clampLicenseUserCount,
   parseCart,
   serializeCart,
   type CartLine,
@@ -39,31 +39,33 @@ async function writeCart(lines: CartLine[]) {
 export async function addToCart(input: {
   productId: number;
   tariffId: number;
-  quantity: number;
+  licenseUserCount: number;
 }) {
   const productId = Math.trunc(input.productId);
   const tariffId = Math.trunc(input.tariffId);
   if (productId <= 0 || tariffId <= 0) {
     return;
   }
-  const quantity = clampQuantity(input.quantity);
+  const licenseUserCount = clampLicenseUserCount(input.licenseUserCount);
 
   const lines = await currentCart();
   const existing = lines.find(
     (line) => line.productId === productId && line.tariffId === tariffId,
   );
   if (existing) {
-    existing.quantity = clampQuantity(existing.quantity + quantity);
+    existing.licenseUserCount = clampLicenseUserCount(
+      existing.licenseUserCount + licenseUserCount,
+    );
   } else {
-    lines.push({ productId, tariffId, quantity });
+    lines.push({ productId, tariffId, licenseUserCount });
   }
   await writeCart(lines);
 }
 
-export async function updateCartLineQuantity(input: {
+export async function updateCartLineUserCount(input: {
   productId: number;
   tariffId: number;
-  quantity: number;
+  licenseUserCount: number;
 }) {
   const lines = await currentCart();
   const line = lines.find(
@@ -73,12 +75,12 @@ export async function updateCartLineQuantity(input: {
   if (!line) {
     return;
   }
-  line.quantity = clampQuantity(input.quantity);
+  line.licenseUserCount = clampLicenseUserCount(input.licenseUserCount);
   await writeCart(lines);
 }
 
 // Switching a line's billing period changes its key; if a line for the target
-// tariff already exists, merge the quantities into it.
+// tariff already exists, merge the covered users into it.
 export async function updateCartLineTariff(input: {
   productId: number;
   fromTariffId: number;
@@ -103,7 +105,9 @@ export async function updateCartLineTariff(input: {
       entry.tariffId === input.toTariffId,
   );
   if (target) {
-    target.quantity = clampQuantity(target.quantity + source.quantity);
+    target.licenseUserCount = clampLicenseUserCount(
+      target.licenseUserCount + source.licenseUserCount,
+    );
     await writeCart(lines.filter((entry) => entry !== source));
   } else {
     source.tariffId = input.toTariffId;
