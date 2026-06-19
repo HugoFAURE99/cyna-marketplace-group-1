@@ -15,12 +15,13 @@ export async function login(
 
   const email = formData.get('email') as string;
   const password = formData.get('password') as string;
+  const isRememberMe = formData.get('remember') === 'on';
 
   if (!email || !password) {
     return { errorKey: "errorMissingFields" };
   }
 
-  const supabase = await createServerClient();
+  const supabase = await createServerClient(isRememberMe);
 
   const { error } = await supabase.auth.signInWithPassword({
     email,

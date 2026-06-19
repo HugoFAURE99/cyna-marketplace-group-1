@@ -146,7 +146,7 @@
       "loading": "Logging in...",
       "noAccount": "Don't have an account?",
       "createAccount": "Create an account",
-
+      "rememberMe": "Se souvenir de moi",
       "registerSuccess": "Account created successfully! Please log in.",
       "errorInvalidCredentials": "Invalid email or password.",
       "checkEmail": "Registration successful! Please check your inbox to confirm your email.",
