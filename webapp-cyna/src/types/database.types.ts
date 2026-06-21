@@ -285,16 +285,19 @@ export type Database = {
           est_actif: boolean;
           id_image: number;
           lien_image_caroussel: string;
+          ordre: number;
         };
         Insert: {
           est_actif?: boolean;
           id_image?: number;
           lien_image_caroussel: string;
+          ordre?: number;
         };
         Update: {
           est_actif?: boolean;
           id_image?: number;
           lien_image_caroussel?: string;
+          ordre?: number;
         };
         Relationships: [];
       };

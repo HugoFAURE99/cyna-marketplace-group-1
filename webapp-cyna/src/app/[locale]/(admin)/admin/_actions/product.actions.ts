@@ -244,6 +244,11 @@ export async function getProducts(locale: Locale = DEFAULT_LOCALE) {
       `
       id_produit,
       statut_produit,
+      is_priorite,
+      ordre_priorite,
+      mis_avant,
+      mis_avant_ordre,
+      id_categorie,
       produit_traduction (
         langue,
         nom_pro
@@ -278,7 +283,12 @@ export async function getProducts(locale: Locale = DEFAULT_LOCALE) {
     );
     return {
       id_produit: product.id_produit,
+      id_categorie: product.id_categorie,
       statut_produit: product.statut_produit,
+      is_priorite: product.is_priorite,
+      ordre_priorite: product.ordre_priorite,
+      mis_avant: product.mis_avant,
+      mis_avant_ordre: product.mis_avant_ordre,
       nom_pro: pickTranslation(product.produit_traduction, locale)?.nom_pro ?? "",
       categorie: product.categorie
         ? {
@@ -553,9 +563,13 @@ export async function updateProduct(
 export async function toggleProductStatus(id: number, active: boolean) {
   const supabase = createAdminClient();
 
+  const updates = active
+    ? { statut_produit: true }
+    : { statut_produit: false, mis_avant: false, mis_avant_ordre: 0, is_priorite: false };
+
   const { error } = await supabase
     .from("produit")
-    .update({ statut_produit: active })
+    .update(updates)
     .eq("id_produit", id);
 
   if (error) {
@@ -626,6 +640,93 @@ export async function bulkToggleProductStatus(ids: number[], active: boolean) {
     throw new Error(
       `${failures.length} produit(s) n'ont pas pu être mis à jour.`,
     );
+  }
+
+  revalidatePath("/[locale]/admin/products", "page");
+}
+
+export async function toggleProductPriority(id: number, priority: boolean) {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("produit")
+    .update({ is_priorite: priority })
+    .eq("id_produit", id);
+  if (error) throw new Error(`Erreur mise à jour priorité : ${error.message}`);
+  revalidatePath("/[locale]/admin/products", "page");
+}
+
+export async function bulkToggleProductPriority(
+  ids: number[],
+  priority: boolean,
+) {
+  const supabase = createAdminClient();
+  const results = await Promise.allSettled(
+    ids.map((id) =>
+      supabase
+        .from("produit")
+        .update({ is_priorite: priority })
+        .eq("id_produit", id)
+        .then(({ error }) => {
+          if (error) throw error;
+        }),
+    ),
+  );
+  const bulkFailures = results.filter((r) => r.status === "rejected");
+  if (bulkFailures.length > 0)
+    throw new Error(
+      `${bulkFailures.length} produit(s) n'ont pas pu être mis à jour.`,
+    );
+  revalidatePath("/[locale]/admin/products", "page");
+}
+
+export async function updatePriorityOrder(
+  items: { id: number; ordre: number }[],
+) {
+  const supabase = createAdminClient();
+  const results = await Promise.allSettled(
+    items.map(({ id, ordre }) =>
+      supabase
+        .from("produit")
+        .update({ ordre_priorite: ordre })
+        .eq("id_produit", id)
+        .then(({ error }) => {
+          if (error) throw error;
+        }),
+    ),
+  );
+  const orderFailures = results.filter((r) => r.status === "rejected");
+  if (orderFailures.length > 0)
+    throw new Error(`Erreur mise à jour de l'ordre des priorités.`);
+  revalidatePath("/[locale]/admin/products", "page");
+}
+
+export async function updateFeaturedProducts(
+  items: { id: number; ordre: number }[],
+) {
+  const supabase = createAdminClient();
+
+  const { error: clearError } = await supabase
+    .from("produit")
+    .update({ mis_avant: false, mis_avant_ordre: 0 })
+    .eq("mis_avant", true);
+  if (clearError)
+    throw new Error(`Erreur réinitialisation mis en avant : ${clearError.message}`);
+
+  if (items.length > 0) {
+    const results = await Promise.allSettled(
+      items.map(({ id, ordre }) =>
+        supabase
+          .from("produit")
+          .update({ mis_avant: true, mis_avant_ordre: ordre })
+          .eq("id_produit", id)
+          .then(({ error }) => {
+            if (error) throw error;
+          }),
+      ),
+    );
+    const featuredFailures = results.filter((r) => r.status === "rejected");
+    if (featuredFailures.length > 0)
+      throw new Error(`Erreur mise à jour des produits mis en avant.`);
   }
 
   revalidatePath("/[locale]/admin/products", "page");

@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { Plus, X } from "lucide-react";
+import { ArrowLeft, Plus, X } from "lucide-react";
+import Spinner from "@/components/ui/spinner";
 
 import { useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -194,6 +195,14 @@ export default function CategoryForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        {tActions("back")}
+      </button>
       <h2 className="text-2xl font-bold mb-6">
         {category ? t("editTitle") : t("createTitle")}
       </h2>
@@ -332,7 +341,7 @@ export default function CategoryForm({
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting
-                ? t("submitting")
+                ? <><Spinner /> {t("submitting")}</>
                 : category
                   ? t("submitUpdate")
                   : t("submitCreate")}

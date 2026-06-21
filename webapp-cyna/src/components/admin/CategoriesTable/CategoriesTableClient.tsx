@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@base-ui/react/dialog";
 import type { getCategories } from "@/app/[locale]/(admin)/admin/_actions/category.actions";
 import { deleteCategories } from "@/app/[locale]/(admin)/admin/_actions/category.actions";
+import Spinner from "@/components/ui/spinner";
 import DeleteCategoryButton from "@/components/admin/CategoriesTable/DeleteCategoryButton";
 
 type Category = Awaited<ReturnType<typeof getCategories>>[number];
@@ -182,7 +183,7 @@ export default function CategoriesTableClient({
                     onClick={handleBulkDelete}
                     disabled={isPending}
                   >
-                    {isPending ? tDelete("deleting") : tDelete("confirm")}
+                    {isPending ? <><Spinner /> {tDelete("deleting")}</> : tDelete("confirm")}
                   </Button>
                 </div>
               </Dialog.Popup>
