@@ -364,5 +364,16 @@
     "paragraph6": "L'utilisateur est seul responsable de l'utilisation qu'il fait des informations fournies sur le site et de la sécurité de son propre matériel informatique. CYNA-IT ne pourra être tenue responsable des dommages indirects, des pertes de données ou des interruptions de service causés par un événement de force majeure ou un dysfonctionnement du réseau Internet.",
     "subtitle7": "Modification des conditions et droit applicable",
     "paragraph7": "CYNA-IT met en œuvre tous les moyens nécessaires pour assurer un accès continu à sa plateforme e-commerce et à ses outils d'assistance comme le Chatbot. Toutefois, l'entreprise se réserve le droit de suspendre temporairement l'accès au site pour des raisons de maintenance technique ou de mise à jour, sans que cela n'ouvre droit à une indemnisation."
+  },
+  "user_dashboard": {
+    "account": "Informations de compte",
+    "orders": "Commandes"
+  },
+  "account": {
+    "title": "Informations de compte"
+  },
+  "orders": {
+    "title": "Vos Commande",
+    "last_orders": "Dernières Commandes"
   }
 }

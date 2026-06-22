@@ -363,5 +363,16 @@
     "paragraph6": "The user is solely responsible for their use of the information provided on the website and for the security of their own computer equipment. CYNA-IT shall not be held liable for any indirect damages, data loss, or service interruptions caused by a force majeure event or an Internet network malfunction.",
     "subtitle7": "Modifications to Terms and Applicable Law",
     "paragraph7": "CYNA-IT reserves the right to modify these terms at any time to adapt to technical or legal changes. These terms are governed by French law, and any dispute shall be submitted to the exclusive jurisdiction of the courts of Paris."
+  },
+  "user_dashboard": {
+    "account": "Account Informations",
+    "orders": "Orders"
+  },
+  "account": {
+    "title": "Account Informations"
+  },
+  "orders": {
+    "title": "Orders",
+    "last_orders": "Last Orders"
   }
 }
