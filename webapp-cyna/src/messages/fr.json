@@ -58,7 +58,8 @@
     "productImageAlt": "Image de {name}",
     "carouselPrevious": "Diapositive précédente",
     "carouselNext": "Diapositive suivante",
-    "carouselGoToSlide": "Afficher la diapositive {number}"
+    "carouselGoToSlide": "Afficher la diapositive {number}",
+    "paymentSuccess": "🎉 Merci pour votre commande ! Votre paiement a bien été validé."
   },
   "product": {
     "overview": "Aperçu",
@@ -107,7 +108,10 @@
     "subtotal": "Sous-total",
     "proceedToCheckout": "Passer à la caisse",
     "checkoutComingSoon": "Le paiement arrive bientôt.",
-    "saveCartPrompt": "<login>Connectez-vous</login> ou <register>créez un compte</register> pour sauvegarder votre panier"
+    "saveCartPrompt": "<login>Connectez-vous</login> ou <register>créez un compte</register> pour sauvegarder votre panier",
+    "checkoutError": "Une erreur est survenue lors de la préparation de la commande.",
+    "redirecting": "Redirection...",
+    "securePayment": "Paiement sécurisé via Stripe."
   },
   "search": {
     "title": "Recherche",
