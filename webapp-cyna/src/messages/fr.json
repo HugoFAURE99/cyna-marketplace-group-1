@@ -367,13 +367,45 @@
   },
   "user_dashboard": {
     "account": "Informations de compte",
-    "orders": "Commandes"
+    "orders": "Commandes",
+    "addresses": "Carnet d'adresses"
   },
   "account": {
-    "title": "Informations de compte"
+    "title": "Informations de compte",
+    "editProfile": "Modifier le profil"
   },
   "orders": {
     "title": "Vos Commande",
     "last_orders": "Dernières Commandes"
+  },
+  "user_edition": {
+    "title": "Édition du profil",
+    "editEmailTitle": "Modifier l'adresse email",
+    "newEmailLabel": "Nouvelle adresse email",
+    "emailPlaceholder": "votre@email.com",
+    "updateEmailButton": "Mettre à jour l'email",
+    "editPasswordTitle": "Modifier le mot de passe",
+    "newPasswordLabel": "Nouveau mot de passe",
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "passwordPlaceholder": "••••••••",
+    "updatePasswordButton": "Mettre à jour le mot de passe"
+  },
+  "addresses": {
+    "title": "Carnets d'adresses",
+    "addNew": "Ajouter un carnet",
+    "noAddresses": "Aucun carnet d'adresses enregistré.",
+    "newTitle": "Ajouter un nouveau carnet d'adresses",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "address1": "Adresse 1 : Rue et numéro",
+    "address2": "Adresse 2 : Complément d'adresse (optionnel)",
+    "city": "Ville",
+    "region": "Région",
+    "postalCode": "Code postal",
+    "country": "Pays",
+    "phone": "Numéro de téléphone mobile",
+    "phoneHint": "Utilisé pour d'éventuelles notifications liées aux services ou à la facturation",
+    "submitNew": "Enregistrer l'adresse",
+    "cancel": "Annuler"
   }
 }

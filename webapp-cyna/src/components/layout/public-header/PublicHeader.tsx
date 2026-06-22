@@ -62,15 +62,19 @@ export default async function PublicHeader() {
             className="hidden h-6 w-px bg-slate-200 sm:block"
           />
           {user ? (
-            <span className="hidden max-w-[200px] items-center gap-1.5 text-sm sm:inline-flex">
-              <CircleUserRound
-                aria-hidden="true"
-                className="size-5 shrink-0 text-purple-700"
-              />
-              <span className="truncate font-semibold text-slate-900">
-                {displayName}
+            <Link href="/user-dashboard/infos">
+              <span className="hidden max-w-[200px] items-center gap-1.5 text-sm sm:inline-flex">
+                <CircleUserRound
+                  aria-hidden="true"
+                  className="size-5 shrink-0 text-purple-700"
+                />
+
+                <span className="truncate font-semibold text-slate-900">
+                  {displayName}
+                </span>
+
               </span>
-            </span>
+            </Link>
           ) : (
             <Link
               className="hidden h-9 items-center gap-1.5 rounded-md px-3 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:inline-flex"

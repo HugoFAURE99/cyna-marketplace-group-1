@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
+import { createServerClient } from "@/lib/supabase/server-client";
 
 import { Link } from "@/i18n/navigation";
 
@@ -10,18 +11,37 @@ export default async function PublicLayout({
   params: Promise<{ locale: Locale }>;
   children: React.ReactNode;
 }>) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations("user_dashboard");
+
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Requête pour associer l'utilisateur à ses carnets d'adresses (compte du nombre d'adresses actives)
+  let addressesCount = 0;
+  if (user) {
+    const { count } = await supabase
+      .from("adresse")
+      .select("*", { count: "exact", head: true })
+      .eq("id_compte", user.id)
+      .eq("is_deleted", false);
+    addressesCount = count || 0;
+  }
 
   return (
     <div className="flex">
       <div className="flex min-h-screen w-70  align-center py-5 border border-radius-8 shadow-sm px-5">
         <nav>
-          <ul className="flex flex-col gap-4">
-            <li className="cursor-pointer">
-              <Link href="/user-dashboard/infos">{t("account")}</Link>
+          <ul className="flex flex-col gap-4 w-full">
+            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+              <Link href="/user-dashboard/infos" className="block w-full">{t("account")}</Link>
             </li>
-            <li className="cursor-pointer">
-              <Link href="/user-dashboard/orders">{t("orders")}</Link>
+            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+              <Link href="/user-dashboard/orders" className="block w-full">{t("orders")}</Link>
+            </li>
+            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors flex items-center justify-between">
+              <Link href="/user-dashboard/addresses" className="block w-full">{t("addresses")}</Link>
             </li>
           </ul>
         </nav>

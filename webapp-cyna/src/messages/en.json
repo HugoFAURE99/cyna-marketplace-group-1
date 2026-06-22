@@ -366,13 +366,45 @@
   },
   "user_dashboard": {
     "account": "Account Informations",
-    "orders": "Orders"
+    "orders": "Orders",
+    "addresses": "Address Book"
   },
   "account": {
-    "title": "Account Informations"
+    "title": "Account Informations",
+    "editProfile": "Edit User Profile"
   },
   "orders": {
     "title": "Orders",
     "last_orders": "Last Orders"
+  },
+  "user_edition": {
+    "title": "Edit Profile",
+    "editEmailTitle": "Edit Email Address",
+    "newEmailLabel": "New Email Address",
+    "emailPlaceholder": "your@email.com",
+    "updateEmailButton": "Update Email",
+    "editPasswordTitle": "Edit Password",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "passwordPlaceholder": "••••••••",
+    "updatePasswordButton": "Update Password"
+  },
+  "addresses": {
+    "title": "Address Books",
+    "addNew": "Add new address book",
+    "noAddresses": "No address books registered.",
+    "newTitle": "Add a New Address Book",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "address1": "Address 1: Street and number",
+    "address2": "Address 2: Apartment, suite, etc. (optional)",
+    "city": "City",
+    "region": "State / Province",
+    "postalCode": "Postal Code",
+    "country": "Country",
+    "phone": "Mobile Phone Number",
+    "phoneHint": "Used for service or billing-related notifications",
+    "submitNew": "Save Address",
+    "cancel": "Cancel"
   }
 }
