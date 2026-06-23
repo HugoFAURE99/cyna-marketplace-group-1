@@ -82,9 +82,20 @@ export async function processCheckout(locale: any) {
         mode: "subscription", // Important pour les SaaS (abonnements)
         success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/${locale}?payment=success`,
         cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart`,
+
         metadata: {
+            // 1. Les infos de base
             id_commande: commande.id_commande.toString(),
             id_compte: user ? user.id : 'invite',
+
+            // 2. Le "post-it" du panier
+            cartData: JSON.stringify(
+                cartView.items.map((item) => ({
+                    id_prix: item.tariffId,
+                    quantite: item.licenseUserCount,
+                    prix_unitaire: item.unitPriceCents,
+                }))
+            ),
         },
     };
 
