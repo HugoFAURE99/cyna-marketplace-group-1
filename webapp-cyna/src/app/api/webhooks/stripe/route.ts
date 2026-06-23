@@ -8,7 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
 });
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
-// 2. Initialisation de Supabase avec la clé d'administration (Service Role)
+// 2. Initialisation de Supabase avec la clé Service Role
 // Cela permet au Webhook d'écrire dans la BDD de manière sécurisée en arrière-plan
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
@@ -27,45 +27,77 @@ export async function POST(req: Request) {
     try {
         event = stripe.webhooks.constructEvent(rawBody, signature, endpointSecret);
     } catch (err: any) {
-        console.error("❌ Erreur de signature du Webhook :", err.message);
+        console.error(" Erreur de signature du Webhook :", err.message);
         return NextResponse.json({ error: err.message }, { status: 400 });
     }
 
-    // 👇 LA MAGIE OPÈRE ICI 👇
+
     if (event.type === "checkout.session.completed") {
         const session = event.data.object as Stripe.Checkout.Session;
 
         try {
-            // On récupère l'email et on convertit le montant en euros (Stripe envoie des centimes)
-            const email = session.customer_details?.email || session.customer_email || "invite@inconnu.com";
-            const montantTotal = (session.amount_total || 0) / 100;
+            console.log(" Traitement du paiement réussi, récupération de la facture...");
 
-            console.log("⏳ Insertion de la commande en cours...");
+            // On récupère l'ID de la commande "En attente" via les metadata
+            const idCommande = session.metadata?.id_commande;
+            if (!idCommande) {
+                throw new Error("Aucun id_commande trouvé dans les metadata Stripe");
+            }
 
-            // A. INSERTION DANS LA TABLE 'commande'
-            const { data: nouvelleCommande, error: commandeError } = await supabase
+            let fileNameKey = null;
+
+            // RÉCUPÉRATION ET TÉLÉCHARGEMENT DE LA FACTURE STRIPE
+            if (session.invoice) {
+                const invoice = await stripe.invoices.retrieve(session.invoice as string);
+                const pdfUrl = invoice.invoice_pdf;
+
+                if (pdfUrl) {
+                    const response = await fetch(pdfUrl);
+                    if (!response.ok) throw new Error("Impossible de télécharger le PDF de Stripe");
+
+                    const arrayBuffer = await response.arrayBuffer();
+                    const buffer = Buffer.from(arrayBuffer);
+
+                    // Nom unique du fichier
+                    const fileName = `facture_${idCommande}_${invoice.id}.pdf`;
+
+                    // Envoi du PDF dans ton Bucket privé avec le bon format
+                    const { error: storageError } = await supabase.storage
+                        .from("Factures")
+                        .upload(fileName, buffer, {
+                            contentType: "application/pdf",
+                            upsert: true,
+                        });
+
+                    if (storageError) throw storageError;
+
+                    // On enregistre uniquement le nom du fichier pour la BDD
+                    fileNameKey = fileName;
+                    console.log("📁 PDF sauvegardé dans le Bucket :", fileNameKey);
+                }
+            }
+
+            // A. MISE À JOUR DE LA COMMANDE EXISTANTE
+            const { error: commandeError } = await supabase
                 .from("commande")
-                .insert({
-                    montant_total: montantTotal,
-                    statut_commande: "Validée", // On valide direct car Stripe a pris l'argent
-                    mail_utilisateur_invite: email,
+                .update({
+                    statut_commande: "Validée",
+                    url_facture: fileNameKey, // On stocke juste le nom du PDF
                 })
-                .select("id_commande")
-                .single();
+                .eq("id_commande", idCommande);
 
             if (commandeError) throw commandeError;
 
             // B. INSERTION DANS LA TABLE 'ligne_commande'
-            // On lit le "post-it" qu'on avait caché dans la création de la session
             if (session.metadata?.cartData) {
                 const cartItems = JSON.parse(session.metadata.cartData);
 
                 const lignesAInserer = cartItems.map((item: any) => ({
-                    id_commande: nouvelleCommande.id_commande,
+                    id_commande: parseInt(idCommande),
                     id_prix: item.id_prix,
                     quantite: item.quantite,
-                    prix_unitaire: item.prix_unitaire / 100, // On remet en euros
-                    sous_total: (item.prix_unitaire * item.quantite) / 100,
+                    prix_unitaire: item.prix_unitaire, // Assure-toi que c'est le bon montant (en euros ou centimes selon ton action)
+                    sous_total: item.sous_total || (item.prix_unitaire * item.quantite),
                 }));
 
                 const { error: lignesError } = await supabase
@@ -75,11 +107,10 @@ export async function POST(req: Request) {
                 if (lignesError) throw lignesError;
             }
 
-            console.log("✅ COMMANDE ENREGISTRÉE EN BASE DE DONNÉES ! ID:", nouvelleCommande.id_commande);
+            console.log(`✅ COMMANDE ${idCommande} MISE À JOUR ET ENREGISTRÉE EN BASE DE DONNÉES !`);
 
         } catch (dbError) {
             console.error("❌ Erreur lors de l'insertion dans Supabase :", dbError);
-            // Même s'il y a une erreur BDD, on doit renvoyer 200 à Stripe sinon il va spammer le webhook
             return NextResponse.json({ received: true, db_error: true }, { status: 200 });
         }
     }

@@ -5,3 +5,7 @@ webapp-cyna/src/app/auth/action/auth.action.ts,:
 -décommenter de le proxy
 
 carte stripe 4242 4242 4242 4242
+
+stripe login
+
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
