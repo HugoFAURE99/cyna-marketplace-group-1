@@ -8,17 +8,16 @@ export default async function PublicLayout({
   params,
   children,
 }: Readonly<{
-  params: Promise<{ locale: Locale }>;
+  params: Promise<{ locale: string }>;
   children: React.ReactNode;
 }>) {
   const { locale } = await params;
-  setRequestLocale(locale);
+  setRequestLocale(locale as Locale);
   const t = await getTranslations("user_dashboard");
 
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Requête pour associer l'utilisateur à ses carnets d'adresses (compte du nombre d'adresses actives)
   let addressesCount = 0;
   if (user) {
     const { count } = await supabase
@@ -39,6 +38,12 @@ export default async function PublicLayout({
             </li>
             <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
               <Link href="/user-dashboard/orders" className="block w-full">{t("orders")}</Link>
+            </li>
+            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+              <Link href="/user-dashboard/subscriptions" className="block w-full">{t("subscriptions")}</Link>
+            </li>
+            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
+              <Link href="/user-dashboard/billing" className="block w-full">{t("billing")}</Link>
             </li>
             <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors flex items-center justify-between">
               <Link href="/user-dashboard/addresses" className="block w-full">{t("addresses")}</Link>

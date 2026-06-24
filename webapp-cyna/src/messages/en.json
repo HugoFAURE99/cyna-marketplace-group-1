@@ -367,6 +367,8 @@
   "user_dashboard": {
     "account": "Account Informations",
     "orders": "Orders",
+    "subscriptions": "Subscriptions",
+    "billing": "Billing",
     "addresses": "Address Book"
   },
   "account": {
@@ -406,5 +408,24 @@
     "phoneHint": "Used for service or billing-related notifications",
     "submitNew": "Save Address",
     "cancel": "Cancel"
+  },
+  "subscriptions": {
+    "title": "My Subscriptions",
+    "status": "Status",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "deactivate": "Deactivate",
+    "deactivating": "Deactivating...",
+    "unknown": "Unknown Subscription",
+    "noSubscriptions": "You do not have any subscriptions at the moment."
+  },
+  "billing": {
+    "title": "Billing",
+    "id": "Invoice ID",
+    "date": "Date",
+    "amount": "Amount",
+    "status": "Status",
+    "download": "Download Invoice",
+    "noInvoices": "You do not have any invoices at the moment."
   }
 }

@@ -368,6 +368,8 @@
   "user_dashboard": {
     "account": "Informations de compte",
     "orders": "Commandes",
+    "subscriptions": "Abonnements",
+    "billing": "Facturation",
     "addresses": "Carnet d'adresses"
   },
   "account": {
@@ -407,5 +409,24 @@
     "phoneHint": "Utilisé pour d'éventuelles notifications liées aux services ou à la facturation",
     "submitNew": "Enregistrer l'adresse",
     "cancel": "Annuler"
+  },
+  "subscriptions": {
+    "title": "Mes abonnements",
+    "status": "Statut",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "deactivate": "Désactiver",
+    "deactivating": "Désactivation...",
+    "unknown": "Abonnement inconnu",
+    "noSubscriptions": "Vous n'avez aucun abonnement pour le moment."
+  },
+  "billing": {
+    "title": "Facturation",
+    "id": "N° Facture",
+    "date": "Date",
+    "amount": "Montant",
+    "status": "Statut",
+    "download": "Télécharger la facture",
+    "noInvoices": "Vous n'avez aucune facture pour le moment."
   }
 }
