@@ -2,8 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
 
-import { Link } from "@/i18n/navigation";
-
+import { Link, redirect } from "@/i18n/navigation";
 export default async function PublicLayout({
   params,
   children,
@@ -17,6 +16,10 @@ export default async function PublicLayout({
 
   const supabase = await createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect({ href: "/", locale: locale as Locale });
+  }
 
   let addressesCount = 0;
   if (user) {
