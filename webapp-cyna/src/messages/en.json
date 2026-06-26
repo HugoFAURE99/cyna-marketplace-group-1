@@ -369,8 +369,7 @@
     "orders": "Orders",
     "subscriptions": "Subscriptions",
     "billing": "Billing",
-    "addresses": "Address Book",
-    "payment": "Payment Methods"
+    "addresses": "Address Book"
   },
   "account": {
     "title": "Account Informations",
@@ -393,7 +392,12 @@
     "newPasswordLabel": "New Password",
     "confirmPasswordLabel": "Confirm Password",
     "passwordPlaceholder": "••••••••",
-    "updatePasswordButton": "Update Password"
+    "updatePasswordButton": "Update Password",
+    "successEmailUpdate": "Email address updated successfully.",
+    "successPasswordUpdate": "Password updated successfully.",
+    "errorMismatch": "Passwords do not match.",
+    "errorMissingFields": "Please fill in all required fields.",
+    "errorUpdateFailed": "An error occurred during the update."
   },
   "addresses": {
     "title": "Address Books",
@@ -435,16 +439,5 @@
     "noInvoices": "You do not have any invoices at the moment.",
     "searchPlaceholder": "Search for an invoice (ID, status, amount)...",
     "noSearchResults": "No invoice found for \"{search}\"."
-  },
-  "payment": {
-    "title": "Payment Method",
-    "method": "Payment Method",
-    "cardType": "Card Type",
-    "cardNumber": "Card Number",
-    "cardHolderName": "Cardholder Name",
-    "expirationDate": "Expiration Date",
-    "cvv": "CVV",
-    "save": "Save",
-    "success": "Payment method saved successfully"
   }
 }

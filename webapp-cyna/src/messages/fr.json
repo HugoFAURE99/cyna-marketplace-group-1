@@ -370,8 +370,7 @@
     "orders": "Commandes",
     "subscriptions": "Abonnements",
     "billing": "Facturation",
-    "addresses": "Carnet d'adresses",
-    "payment": "Méthode de Paiement"
+    "addresses": "Carnet d'adresses"
   },
   "account": {
     "title": "Informations de compte",
@@ -394,7 +393,12 @@
     "newPasswordLabel": "Nouveau mot de passe",
     "confirmPasswordLabel": "Confirmer le mot de passe",
     "passwordPlaceholder": "••••••••",
-    "updatePasswordButton": "Mettre à jour le mot de passe"
+    "updatePasswordButton": "Mettre à jour le mot de passe",
+    "successEmailUpdate": "Adresse email mise à jour avec succès.",
+    "successPasswordUpdate": "Mot de passe mis à jour avec succès.",
+    "errorMismatch": "Les mots de passe ne correspondent pas.",
+    "errorMissingFields": "Veuillez remplir tous les champs obligatoires.",
+    "errorUpdateFailed": "Une erreur est survenue lors de la mise à jour."
   },
   "addresses": {
     "title": "Carnets d'adresses",
@@ -436,16 +440,5 @@
     "noInvoices": "Vous n'avez aucune facture pour le moment.",
     "searchPlaceholder": "Rechercher une facture (N°, statut, montant)...",
     "noSearchResults": "Aucune facture trouvée pour \"{search}\"."
-  },
-  "payment": {
-    "title": "Moyen de paiement",
-    "method": "Méthode de paiement",
-    "cardType": "Type de carte",
-    "cardNumber": "Numéro de carte",
-    "cardHolderName": "Nom sur la carte",
-    "expirationDate": "Date d'expiration",
-    "cvv": "CVV",
-    "save": "Enregistrer",
-    "success": "Moyen de paiement enregistré avec succès"
   }
 }

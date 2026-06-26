@@ -51,8 +51,7 @@ export default async function PublicLayout({
     { title: t("orders"), url: "/user-dashboard/orders", icon: "package" },
     { title: t("subscriptions"), url: "/user-dashboard/subscriptions", icon: "refresh" },
     { title: t("billing"), url: "/user-dashboard/billing", icon: "credit-card" },
-    { title: t("addresses"), url: "/user-dashboard/addresses", icon: "map-pin" },
-    { title: t("payment"), url: "/user-dashboard/payment", icon: "wallet" },
+    { title: t("addresses"), url: "/user-dashboard/addresses", icon: "map-pin" }
   ];
 
   return (
