@@ -369,7 +369,8 @@
     "orders": "Orders",
     "subscriptions": "Subscriptions",
     "billing": "Billing",
-    "addresses": "Address Book"
+    "addresses": "Address Book",
+    "payment": "Payment"
   },
   "account": {
     "title": "Account Informations",
@@ -427,5 +428,16 @@
     "status": "Status",
     "download": "Download Invoice",
     "noInvoices": "You do not have any invoices at the moment."
+  },
+  "payment": {
+    "title": "Payment Method",
+    "method": "Payment Method",
+    "cardType": "Card Type",
+    "cardNumber": "Card Number",
+    "cardHolderName": "Cardholder Name",
+    "expirationDate": "Expiration Date",
+    "cvv": "CVV",
+    "save": "Save",
+    "success": "Payment method saved successfully"
   }
 }

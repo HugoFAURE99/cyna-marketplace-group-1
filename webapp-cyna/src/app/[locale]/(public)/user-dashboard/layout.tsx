@@ -51,10 +51,13 @@ export default async function PublicLayout({
             <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors flex items-center justify-between">
               <Link href="/user-dashboard/addresses" className="block w-full">{t("addresses")}</Link>
             </li>
+            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors flex items-center justify-between">
+              <Link href="/user-dashboard/payment" className="block w-full">{t("payment")}</Link>
+            </li>
           </ul>
         </nav>
       </div>
-      <div className="mt-5 pl-50">{children}</div>
+      <div className="mt-5 pl-50 flex-1 w-full">{children}</div>
     </div>
   );
 }
