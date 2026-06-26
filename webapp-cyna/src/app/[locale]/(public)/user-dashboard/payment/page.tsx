@@ -13,8 +13,8 @@ export default async function Payment({
   const t = await getTranslations("payment");
 
   return (
-    <div className="flex flex-col bg-white text-gray-900 font-sans w-full">
-      <h1 className="text-3xl font-bold text-black mb-10">{t("title")}</h1>
+    <div className="flex flex-col bg-white text-gray-900 font-sans w-full sm:p-4">
+      <h1 className="text-2xl sm:text-3xl font-bold text-black mb-6 sm:mb-10">{t("title")}</h1>
 
       <div className="w-full max-w-md">
         <PaymentForm />

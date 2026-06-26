@@ -3,6 +3,21 @@ import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
 
 import { Link, redirect } from "@/i18n/navigation";
+
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+
+import { UserDashboardSidebarMenu } from "@/components/layout/user-dashboard-sidebar";
+
 export default async function PublicLayout({
   params,
   children,
@@ -31,33 +46,34 @@ export default async function PublicLayout({
     addressesCount = count || 0;
   }
 
+  const items = [
+    { title: t("account"), url: "/user-dashboard/infos", icon: "user" },
+    { title: t("orders"), url: "/user-dashboard/orders", icon: "package" },
+    { title: t("subscriptions"), url: "/user-dashboard/subscriptions", icon: "refresh" },
+    { title: t("billing"), url: "/user-dashboard/billing", icon: "credit-card" },
+    { title: t("addresses"), url: "/user-dashboard/addresses", icon: "map-pin" },
+    { title: t("payment"), url: "/user-dashboard/payment", icon: "wallet" },
+  ];
+
   return (
-    <div className="flex">
-      <div className="flex min-h-screen w-70  align-center py-5 border border-radius-8 shadow-sm px-5">
-        <nav>
-          <ul className="flex flex-col gap-4 w-full">
-            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
-              <Link href="/user-dashboard/infos" className="block w-full">{t("account")}</Link>
-            </li>
-            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
-              <Link href="/user-dashboard/orders" className="block w-full">{t("orders")}</Link>
-            </li>
-            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
-              <Link href="/user-dashboard/subscriptions" className="block w-full">{t("subscriptions")}</Link>
-            </li>
-            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors">
-              <Link href="/user-dashboard/billing" className="block w-full">{t("billing")}</Link>
-            </li>
-            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors flex items-center justify-between">
-              <Link href="/user-dashboard/addresses" className="block w-full">{t("addresses")}</Link>
-            </li>
-            <li className="cursor-pointer hover:bg-gray-50 p-2 rounded-md transition-colors flex items-center justify-between">
-              <Link href="/user-dashboard/payment" className="block w-full">{t("payment")}</Link>
-            </li>
-          </ul>
-        </nav>
-      </div>
-      <div className="mt-5 pl-50 flex-1 w-full">{children}</div>
-    </div>
+    <SidebarProvider>
+      <Sidebar className="top-29! h-[calc(100vh-116px)]!">
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <UserDashboardSidebarMenu items={items} />
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+      <main className="flex-1 w-full min-w-0">
+        <div className="p-4 md:hidden">
+          <SidebarTrigger />
+        </div>
+        <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+          {children}
+        </div>
+      </main>
+    </SidebarProvider>
   );
 }

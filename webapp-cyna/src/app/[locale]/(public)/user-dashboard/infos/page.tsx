@@ -52,12 +52,12 @@ export default async function Account({
   };
 
   return (
-    <div className="flex flex-col bg-white text-gray-900 font-sans p-6 lg:p-10">
-      <div className="flex items-center justify-between mb-10 gap-20">
-        <h1 className="text-3xl font-bold text-black">{t("title")}</h1>
+    <div className="flex flex-col bg-white text-gray-900 font-sans sm:p-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-10 gap-4 sm:gap-20">
+        <h1 className="text-2xl sm:text-3xl font-bold text-black">{t("title")}</h1>
         <Link
           href="/user-dashboard/user-edition"
-          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all w-full sm:w-auto justify-center"
         >
           <span className="font-medium">{t("editProfile")}</span>
         </Link>

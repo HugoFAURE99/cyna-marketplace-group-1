@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
-
+import { OrdersList } from "@/components/account/orders-list";
 export default async function Orders({
   params,
 }: {
@@ -47,59 +47,10 @@ export default async function Orders({
   }
 
   return (
-    <div className="flex flex-col bg-white text-gray-900 font-sans">
-      <h1 className="text-3xl font-bold text-black mb-10">{t("title")}</h1>
+    <div className="flex flex-col bg-white text-gray-900 font-sans sm:p-4">
+      <h1 className="text-2xl sm:text-3xl font-bold text-black mb-6 sm:mb-10">{t("title")}</h1>
 
-      <div className="p-10 overflow-x-auto">
-        {orders.length > 0 ? (
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b-2 border-gray-100">
-                <th className="pb-4 font-bold text-gray-700">ID Commande</th>
-                <th className="pb-4 font-bold text-gray-700">Date</th>
-                <th className="pb-4 font-bold text-gray-700">Montant</th>
-                <th className="pb-4 font-bold text-gray-700">Statut</th>
-                <th className="pb-4 font-bold text-gray-700">Facture</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order.id_commande} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 text-gray-600">#{order.id_commande}</td>
-                  <td className="py-4 text-gray-600">
-                    {new Date(order.date_commande).toLocaleDateString(locale)}
-                  </td>
-                  <td className="py-4 text-gray-600 font-semibold">{order.montant_total} €</td>
-                  <td className="py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${order.statut_commande === 'payée' || order.statut_commande === 'payee' || order.statut_commande === 'completed'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-yellow-100 text-yellow-700'
-                      }`}>
-                      {order.statut_commande}
-                    </span>
-                  </td>
-                  <td className="py-4">
-                    {order.url_facture ? (
-                      <a
-                        href={order.url_facture}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm font-medium"
-                      >
-                        Voir la facture
-                      </a>
-                    ) : (
-                      <span className="text-gray-400 text-sm">-</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="text-gray-500 text-center py-8">Aucune commande trouvée.</p>
-        )}
-      </div>
+      <OrdersList orders={orders} locale={locale} />
     </div>
   );
 }

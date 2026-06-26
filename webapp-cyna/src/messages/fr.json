@@ -379,7 +379,10 @@
   },
   "orders": {
     "title": "Vos Commande",
-    "last_orders": "Dernières Commandes"
+    "last_orders": "Dernières Commandes",
+    "searchPlaceholder": "Rechercher une commande (ID, statut, montant)...",
+    "noSearchResults": "Aucune commande trouvée pour \"{search}\".",
+    "noOrders": "Vous n'avez aucune commande pour le moment."
   },
   "user_edition": {
     "title": "Édition du profil",
@@ -419,7 +422,9 @@
     "deactivate": "Désactiver",
     "deactivating": "Désactivation...",
     "unknown": "Abonnement inconnu",
-    "noSubscriptions": "Vous n'avez aucun abonnement pour le moment."
+    "noSubscriptions": "Vous n'avez aucun abonnement pour le moment.",
+    "searchPlaceholder": "Rechercher un abonnement...",
+    "noSearchResults": "Aucun abonnement trouvé pour \"{search}\"."
   },
   "billing": {
     "title": "Facturation",
@@ -428,7 +433,9 @@
     "amount": "Montant",
     "status": "Statut",
     "download": "Télécharger la facture",
-    "noInvoices": "Vous n'avez aucune facture pour le moment."
+    "noInvoices": "Vous n'avez aucune facture pour le moment.",
+    "searchPlaceholder": "Rechercher une facture (N°, statut, montant)...",
+    "noSearchResults": "Aucune facture trouvée pour \"{search}\"."
   },
   "payment": {
     "title": "Moyen de paiement",

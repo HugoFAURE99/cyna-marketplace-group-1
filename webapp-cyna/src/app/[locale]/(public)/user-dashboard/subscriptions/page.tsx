@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
-import { SubscriptionCard } from "@/components/account/subscription-card";
+import { SubscriptionsList } from "@/components/account/subscriptions-list";
 
 export default async function Subscriptions({
   params,
@@ -41,20 +41,10 @@ export default async function Subscriptions({
   }
 
   return (
-    <div className="flex flex-col bg-white text-gray-900 font-sans w-full">
-      <h1 className="text-3xl font-bold text-black mb-10">{t("title")}</h1>
+    <div className="flex flex-col bg-white text-gray-900 font-sans w-full sm:p-4">
+      <h1 className="text-2xl sm:text-3xl font-bold text-black mb-6 sm:mb-10">{t("title")}</h1>
 
-      <div className="w-full">
-        {subscriptions.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {subscriptions.map((subscription) => (
-              <SubscriptionCard key={subscription.id_abonnement} subscription={subscription} />
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-500 py-8">{t("noSubscriptions")}</p>
-        )}
-      </div>
+      <SubscriptionsList subscriptions={subscriptions} />
     </div>
   );
 }
