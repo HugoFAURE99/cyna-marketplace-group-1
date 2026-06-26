@@ -88,16 +88,29 @@ export async function POST(req: Request) {
             // ==========================================
             // ÉTAPE B : MISE À JOUR DE LA COMMANDE
             // ==========================================
+            type UpdateCommandeData = {
+                statut_commande: string;
+                url_facture: string | null;
+                mail_utilisateur_invite?: string; // Le "?" signifie que c'est optionnel
+            };
+
+            const dataToUpdate: UpdateCommandeData = {
+                statut_commande: "Validée",
+                url_facture: fileNameKey,
+            };
+
+            // Si c'est un invité, on ajoute l'e-mail
+            if (idCompte === "invite" && emailClient) {
+                dataToUpdate.mail_utilisateur_invite = emailClient;
+            }
+
             const { error: commandeError } = await supabase
                 .from("commande")
-                .update({
-                    statut_commande: "Validée",
-                    url_facture: fileNameKey,
-                })
+                .update(dataToUpdate)
                 .eq("id_commande", idCommande);
 
             if (commandeError) throw commandeError;
-            console.log(`✅ Commande N°${idCommande} validée en BDD.`);
+            console.log(`✅ Commande N°${idCommande} validée en BDD .`);
 
             // ==========================================
             // ÉTAPE C : ENREGISTREMENT DE L'ADRESSE (Point 2)
@@ -131,30 +144,7 @@ export async function POST(req: Request) {
             }
 
             // ==========================================
-            // ÉTAPE D : INSERTION DES LIGNES DE COMMANDE
-            // ==========================================
-            let listCartItems: any[] = [];
-            if (session.metadata?.cartData) {
-                listCartItems = JSON.parse(session.metadata.cartData);
-
-                const lignesAInserer = listCartItems.map((item: any) => ({
-                    id_commande: parseInt(idCommande),
-                    id_prix: item.id_prix,
-                    quantite: item.quantite,
-                    prix_unitaire: item.prix_unitaire,
-                    sous_total: item.sous_total || (item.prix_unitaire * item.quantite),
-                }));
-
-                const { error: lignesError } = await supabase
-                    .from("ligne_commande")
-                    .insert(lignesAInserer);
-
-                if (lignesError) throw lignesError;
-                console.log("📦 Lignes de commande enregistrées.");
-            }
-
-            // ==========================================
-            // ÉTAPE E : CRÉATION DE L'ABONNEMENT SAAS (Point 4)
+            // ÉTAPE D : CRÉATION DE L'ABONNEMENT SAAS (Point 4)
             // ==========================================
             if (session.subscription) {
                 const subscription: any = await stripe.subscriptions.retrieve(session.subscription as string);
@@ -175,6 +165,11 @@ export async function POST(req: Request) {
                             dateFin = new Date(firstLine.period.end * 1000).toISOString();
                         }
                     }
+                }
+
+                let listCartItems: any[] = [];
+                if (session.metadata?.cartData) {
+                    listCartItems = JSON.parse(session.metadata.cartData);
                 }
 
                 // On cherche l'id_prix technique de notre BDD à partir du premier item du panier
@@ -202,7 +197,7 @@ export async function POST(req: Request) {
             }
 
             // ==========================================
-            // ÉTAPE F : SAUVEGARDE DE L'ID CLIENT STRIPE (Point 3)
+            // ÉTAPE E : SAUVEGARDE DE L'ID CLIENT STRIPE (Point 3)
             // ==========================================
             if (idCompte !== "invite" && stripeCustomerId) {
                 const { error: userUpdateError } = await supabase

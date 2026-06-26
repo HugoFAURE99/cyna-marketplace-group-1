@@ -80,7 +80,9 @@ export async function processCheckout(locale: any) {
         billing_address_collection: "required", // Stripe demandera l'adresse
         phone_number_collection: { enabled: true },//stripe demande le numero de telephone
         line_items: lineItems,
-        mode: "subscription", // Important pour les SaaS (abonnements)
+
+
+        mode: "subscription", // Important pour les abonnements
         success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/${locale}?payment=success`,
         cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart`,
 
