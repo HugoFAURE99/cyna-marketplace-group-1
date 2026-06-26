@@ -371,7 +371,7 @@
     "subscriptions": "Abonnements",
     "billing": "Facturation",
     "addresses": "Carnet d'adresses",
-    "payment": "Information Paiement"
+    "payment": "Méthode de Paiement"
   },
   "account": {
     "title": "Informations de compte",
