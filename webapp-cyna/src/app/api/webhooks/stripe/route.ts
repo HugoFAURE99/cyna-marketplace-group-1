@@ -73,7 +73,7 @@ export async function POST(req: Request) {
 
                     // Envoi du PDF dans ton Bucket privé "Factures" (avec la majuscule)
                     const { error: storageError } = await supabase.storage
-                        .from("Factures")
+                        .from("invoice-pdf")
                         .upload(fileName, buffer, {
                             contentType: "application/pdf",
                             upsert: true,

@@ -19,7 +19,7 @@ export async function getFactureSignedUrl(fileName: string) {
 
     // 2. On demande à Supabase un lien secret temporaire valable 1 minute (60 secondes)
     const { data, error } = await supabase.storage
-        .from("factures")
+        .from("invoice-pdf")
         .createSignedUrl(fileName, 60);
 
     if (error || !data) {
