@@ -82,6 +82,7 @@ export async function processCheckout(locale: any) {
         line_items: lineItems,
         mode: "subscription", // Important pour les abonnements
 
+        allow_promotion_codes: true,
 
         success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/${locale}?payment=success`,
         cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart`,
