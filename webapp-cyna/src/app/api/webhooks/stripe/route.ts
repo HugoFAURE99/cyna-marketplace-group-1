@@ -144,58 +144,56 @@ export async function POST(req: Request) {
             }
 
             // ==========================================
-            // ÉTAPE D : CRÉATION DE L'ABONNEMENT SAAS (Point 4)
+            // ÉTAPE D : CRÉATION DE L'ABONNEMENT SAAS (MULTI-LICENCES)
             // ==========================================
             if (session.subscription) {
                 const subscription: any = await stripe.subscriptions.retrieve(session.subscription as string);
-
-                // 🆕 On récupère les dates depuis les "lines" de la facture (invoice)
-                // Comme on a déjà récupéré 'invoice' à l'étape A, on peut s'en servir !
-                let dateDebut = new Date().toISOString(); // Valeur par défaut : aujourd'hui
-                let dateFin = new Date(new Date().setMonth(new Date().getMonth() + 1)).toISOString(); // Valeur par défaut : +1 mois
-
-                if (session.invoice) {
-                    // Si tu n'as pas gardé la variable invoice de l'étape A en dehors du if,
-                    // refaisons un retrieve propre ici juste pour être sûr.
-                    const inv = await stripe.invoices.retrieve(session.invoice as string);
-                    if (inv.lines && inv.lines.data.length > 0) {
-                        const firstLine = inv.lines.data[0];
-                        if (firstLine.period) {
-                            dateDebut = new Date(firstLine.period.start * 1000).toISOString();
-                            dateFin = new Date(firstLine.period.end * 1000).toISOString();
-                        }
-                    }
-                }
 
                 let listCartItems: any[] = [];
                 if (session.metadata?.cartData) {
                     listCartItems = JSON.parse(session.metadata.cartData);
                 }
 
-                // On cherche l'id_prix technique de notre BDD à partir du premier item du panier
-                const premierItem = listCartItems[0];
+                if (listCartItems.length > 0) {
+                    console.log(`🔄 Traitement de ${listCartItems.length} licence(s) pour l'abonnement Stripe...`);
 
-                if (premierItem) {
-                    const { error: abonnementError } = await supabase
-                        .from("abonnement")
-                        .insert({
+                    //  ON PARCOURT TOUT LE PANIER POUR CRÉER CHAQUE LIGNE
+                    const abonnementsAInserer = listCartItems.map((item: any) => {
+
+                        // Calcul dynamique de la date de fin selon l'intervalle (Mensuel/Annuel)
+                        const startDate = new Date();
+                        const endDate = new Date(startDate);
+
+                        if (item.typeFacturation === "annuel") {
+                            endDate.setFullYear(endDate.getFullYear() + 1);
+                        } else {
+                            // Par défaut (Mensuel)
+                            endDate.setMonth(endDate.getMonth() + 1);
+                        }
+
+                        return {
                             statut_abonnement: subscription.status === "active" ? "Actif" : subscription.status,
-                            date_debut: dateDebut,
-                            date_fin: dateFin,
-                            id_prix: premierItem.id_prix,
+                            date_debut: startDate.toISOString(),
+                            date_fin: endDate.toISOString(),
+                            id_prix: item.id_prix,
                             id_commande: parseInt(idCommande),
                             id_compte: idCompte !== "invite" ? idCompte : null,
                             stripe_subscription_id: subscription.id
-                        });
+                        };
+                    });
+
+                    // On insère TOUTES les licences d'un coup
+                    const { error: abonnementError } = await supabase
+                        .from("abonnement")
+                        .insert(abonnementsAInserer);
 
                     if (abonnementError) {
-                        console.error("⚠️ Échec création abonnement :", abonnementError);
+                        console.error("⚠️ Échec création des abonnements de licences :", abonnementError);
                     } else {
-                        console.log("📅 Abonnement SaaS activé en BDD avec les bonnes dates.");
+                        console.log(`📅 ${listCartItems.length} licence(s) SaaS activée(s) avec succès en BDD !`);
                     }
                 }
             }
-
             // ==========================================
             // ÉTAPE E : SAUVEGARDE DE L'ID CLIENT STRIPE (Point 3)
             // ==========================================
