@@ -69,12 +69,17 @@ export async function POST(req: Request) {
                     const buffer = Buffer.from(arrayBuffer);
 
                     // Nom unique du fichier pour ton bucket
+                    // 1. Nom du fichier brut
                     const fileName = `facture_${idCommande}_${invoice.id}.pdf`;
+
+                    // 2. LE CHEMIN COMPLET AVEC LE SOUS-DOSSIER
+                    // Résultat : "550e8400-e29b.../facture_123_in_456.pdf" ou "invite/facture_123_in_456.pdf"
+                    const filePath = `${idCompte}/${fileName}`;
 
                     // Envoi du PDF dans ton Bucket privé "Factures" (avec la majuscule)
                     const { error: storageError } = await supabase.storage
                         .from("invoice-pdf")
-                        .upload(fileName, buffer, {
+                        .upload(filePath, buffer, {
                             contentType: "application/pdf",
                             upsert: true,
                         });
