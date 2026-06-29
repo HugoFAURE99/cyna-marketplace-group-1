@@ -45,7 +45,7 @@ export default async function Account({
   const user: UserProfile = {
     firstName: firstName || "Utilisateur",
     lastName: lastName || "",
-    email: dbUser?.adresse_mail || authUser?.email || "",
+    email: dbUser?.adresse_mail || "",
     creationDate: authUser?.created_at
       ? new Date(authUser.created_at).toLocaleDateString()
       : "",

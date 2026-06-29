@@ -23,10 +23,9 @@ export default async function UserEdition({
     data: { user: authUser },
   } = await supabase.auth.getUser();
 
-  let email = authUser?.email || "";
+  let email = "";
 
-  // Si l'email n'est pas dans authUser, on le cherche dans la table utilisateur
-  if (authUser && !email) {
+  if (authUser) {
     const { data: dbUser } = await supabase
       .from("utilisateur")
       .select("adresse_mail")

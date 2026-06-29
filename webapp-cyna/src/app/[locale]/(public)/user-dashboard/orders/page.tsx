@@ -1,7 +1,11 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
+import { createAdminClient } from "@/lib/supabase/server";
 import { OrdersList } from "@/components/account/orders-list";
+
+export const dynamic = "force-dynamic";
+
 export default async function Orders({
   params,
 }: {
@@ -18,30 +22,32 @@ export default async function Orders({
     data: { user: authUser },
   } = await supabase.auth.getUser();
 
-  let email = authUser?.email;
-
-  // Si l'email n'est pas dans authUser, on le cherche dans la table utilisateur
-  if (authUser && !email) {
+  let email = authUser?.email || "";
+  if (authUser) {
     const { data: dbUser } = await supabase
       .from("utilisateur")
       .select("adresse_mail")
       .eq("id_compte", authUser.id)
       .single();
-    if (dbUser) {
+    if (dbUser && dbUser.adresse_mail) {
       email = dbUser.adresse_mail;
     }
   }
 
-  // Récupération des commandes associées à l'email
+  // Récupération des commandes associées à l'email de l'utilisateur
   let orders: any[] = [];
   if (email) {
-    const { data } = await supabase
+    const adminSupabase = createAdminClient();
+    const { data, error } = await adminSupabase
       .from("commande")
       .select("*")
-      .eq("mail_utilisateur_invite", email)
+      .ilike("mail_utilisateur_invite", email)
       .order("date_commande", { ascending: false });
 
-    if (data) {
+    if (error) {
+      console.error("Supabase Error Orders:", error);
+      orders = [{ id_commande: 9999, date_commande: new Date().toISOString(), montant_total: 0, statut_commande: "ERROR: " + error.message }];
+    } else if (data) {
       orders = data;
     }
   }

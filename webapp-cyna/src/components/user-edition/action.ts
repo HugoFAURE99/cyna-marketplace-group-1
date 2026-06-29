@@ -39,8 +39,18 @@ export async function updateEmail(
     .update({ adresse_mail: email })
     .eq('id_compte', user.id);
 
+  // Update 'commande' table so they don't lose their past orders
+  if (user.email) {
+    await supabaseAdmin
+      .from('commande')
+      .update({ mail_utilisateur_invite: email })
+      .eq('mail_utilisateur_invite', user.email);
+  }
+
   revalidatePath('/user-dashboard/user-edition');
   revalidatePath('/user-dashboard/infos'); // Just in case it's shown there
+  revalidatePath('/user-dashboard/orders');
+  revalidatePath('/user-dashboard/billing');
 
   return { successKey: "successEmailUpdate" };
 }

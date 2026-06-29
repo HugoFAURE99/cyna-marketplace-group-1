@@ -13,7 +13,8 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: any[] }) {
   const filteredSubscriptions = subscriptions.filter((sub) => {
     if (!search) return true;
     const term = search.toLowerCase();
-    const planName = sub.prix_tarif?.prix_tarif_traduction?.[0]?.nom_prix_tarif || "";
+    const prodTrad = sub.prix_tarif?.produit?.produit_traduction?.[0]?.nom_pro;
+    const planName = prodTrad || sub.prix_tarif?.prix_tarif_traduction?.[0]?.nom_prix_tarif || "";
     return (
       (sub.statut && sub.statut.toLowerCase().includes(term)) ||
       planName.toLowerCase().includes(term) ||

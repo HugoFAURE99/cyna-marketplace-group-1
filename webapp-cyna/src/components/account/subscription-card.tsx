@@ -40,9 +40,13 @@ export function SubscriptionCard({ subscription }: SubscriptionCardProps) {
   };
 
   // Find the translated name
+  const prodTraductions = (subscription as any).prix_tarif?.produit?.produit_traduction || [];
+  const prodTranslation = prodTraductions.find((tr: any) => tr.langue === locale) || prodTraductions[0];
+  const prodName = prodTranslation?.nom_pro;
+
   const traductions = (subscription as any).prix_tarif?.prix_tarif_traduction || [];
   const translation = traductions.find((tr: any) => tr.langue === locale) || traductions[0];
-  const name = translation?.nom_prix_tarif || t("unknown");
+  const name = prodName || translation?.nom_prix_tarif || t("unknown");
 
   return (
     <Card className="h-full flex flex-col">

@@ -29,6 +29,12 @@ export default async function Subscriptions({
           prix_tarif_traduction (
             nom_prix_tarif,
             langue
+          ),
+          produit (
+            produit_traduction (
+              nom_pro,
+              langue
+            )
           )
         )
       `)
