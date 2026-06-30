@@ -40,7 +40,14 @@ export default async function Orders({
     const adminSupabase = createAdminClient();
     const { data, error } = await adminSupabase
       .from("commande")
-      .select("*")
+      .select(`
+        *,
+        ligne_commande (
+          prix_tarif (
+            type_facturation
+          )
+        )
+      `)
       .ilike("mail_utilisateur_invite", email)
       .order("date_commande", { ascending: false });
 

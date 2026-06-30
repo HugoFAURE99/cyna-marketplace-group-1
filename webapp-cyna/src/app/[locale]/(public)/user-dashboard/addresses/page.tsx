@@ -3,6 +3,7 @@ import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
 import { Link } from "@/i18n/navigation";
 import { Plus } from "lucide-react";
+import { AddressesList } from "@/components/account/addresses-list";
 
 export default async function Addresses({
   params,
@@ -48,47 +49,7 @@ export default async function Addresses({
         </Link>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {addresses.length > 0 ? (
-          addresses.map((addr) => (
-            <div
-              key={addr.id_adresse}
-              className="border border-gray-200 rounded-2xl p-6 shadow-sm bg-white flex flex-col hover:border-gray-300 transition-colors"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="font-bold text-lg text-gray-800">
-                  {addr.prenom} {addr.nom}
-                </h3>
-                {addr.type_adresse && (
-                  <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-md uppercase font-semibold">
-                    {addr.type_adresse}
-                  </span>
-                )}
-              </div>
-
-              <div className="text-gray-600 mb-4 flex-1">
-                <p>{addr.adresse}</p>
-                {addr.adresse_complement && <p>{addr.adresse_complement}</p>}
-                <p>
-                  {addr.code_postal} {addr.ville}
-                </p>
-                <p>{addr.pays}</p>
-              </div>
-
-              {addr.telephone && (
-                <div className="text-gray-500 text-sm mt-auto pt-4 border-t border-gray-100 flex items-center gap-2">
-                  <span>📞</span>
-                  <span>{addr.telephone}</span>
-                </div>
-              )}
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-300">
-            <p className="text-gray-500">{t("noAddresses")}</p>
-          </div>
-        )}
-      </div>
+      <AddressesList addresses={addresses} />
     </div>
   );
 }

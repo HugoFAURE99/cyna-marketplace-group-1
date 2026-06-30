@@ -63,7 +63,7 @@ export default async function Account({
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-8 max-w-3xl shadow-sm">
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 max-w-3xl shadow-sm w-full">
         <div className="mb-8">
           <h2 className="text-2xl font-bold uppercase m-0 tracking-wide text-gray-800">
             {user.lastName} <span className="capitalize">{user.firstName}</span>

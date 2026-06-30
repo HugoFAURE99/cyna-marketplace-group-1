@@ -380,7 +380,30 @@
     "last_orders": "Last Orders",
     "searchPlaceholder": "Search for an order (ID, status, amount)...",
     "noSearchResults": "No order found for \"{search}\".",
-    "noOrders": "You do not have any orders at the moment."
+    "noOrders": "You do not have any orders at the moment.",
+    "subscriptionType": {
+      "annuel": "Annual",
+      "mensuel": "Monthly",
+      "unique": "One-time",
+      "unknown": "-"
+    },
+    "allSubscriptions": "All subscriptions",
+    "allStatuses": "All statuses",
+    "columns": {
+      "id": "Order ID",
+      "date": "Date",
+      "amount": "Amount",
+      "subscription": "Subscription",
+      "status": "Status",
+      "invoice": "Invoice"
+    },
+    "status": {
+      "completed": "Paid",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "failed": "Failed"
+    },
+    "viewInvoice": "View invoice"
   },
   "user_edition": {
     "title": "Edit Profile",

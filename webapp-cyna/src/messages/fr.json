@@ -377,11 +377,34 @@
     "editProfile": "Modifier le profil"
   },
   "orders": {
-    "title": "Vos Commande",
+    "title": "Vos Commandes",
     "last_orders": "Dernières Commandes",
     "searchPlaceholder": "Rechercher une commande (ID, statut, montant)...",
     "noSearchResults": "Aucune commande trouvée pour \"{search}\".",
-    "noOrders": "Vous n'avez aucune commande pour le moment."
+    "noOrders": "Vous n'avez aucune commande pour le moment.",
+    "subscriptionType": {
+      "annuel": "Annuel",
+      "mensuel": "Mensuel",
+      "unique": "Unique",
+      "unknown": "-"
+    },
+    "allSubscriptions": "Tous les abonnements",
+    "allStatuses": "Tous les statuts",
+    "columns": {
+      "id": "ID Commande",
+      "date": "Date",
+      "amount": "Montant",
+      "subscription": "Abonnement",
+      "status": "Statut",
+      "invoice": "Facture"
+    },
+    "status": {
+      "completed": "Payée",
+      "pending": "En attente",
+      "cancelled": "Annulée",
+      "failed": "Échouée"
+    },
+    "viewInvoice": "Voir la facture"
   },
   "user_edition": {
     "title": "Édition du profil",
