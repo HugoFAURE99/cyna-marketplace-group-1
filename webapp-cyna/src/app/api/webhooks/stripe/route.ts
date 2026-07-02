@@ -26,16 +26,16 @@ export async function POST(req: Request) {
     try {
         event = stripe.webhooks.constructEvent(rawBody, signature, endpointSecret);
     } catch (err: any) {
-        console.error("❌ Erreur de signature du Webhook :", err.message);
+        console.error(" Erreur de signature du Webhook :", err.message);
         return NextResponse.json({ error: err.message }, { status: 400 });
     }
 
-    // 👇 TRAITEMENT DU PAIEMENT RÉUSSI 👇
+    //  TRAITEMENT DU PAIEMENT RÉUSSI 
     if (event.type === "checkout.session.completed") {
         const session = event.data.object as Stripe.Checkout.Session;
 
         try {
-            console.log("⏳ Début du traitement automatique post-paiement...");
+            console.log(" Début du traitement automatique post-paiement...");
 
             // Récupération des métadonnées envoyées depuis ton checkout action
             const idCommande = session.metadata?.id_commande;
@@ -84,7 +84,7 @@ export async function POST(req: Request) {
 
                     if (storageError) throw storageError;
                     fileNameKey = fileName;
-                    console.log("📁 Facture PDF sécurisée dans le Bucket Privé.");
+                    console.log(" Facture PDF sécurisée dans le Bucket Privé.");
                 }
             }
 
@@ -113,7 +113,7 @@ export async function POST(req: Request) {
                 .eq("id_commande", idCommande);
 
             if (commandeError) throw commandeError;
-            console.log(`✅ Commande N°${idCommande} validée en BDD .`);
+            console.log(` Commande N°${idCommande} validée en BDD .`);
 
             // ==========================================
             // ÉTAPE C : ENREGISTREMENT DE L'ADRESSE (Point 2)
@@ -140,9 +140,9 @@ export async function POST(req: Request) {
                     });
 
                 if (adresseError) {
-                    console.error("⚠️ Échec insertion adresse (non bloquant) :", adresseError);
+                    console.error(" Échec insertion adresse (non bloquant) :", adresseError);
                 } else {
-                    console.log("📍 Adresse de facturation enregistrée.");
+                    console.log(" Adresse de facturation enregistrée.");
                 }
             }
 
@@ -158,7 +158,7 @@ export async function POST(req: Request) {
                 }
 
                 if (listCartItems.length > 0) {
-                    console.log(`🔄 Traitement de ${listCartItems.length} licence(s) pour l'abonnement Stripe...`);
+                    console.log(` Traitement de ${listCartItems.length} licence(s) pour l'abonnement Stripe...`);
 
                     //  ON PARCOURT TOUT LE PANIER POUR CRÉER CHAQUE LIGNE
                     const abonnementsAInserer = listCartItems.map((item: any) => {
@@ -191,9 +191,9 @@ export async function POST(req: Request) {
                         .insert(abonnementsAInserer);
 
                     if (abonnementError) {
-                        console.error("⚠️ Échec création des abonnements de licences :", abonnementError);
+                        console.error(" Échec création des abonnements de licences :", abonnementError);
                     } else {
-                        console.log(`📅 ${listCartItems.length} licence(s) SaaS activée(s) avec succès en BDD !`);
+                        console.log(` ${listCartItems.length} licence(s) SaaS activée(s) avec succès en BDD !`);
                     }
                 }
             }
@@ -207,19 +207,19 @@ export async function POST(req: Request) {
                         token_connexion_stripe: stripeCustomerId
                     })
                     .eq("id_compte", idCompte)
-                    .is("token_connexion_stripe", null); // 👈 On utilise .is() pour le vrai null SQL
+                    .is("token_connexion_stripe", null); //  On utilise .is() pour le vrai null SQL
 
                 if (userUpdateError) {
-                    console.error("⚠️ Échec mise à jour token_connexion_stripe :", userUpdateError);
+                    console.error(" Échec mise à jour token_connexion_stripe :", userUpdateError);
                 } else {
-                    console.log(`💳 Vérification ID Client Stripe effectuée (ajouté ou déjà existant).`);
+                    console.log(` Vérification ID Client Stripe effectuée (ajouté ou déjà existant).`);
                 }
             }
 
-            console.log(`🚀 TRAITEMENT REUSSI POUR LA COMMANDE N°${idCommande} !`);
+            console.log(` TRAITEMENT REUSSI POUR LA COMMANDE N°${idCommande} !`);
 
         } catch (dbError) {
-            console.error("❌ Crash lors du traitement du Webhook :", dbError);
+            console.error(" Crash lors du traitement du Webhook :", dbError);
             return NextResponse.json({ received: true, db_error: true }, { status: 200 });
         }
     }

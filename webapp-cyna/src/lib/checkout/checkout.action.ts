@@ -1,6 +1,8 @@
 "use server";
 
+//non utilisée actuellement mais dans  le cas d'un page stripe integrée serait utile
 import { redirect } from "next/navigation";
+
 import { createServerClient } from "@/lib/supabase/server-client";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getCartView } from "@/lib/cart/cart";
