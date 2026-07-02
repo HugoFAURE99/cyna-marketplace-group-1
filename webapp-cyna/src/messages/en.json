@@ -58,7 +58,8 @@
     "productImageAlt": "{name} image",
     "carouselPrevious": "Previous slide",
     "carouselNext": "Next slide",
-    "carouselGoToSlide": "Show slide {number}"
+    "carouselGoToSlide": "Show slide {number}",
+    "paymentSuccess": "🎉 Thank you for your order! Your payment has been successfully validated."
   },
   "product": {
     "overview": "Overview",
@@ -107,7 +108,10 @@
     "subtotal": "Subtotal",
     "proceedToCheckout": "Proceed to Checkout",
     "checkoutComingSoon": "Checkout is coming soon.",
-    "saveCartPrompt": "<login>Log in</login> or <register>create an account</register> to save your cart"
+    "saveCartPrompt": "<login>Log in</login> or <register>create an account</register> to save your cart",
+    "checkoutError": "An error occurred while preparing the order.",
+    "redirecting": "Redirecting...",
+    "securePayment": "Secure payment via Stripe."
   },
   "search": {
     "title": "Search",

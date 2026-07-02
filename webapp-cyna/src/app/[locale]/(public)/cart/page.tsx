@@ -6,6 +6,7 @@ import { ShoppingCart } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import CartItemCard from "@/components/cart/CartItemCard";
+import CheckoutSummary from "@/components/cart/CheckoutSummary";
 import { Link } from "@/i18n/navigation";
 import { getCartView } from "@/lib/cart/cart";
 import { formatPriceCents } from "@/lib/i18n/format";
@@ -67,27 +68,7 @@ export default async function CartPage({ params }: CartPageProps) {
               ))}
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-              <div className="flex items-center justify-between">
-                <span className="text-base font-semibold text-slate-950">
-                  {t("subtotal")}
-                </span>
-                <span className="text-2xl font-bold text-slate-950">
-                  {formatPriceCents(subtotalCents, locale)}
-                </span>
-              </div>
-              <button
-                className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-purple-700 text-base font-semibold text-white transition hover:bg-purple-800 disabled:cursor-not-allowed disabled:opacity-60"
-                disabled
-                title={t("checkoutComingSoon")}
-                type="button"
-              >
-                {t("proceedToCheckout")}
-              </button>
-              <p className="mt-2 text-center text-xs text-slate-400">
-                {t("checkoutComingSoon")}
-              </p>
-            </div>
+            <CheckoutSummary subtotalCents={subtotalCents} />
 
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-600">
               {t.rich("saveCartPrompt", {

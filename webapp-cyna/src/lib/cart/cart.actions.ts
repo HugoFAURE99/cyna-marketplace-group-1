@@ -130,3 +130,9 @@ export async function removeCartLine(input: {
     ),
   );
 }
+
+export async function clearCartAction() {
+  // On passe un tableau vide pour vider le panier proprement
+  // et déclencher la mise à jour visuelle du site
+  await writeCart([]);
+}
