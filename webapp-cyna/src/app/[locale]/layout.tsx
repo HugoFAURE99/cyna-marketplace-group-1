@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 
 type LocaleLayoutProps = Readonly<{
   children: React.ReactNode;
-  params: Promise<{ locale: Locale }>;
+  params: Promise<{ locale: string }>;
 }>;
 
 // Pre-render both locales at build time.
@@ -33,10 +33,10 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ locale: Locale }>;
+  params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "metadata" });
+  const t = await getTranslations({ locale: locale as Locale, namespace: "metadata" });
 
   return {
     title: t("title"),
@@ -56,7 +56,7 @@ export default async function LocaleLayout({
   }
 
   // Enables static rendering for this locale.
-  setRequestLocale(locale);
+  setRequestLocale(locale as Locale);
 
   return (
     <html

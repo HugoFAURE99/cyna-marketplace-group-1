@@ -22,7 +22,7 @@ export default async function PublicFooter() {
   const t = await getTranslations("footer");
 
   return (
-    <footer className="bg-[#2b0958] text-white">
+    <footer className="relative z-20 bg-[#2b0958] text-white">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 px-4 py-5 sm:grid sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-6 sm:px-6 lg:px-8">
         <Image
           alt="CYNA"
