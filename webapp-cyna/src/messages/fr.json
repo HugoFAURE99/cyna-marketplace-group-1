@@ -421,7 +421,10 @@
     "successPasswordUpdate": "Mot de passe mis à jour avec succès.",
     "errorMismatch": "Les mots de passe ne correspondent pas.",
     "errorMissingFields": "Veuillez remplir tous les champs obligatoires.",
-    "errorUpdateFailed": "Une erreur est survenue lors de la mise à jour."
+    "errorUpdateFailed": "Une erreur est survenue lors de la mise à jour.",
+    "requestResetDescription": "Vous recevrez un email contenant un lien sécurisé pour changer votre mot de passe.",
+    "requestResetButton": "Envoyer un email de réinitialisation",
+    "successResetEmailSent": "Un email de réinitialisation vous a été envoyé."
   },
   "addresses": {
     "title": "Carnets d'adresses",

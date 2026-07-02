@@ -4,7 +4,7 @@ import { createServerClient } from "@/lib/supabase/server-client";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
 import { UpdateEmailForm } from "@/components/user-edition/update-email-form";
-import { UpdatePasswordForm } from "@/components/user-edition/update-password-form";
+import { RequestPasswordResetForm } from "@/components/user-edition/request-password-reset-form";
 
 export default async function UserEdition({
   params,
@@ -54,8 +54,8 @@ export default async function UserEdition({
 
         <hr className="border-gray-100" />
 
-        {/* Formulaire pour le mot de passe */}
-        <UpdatePasswordForm />
+        {/* Formulaire pour demander la réinitialisation du mot de passe */}
+        <RequestPasswordResetForm />
       </div>
     </div>
   );

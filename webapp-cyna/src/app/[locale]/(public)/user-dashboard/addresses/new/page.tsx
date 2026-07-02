@@ -1,6 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
 import { Link } from "@/i18n/navigation";
+import { ArrowLeft } from "lucide-react";
+import { addAddress } from "./actions";
 
 export default async function NewAddress({
   params,
@@ -14,12 +16,18 @@ export default async function NewAddress({
 
   return (
     <div className="flex flex-col bg-white text-gray-900 font-sans p-6 lg:p-10">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-black mb-2">{t("newTitle")}</h1>
+      <div className="flex items-center gap-4 mb-10">
+        <Link 
+          href="/user-dashboard/addresses"
+          className="p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
+        >
+          <ArrowLeft className="w-6 h-6" />
+        </Link>
+        <h1 className="text-3xl font-bold text-black m-0">{t("newTitle")}</h1>
       </div>
 
       <div className="max-w-2xl bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
-        <form className="flex flex-col gap-6">
+        <form action={addAddress} className="flex flex-col gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
               <label htmlFor="prenom" className="font-medium text-gray-700">

@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache'
 type ActionState = {
   errorKey?: string;
   successKey?: string;
+  rawError?: string;
 };
 
 export async function updateEmail(
@@ -79,4 +80,27 @@ export async function updateDashboardPassword(
   }
 
   return { successKey: "successPasswordUpdate" };
+}
+
+export async function requestPasswordResetEmail(
+  _prevState: ActionState | null,
+  formData: FormData
+): Promise<ActionState | null> {
+  const supabase = await createServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user || !user.email) {
+    return { errorKey: "errorUpdateFailed" };
+  }
+
+  const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?next=/user-dashboard/update-password`,
+  });
+
+  if (error) {
+    console.error("Supabase Reset Password Error:", error);
+    return { errorKey: "errorUpdateFailed", rawError: error.message };
+  }
+
+  return { successKey: "successResetEmailSent" };
 }

@@ -420,7 +420,10 @@
     "successPasswordUpdate": "Password updated successfully.",
     "errorMismatch": "Passwords do not match.",
     "errorMissingFields": "Please fill in all required fields.",
-    "errorUpdateFailed": "An error occurred during the update."
+    "errorUpdateFailed": "An error occurred during the update.",
+    "requestResetDescription": "You will receive an email with a secure link to change your password.",
+    "requestResetButton": "Send a reset email",
+    "successResetEmailSent": "A reset email has been sent to you."
   },
   "addresses": {
     "title": "Address Books",

@@ -1,13 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { LayoutGrid, List } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@/lib/supabase/browser-client";
 
 export function AddressesList({ addresses }: { addresses: any[] }) {
   const t = useTranslations("addresses");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createBrowserClient();
+    const channel = supabase
+      .channel('adresse_changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'adresse' },
+        () => {
+          router.refresh();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [router]);
 
   if (addresses.length === 0) {
     return (
