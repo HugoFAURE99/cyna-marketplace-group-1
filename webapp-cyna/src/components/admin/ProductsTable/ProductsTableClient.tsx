@@ -18,14 +18,17 @@ import type { getProducts } from "@/app/[locale]/(admin)/admin/_actions/product.
 import {
   deleteProducts,
   bulkToggleProductStatus,
+  bulkToggleProductPriority,
 } from "@/app/[locale]/(admin)/admin/_actions/product.actions";
+import Spinner from "@/components/ui/spinner";
 import DeleteProductButton from "@/components/admin/ProductsTable/DeleteProductButton";
 import ToggleStatusButton from "@/components/admin/ProductsTable/ToggleStatusButton";
+import TogglePriorityButton from "@/components/admin/ProductsTable/TogglePriorityButton";
 
 type Product = Awaited<ReturnType<typeof getProducts>>[number];
 
 type SortDirection = "asc" | "desc" | null;
-type SortKey = "name" | "category" | "status" | "priceMonthly" | "priceAnnual";
+type SortKey = "name" | "category" | "status" | "priority" | "priceMonthly" | "priceAnnual";
 
 interface Translations {
   image: string;
@@ -35,6 +38,7 @@ interface Translations {
   priceMonthly: string;
   priceAnnual: string;
   actions: string;
+  priority: string;
   active: string;
   inactive: string;
   edit: string;
@@ -80,12 +84,15 @@ function getAnnualPrice(product: Product): number | null {
 export default function ProductsTableClient({
   products,
   translations,
+  pageSize,
 }: {
   products: Product[];
   translations: Translations;
+  pageSize?: number;
 }) {
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDirection>(null);
+  const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -107,7 +114,8 @@ export default function ProductsTableClient({
   };
 
   const sorted = useMemo(() => {
-    if (!sortKey || !sortDir) return products;
+    if (!sortKey || !sortDir)
+      return [...products].sort((a, b) => a.id_produit - b.id_produit);
 
     return [...products].sort((a, b) => {
       let cmp = 0;
@@ -122,6 +130,9 @@ export default function ProductsTableClient({
           break;
         case "status":
           cmp = Number(a.statut_produit) - Number(b.statut_produit);
+          break;
+        case "priority":
+          cmp = Number(a.is_priorite) - Number(b.is_priorite);
           break;
         case "priceMonthly": {
           const pa = getMonthlyPrice(a) ?? -Infinity;
@@ -140,7 +151,11 @@ export default function ProductsTableClient({
     });
   }, [products, sortKey, sortDir]);
 
+  const totalPages = pageSize ? Math.ceil(sorted.length / pageSize) : 1;
+  const paginated = pageSize ? sorted.slice(page * pageSize, (page + 1) * pageSize) : sorted;
+
   const t = translations;
+  const tPagination = useTranslations("admin.pagination");
 
   const allIds = products.map((p) => p.id_produit);
   const allSelected = allIds.length > 0 && allIds.every((id) => selected.has(id));
@@ -169,6 +184,19 @@ export default function ProductsTableClient({
         await deleteProducts([...selected]);
         setSelected(new Set());
         setConfirmOpen(false);
+        router.refresh();
+      } catch {
+        setError(tBulk("error"));
+      }
+    });
+  };
+
+  const handleBulkPriority = (priority: boolean) => {
+    setError(null);
+    startTransition(async () => {
+      try {
+        await bulkToggleProductPriority([...selected], priority);
+        setSelected(new Set());
         router.refresh();
       } catch {
         setError(tBulk("error"));
@@ -211,6 +239,23 @@ export default function ProductsTableClient({
           >
             {tBulk("deactivateSelected")}
           </Button>
+          <span className="mx-1 h-5 w-px bg-border" />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleBulkPriority(true)}
+            disabled={isPending || selected.size === 0}
+          >
+            {tBulk("priorityOn")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleBulkPriority(false)}
+            disabled={isPending || selected.size === 0}
+          >
+            {tBulk("priorityOff")}
+          </Button>
 
           <Dialog.Root open={confirmOpen} onOpenChange={setConfirmOpen}>
             <Dialog.Trigger
@@ -244,7 +289,7 @@ export default function ProductsTableClient({
                     onClick={handleBulkDelete}
                     disabled={isPending}
                   >
-                    {isPending ? tDelete("deleting") : tDelete("confirm")}
+                    {isPending ? <><Spinner /> {tDelete("deleting")}</> : tDelete("confirm")}
                   </Button>
                 </div>
               </Dialog.Popup>
@@ -287,6 +332,12 @@ export default function ProductsTableClient({
               onClick={() => handleSort("status")}
             />
             <SortableHeader
+              label={t.priority}
+              active={sortKey === "priority"}
+              direction={sortDir}
+              onClick={() => handleSort("priority")}
+            />
+            <SortableHeader
               label={t.priceMonthly}
               active={sortKey === "priceMonthly"}
               direction={sortDir}
@@ -302,7 +353,7 @@ export default function ProductsTableClient({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sorted.map((product, index) => (
+          {paginated.map((product, index) => (
             <TableRow
               key={product.id_produit}
               className={`cursor-pointer transition-colors hover:bg-muted/50 ${selected.has(product.id_produit) ? "bg-muted/40" : index % 2 === 1 ? "bg-muted/20" : ""}`}
@@ -327,7 +378,16 @@ export default function ProductsTableClient({
                   <span className="text-muted-foreground">—</span>
                 )}
               </TableCell>
-              <TableCell>{product.nom_pro}</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  {product.nom_pro}
+                  {product.mis_avant && (
+                    <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 text-xs font-medium text-purple-700">
+                      featured
+                    </span>
+                  )}
+                </div>
+              </TableCell>
               <TableCell>{product.categorie?.cat_nom || "—"}</TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center gap-2">
@@ -345,6 +405,12 @@ export default function ProductsTableClient({
                     {product.statut_produit ? t.active : t.inactive}
                   </span>
                 </div>
+              </TableCell>
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <TogglePriorityButton
+                  productId={product.id_produit}
+                  priority={product.is_priorite}
+                />
               </TableCell>
               <TableCell>
                 {product.prix_tarif.find(
@@ -375,6 +441,36 @@ export default function ProductsTableClient({
           ))}
         </TableBody>
       </Table>
+
+      {pageSize && totalPages > 1 && (
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">
+            {tPagination("info", {
+              from: page * pageSize + 1,
+              to: Math.min((page + 1) * pageSize, sorted.length),
+              total: sorted.length,
+            })}
+          </span>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0}
+            >
+              {tPagination("previous")}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+            >
+              {tPagination("next")}
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

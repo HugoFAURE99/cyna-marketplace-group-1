@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import Spinner from "@/components/ui/spinner";
 import { deleteProduct } from "@/app/[locale]/(admin)/admin/_actions/product.actions";
 import { Dialog } from "@base-ui/react/dialog";
 
@@ -64,7 +65,7 @@ export default function DeleteProductButton({
               onClick={onDelete}
               disabled={isPending}
             >
-              {isPending ? t("deleting") : t("confirm")}
+              {isPending ? <><Spinner /> {t("deleting")}</> : t("confirm")}
             </Button>
           </div>
         </Dialog.Popup>
