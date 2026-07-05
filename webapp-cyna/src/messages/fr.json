@@ -73,7 +73,8 @@
     "productImageAlt": "Image de {name}",
     "carouselPrevious": "Diapositive précédente",
     "carouselNext": "Diapositive suivante",
-    "carouselGoToSlide": "Afficher la diapositive {number}"
+    "carouselGoToSlide": "Afficher la diapositive {number}",
+    "paymentSuccess": "🎉 Merci pour votre commande ! Votre paiement a bien été validé."
   },
   "product": {
     "overview": "Aperçu",
@@ -122,7 +123,10 @@
     "subtotal": "Sous-total",
     "proceedToCheckout": "Passer à la caisse",
     "checkoutComingSoon": "Le paiement arrive bientôt.",
-    "saveCartPrompt": "<login>Connectez-vous</login> ou <register>créez un compte</register> pour sauvegarder votre panier"
+    "saveCartPrompt": "<login>Connectez-vous</login> ou <register>créez un compte</register> pour sauvegarder votre panier",
+    "checkoutError": "Une erreur est survenue lors de la préparation de la commande.",
+    "redirecting": "Redirection...",
+    "securePayment": "Paiement sécurisé via Stripe."
   },
   "search": {
     "title": "Recherche",
@@ -218,7 +222,8 @@
       "categories": "Catégories",
       "users": "Utilisateurs",
       "sales": "Ventes",
-      "orders": "Commandes"
+      "orders": "Commandes",
+      "promotions": "Promotions"
     },
     "orders": {
       "title": "Commandes",
@@ -264,6 +269,77 @@
       "total": "Total (€)",
       "noData": "Aucune donnée de vente pour cette période.",
       "period": "Période"
+    },
+    "promotions": {
+      "title": "Promotions",
+      "add": "Créer une promotion",
+      "search": "Rechercher par code ou ID...",
+      "allStatuses": "Tous les statuts",
+      "active": "Actif",
+      "inactive": "Inactif",
+      "allTypes": "Tous les types",
+      "percentage": "Pourcentage",
+      "fixed": "Montant fixe",
+      "id": "ID",
+      "type": "Type",
+      "value": "Valeur",
+      "expiration": "Expiration",
+      "status": "Statut",
+      "code": "Code",
+      "targets": "Cibles",
+      "actions": "Actions",
+      "noPromotions": "Aucune promotion trouvée.",
+      "view": "Modifier",
+      "delete": "Supprimer",
+      "confirmDeleteTitle": "Supprimer la promotion",
+      "confirmDeleteMessage": "Supprimer cette promotion ? Cette action est irréversible.",
+      "confirmDelete": "Supprimer",
+      "cancelDelete": "Annuler",
+      "deleting": "Suppression...",
+      "cannotDeleteTitle": "Suppression impossible",
+      "cannotDeleteMessage": "Cette promotion a déjà été utilisée dans des commandes et ne peut pas être supprimée. Vous pouvez la désactiver à la place.",
+      "deactivateInstead": "Désactiver",
+      "close": "Fermer",
+      "automatic": "Automatique",
+      "codePromo": "Code promo",
+      "products": "Produits",
+      "categories": "Catégories",
+      "form": {
+        "back": "Retour",
+        "createTitle": "Nouvelle promotion",
+        "editTitle": "Modifier la promotion",
+        "typeRemise": "Type de remise",
+        "percentage": "Pourcentage",
+        "fixed": "Montant fixe",
+        "value": "Valeur de la remise",
+        "expiration": "Date d'expiration",
+        "active": "Actif",
+        "promoMode": "Mode d'application",
+        "automatic": "Automatique",
+        "codePromo": "Code promo",
+        "codeLabel": "Code promotionnel",
+        "targetProducts": "Produits ciblés",
+        "addProducts": "Ajouter",
+        "noProductsSelected": "Aucun produit sélectionné.",
+        "targetCategories": "Catégories ciblées",
+        "addCategories": "Ajouter",
+        "noCategoriesSelected": "Aucune catégorie sélectionnée.",
+        "saving": "Enregistrement...",
+        "save": "Enregistrer",
+        "create": "Créer la promotion",
+        "pickProducts": "Sélectionner des produits",
+        "searchProducts": "Rechercher un produit...",
+        "pickCategories": "Sélectionner des catégories",
+        "searchCategories": "Rechercher une catégorie...",
+        "name": "Nom",
+        "noResults": "Aucun résultat.",
+        "cancel": "Annuler",
+        "confirm": "Confirmer",
+        "noExpiration": "Pas de date d'expiration",
+        "globalOrder": "Sur toute la commande",
+        "globalOrderHint": "Appliquée sur le total de la commande",
+        "targetedHint": "Appliquée sur des produits ou catégories spécifiques"
+      }
     },
     "users": {
       "title": "Utilisateurs",
@@ -634,5 +710,107 @@
     "paragraph6": "L'utilisateur est seul responsable de l'utilisation qu'il fait des informations fournies sur le site et de la sécurité de son propre matériel informatique. CYNA-IT ne pourra être tenue responsable des dommages indirects, des pertes de données ou des interruptions de service causés par un événement de force majeure ou un dysfonctionnement du réseau Internet.",
     "subtitle7": "Modification des conditions et droit applicable",
     "paragraph7": "CYNA-IT met en œuvre tous les moyens nécessaires pour assurer un accès continu à sa plateforme e-commerce et à ses outils d'assistance comme le Chatbot. Toutefois, l'entreprise se réserve le droit de suspendre temporairement l'accès au site pour des raisons de maintenance technique ou de mise à jour, sans que cela n'ouvre droit à une indemnisation."
+  },
+  "user_dashboard": {
+    "account": "Informations de compte",
+    "orders": "Commandes",
+    "subscriptions": "Abonnements",
+    "billing": "Facturation",
+    "addresses": "Carnet d'adresses"
+  },
+  "account": {
+    "title": "Informations de compte",
+    "editProfile": "Modifier le profil"
+  },
+  "orders": {
+    "title": "Vos Commandes",
+    "last_orders": "Dernières Commandes",
+    "searchPlaceholder": "Rechercher une commande (ID, statut, montant)...",
+    "noSearchResults": "Aucune commande trouvée pour \"{search}\".",
+    "noOrders": "Vous n'avez aucune commande pour le moment.",
+    "subscriptionType": {
+      "annuel": "Annuel",
+      "mensuel": "Mensuel",
+      "unique": "Unique",
+      "unknown": "-"
+    },
+    "allSubscriptions": "Tous les abonnements",
+    "allStatuses": "Tous les statuts",
+    "columns": {
+      "id": "ID Commande",
+      "date": "Date",
+      "amount": "Montant",
+      "subscription": "Abonnement",
+      "status": "Statut",
+      "invoice": "Facture"
+    },
+    "status": {
+      "completed": "Payée",
+      "pending": "En attente",
+      "cancelled": "Annulée",
+      "failed": "Échouée"
+    },
+    "viewInvoice": "Voir la facture"
+  },
+  "user_edition": {
+    "title": "Édition du profil",
+    "editEmailTitle": "Modifier l'adresse email",
+    "newEmailLabel": "Nouvelle adresse email",
+    "emailPlaceholder": "votre@email.com",
+    "updateEmailButton": "Mettre à jour l'email",
+    "editPasswordTitle": "Modifier le mot de passe",
+    "newPasswordLabel": "Nouveau mot de passe",
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "passwordPlaceholder": "••••••••",
+    "updatePasswordButton": "Mettre à jour le mot de passe",
+    "successEmailUpdate": "Adresse email mise à jour avec succès.",
+    "successPasswordUpdate": "Mot de passe mis à jour avec succès.",
+    "errorMismatch": "Les mots de passe ne correspondent pas.",
+    "errorMissingFields": "Veuillez remplir tous les champs obligatoires.",
+    "errorUpdateFailed": "Une erreur est survenue lors de la mise à jour.",
+    "requestResetDescription": "Vous recevrez un email contenant un lien sécurisé pour changer votre mot de passe.",
+    "requestResetButton": "Envoyer un email de réinitialisation",
+    "successResetEmailSent": "Un email de réinitialisation vous a été envoyé."
+  },
+  "addresses": {
+    "title": "Carnets d'adresses",
+    "addNew": "Ajouter un carnet",
+    "noAddresses": "Aucun carnet d'adresses enregistré.",
+    "newTitle": "Ajouter un nouveau carnet d'adresses",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "address1": "Adresse 1 : Rue et numéro",
+    "address2": "Adresse 2 : Complément d'adresse (optionnel)",
+    "city": "Ville",
+    "region": "Région",
+    "postalCode": "Code postal",
+    "country": "Pays",
+    "phone": "Numéro de téléphone mobile",
+    "phoneHint": "Utilisé pour d'éventuelles notifications liées aux services ou à la facturation",
+    "submitNew": "Enregistrer l'adresse",
+    "cancel": "Annuler"
+  },
+  "subscriptions": {
+    "title": "Mes abonnements",
+    "status": "Statut",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
+    "deactivate": "Désactiver",
+    "deactivating": "Désactivation...",
+    "unknown": "Abonnement inconnu",
+    "noSubscriptions": "Vous n'avez aucun abonnement pour le moment.",
+    "searchPlaceholder": "Rechercher un abonnement...",
+    "noSearchResults": "Aucun abonnement trouvé pour \"{search}\"."
+  },
+  "billing": {
+    "title": "Facturation",
+    "id": "N° Facture",
+    "date": "Date",
+    "amount": "Montant",
+    "status": "Statut",
+    "download": "Télécharger la facture",
+    "noInvoices": "Vous n'avez aucune facture pour le moment.",
+    "searchPlaceholder": "Rechercher une facture (N°, statut, montant)...",
+    "noSearchResults": "Aucune facture trouvée pour \"{search}\"."
   }
 }

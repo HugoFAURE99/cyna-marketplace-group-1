@@ -9,6 +9,6 @@ if (!key) {
 }
 
 export const stripe = new Stripe(key, {
-  apiVersion: "2026-03-25.dahlia",
+  apiVersion: "2026-05-27.dahlia",
   typescript: true,
 });

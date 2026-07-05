@@ -1,0 +1,228 @@
+import { NextResponse } from "next/server";
+import Stripe from "stripe";
+import { createClient } from "@supabase/supabase-js";
+
+// 1. Initialisation de Stripe
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
+    apiVersion: "2026-05-27.dahlia",
+});
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
+
+// 2. Initialisation de Supabase avec la clé d'administration (Service Role)
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY as string;
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+export async function POST(req: Request) {
+    const rawBody = await req.text();
+    const signature = req.headers.get("stripe-signature");
+
+    if (!signature || !endpointSecret) {
+        return NextResponse.json({ error: "Missing signature" }, { status: 400 });
+    }
+
+    let event: Stripe.Event;
+
+    try {
+        event = stripe.webhooks.constructEvent(rawBody, signature, endpointSecret);
+    } catch (err: any) {
+        console.error(" Erreur de signature du Webhook :", err.message);
+        return NextResponse.json({ error: err.message }, { status: 400 });
+    }
+
+    //  TRAITEMENT DU PAIEMENT RÉUSSI 
+    if (event.type === "checkout.session.completed") {
+        const session = event.data.object as Stripe.Checkout.Session;
+
+        try {
+            console.log(" Début du traitement automatique post-paiement...");
+
+            // Récupération des métadonnées envoyées depuis ton checkout action
+            const idCommande = session.metadata?.id_commande;
+            const idCompte = session.metadata?.id_compte; // UUID de l'user ou la chaîne 'invite'
+
+            if (!idCommande) {
+                throw new Error("Aucun id_commande trouvé dans les metadata Stripe");
+            }
+
+            // Récupération des détails clients fournis sur Stripe
+            const emailClient = session.customer_details?.email || session.customer_email || "invite@inconnu.com";
+            const customerName = session.customer_details?.name;
+            const phone = session.customer_details?.phone;
+            const address = session.customer_details?.address;
+            const stripeCustomerId = session.customer as string;
+
+            let fileNameKey = null;
+
+            // ==========================================
+            // ÉTAPE A : TÉLÉCHARGEMENT DE LA FACTURE PDF
+            // ==========================================
+            if (session.invoice) {
+                const invoice = await stripe.invoices.retrieve(session.invoice as string);
+                const pdfUrl = invoice.invoice_pdf;
+
+                if (pdfUrl) {
+                    const response = await fetch(pdfUrl);
+                    if (!response.ok) throw new Error("Impossible de télécharger le PDF de Stripe");
+
+                    const arrayBuffer = await response.arrayBuffer();
+                    const buffer = Buffer.from(arrayBuffer);
+
+                    // Nom unique du fichier pour ton bucket
+                    const fileName = `facture_${idCommande}_${invoice.id}.pdf`;
+
+                    // 2. LE CHEMIN COMPLET AVEC LE SOUS-DOSSIER
+                    const filePath = `${idCompte}/${fileName}`;
+
+                    // Envoi du PDF dans ton Bucket privé "Factures" (avec la majuscule)
+                    const { error: storageError } = await supabase.storage
+                        .from("invoice-pdf")
+                        .upload(filePath, buffer, {
+                            contentType: "application/pdf",
+                            upsert: true,
+                        });
+
+                    if (storageError) throw storageError;
+                    fileNameKey = fileName;
+                    console.log(" Facture PDF sécurisée dans le Bucket Privé.");
+                }
+            }
+
+            // ==========================================
+            // ÉTAPE B : MISE À JOUR DE LA COMMANDE
+            // ==========================================
+            type UpdateCommandeData = {
+                statut_commande: string;
+                url_facture: string | null;
+                mail_utilisateur_invite?: string; // Le "?" signifie que c'est optionnel
+            };
+
+            const dataToUpdate: UpdateCommandeData = {
+                statut_commande: "Validée",
+                url_facture: fileNameKey,
+            };
+
+            // Si c'est un invité, on ajoute l'e-mail
+            if (idCompte === "invite" && emailClient) {
+                dataToUpdate.mail_utilisateur_invite = emailClient;
+            }
+
+            const { error: commandeError } = await supabase
+                .from("commande")
+                .update(dataToUpdate)
+                .eq("id_commande", idCommande);
+
+            if (commandeError) throw commandeError;
+            console.log(` Commande N°${idCommande} validée en BDD .`);
+
+            // ==========================================
+            // ÉTAPE C : ENREGISTREMENT DE L'ADRESSE (Point 2)
+            // ==========================================
+            if (address) {
+                const nameParts = customerName ? customerName.split(" ") : [];
+                const prenom = nameParts[0] || "Prénom inconnu";
+                const nom = nameParts.slice(1).join(" ") || "Nom inconnu";
+
+                const { error: adresseError } = await supabase
+                    .from("adresse")
+                    .insert({
+                        prenom: prenom,
+                        nom: nom,
+                        adresse: address.line1,
+                        adresse_complement: address.line2 || null,
+                        ville: address.city,
+                        code_postal: address.postal_code,
+                        pays: address.country,
+                        telephone: phone || null,
+                        type_adresse: "Facturation",
+                        id_compte: idCompte !== "invite" ? idCompte : null, // NULL si invité
+                        mail_utilisateur_invite: idCompte === "invite" ? emailClient : null // Pour la réconciliation (Point 1)
+                    });
+
+                if (adresseError) {
+                    console.error(" Échec insertion adresse (non bloquant) :", adresseError);
+                } else {
+                    console.log(" Adresse de facturation enregistrée.");
+                }
+            }
+
+            // ==========================================
+            // ÉTAPE D : CRÉATION DE L'ABONNEMENT SAAS (MULTI-LICENCES)
+            // ==========================================
+            if (session.subscription) {
+                const subscription: any = await stripe.subscriptions.retrieve(session.subscription as string);
+
+                let listCartItems: any[] = [];
+                if (session.metadata?.cartData) {
+                    listCartItems = JSON.parse(session.metadata.cartData);
+                }
+
+                if (listCartItems.length > 0) {
+                    console.log(` Traitement de ${listCartItems.length} licence(s) pour l'abonnement Stripe...`);
+
+                    //  ON PARCOURT TOUT LE PANIER POUR CRÉER CHAQUE LIGNE
+                    const abonnementsAInserer = listCartItems.map((item: any) => {
+
+                        // Calcul dynamique de la date de fin selon l'intervalle (Mensuel/Annuel)
+                        const startDate = new Date();
+                        const endDate = new Date(startDate);
+
+                        if (item.typeFacturation === "annuel") {
+                            endDate.setFullYear(endDate.getFullYear() + 1);
+                        } else {
+                            // Par défaut (Mensuel)
+                            endDate.setMonth(endDate.getMonth() + 1);
+                        }
+
+                        return {
+                            statut_abonnement: subscription.status === "active" ? "Actif" : subscription.status,
+                            date_debut: startDate.toISOString(),
+                            date_fin: endDate.toISOString(),
+                            id_prix: item.id_prix,
+                            id_commande: parseInt(idCommande),
+                            id_compte: idCompte !== "invite" ? idCompte : null,
+                            stripe_subscription_id: subscription.id
+                        };
+                    });
+
+                    // On insère TOUTES les licences d'un coup
+                    const { error: abonnementError } = await supabase
+                        .from("abonnement")
+                        .insert(abonnementsAInserer);
+
+                    if (abonnementError) {
+                        console.error(" Échec création des abonnements de licences :", abonnementError);
+                    } else {
+                        console.log(` ${listCartItems.length} licence(s) SaaS activée(s) avec succès en BDD !`);
+                    }
+                }
+            }
+            // ==========================================
+            // ÉTAPE E : SAUVEGARDE DE L'ID CLIENT STRIPE (Point 3)
+            // ==========================================
+            if (idCompte !== "invite" && stripeCustomerId) {
+                const { error: userUpdateError } = await supabase
+                    .from("utilisateur")
+                    .update({
+                        token_connexion_stripe: stripeCustomerId
+                    })
+                    .eq("id_compte", idCompte)
+                    .is("token_connexion_stripe", null); //  On utilise .is() pour le vrai null SQL
+
+                if (userUpdateError) {
+                    console.error(" Échec mise à jour token_connexion_stripe :", userUpdateError);
+                } else {
+                    console.log(` Vérification ID Client Stripe effectuée (ajouté ou déjà existant).`);
+                }
+            }
+
+            console.log(` TRAITEMENT REUSSI POUR LA COMMANDE N°${idCommande} !`);
+
+        } catch (dbError) {
+            console.error(" Crash lors du traitement du Webhook :", dbError);
+            return NextResponse.json({ received: true, db_error: true }, { status: 200 });
+        }
+    }
+
+    return NextResponse.json({ received: true }, { status: 200 });
+}

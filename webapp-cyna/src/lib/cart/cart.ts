@@ -40,6 +40,7 @@ export type CartViewItem = {
   unitPriceCents: number;
   lineTotalCents: number;
   isUnavailable: boolean;
+  stripePriceId: string;
 };
 
 export type CartView = {
@@ -172,6 +173,7 @@ export async function getCartView(locale: Locale): Promise<CartView> {
       unitPriceCents: tariff.prix,
       lineTotalCents: tariff.prix * line.licenseUserCount,
       isUnavailable: product.quantite_produit <= 0,
+      stripePriceId: tariff.stripe_price_id,
     });
   }
 

@@ -73,7 +73,8 @@
     "productImageAlt": "{name} image",
     "carouselPrevious": "Previous slide",
     "carouselNext": "Next slide",
-    "carouselGoToSlide": "Show slide {number}"
+    "carouselGoToSlide": "Show slide {number}",
+    "paymentSuccess": "🎉 Thank you for your order! Your payment has been successfully validated."
   },
   "product": {
     "overview": "Overview",
@@ -122,7 +123,10 @@
     "subtotal": "Subtotal",
     "proceedToCheckout": "Proceed to Checkout",
     "checkoutComingSoon": "Checkout is coming soon.",
-    "saveCartPrompt": "<login>Log in</login> or <register>create an account</register> to save your cart"
+    "saveCartPrompt": "<login>Log in</login> or <register>create an account</register> to save your cart",
+    "checkoutError": "An error occurred while preparing the order.",
+    "redirecting": "Redirecting...",
+    "securePayment": "Secure payment via Stripe."
   },
   "search": {
     "title": "Search",
@@ -218,7 +222,8 @@
       "categories": "Categories",
       "users": "Users",
       "sales": "Sales",
-      "orders": "Orders"
+      "orders": "Orders",
+      "promotions": "Promotions"
     },
     "orders": {
       "title": "Orders",
@@ -264,6 +269,77 @@
       "total": "Total (€)",
       "noData": "No sales data for this period.",
       "period": "Period"
+    },
+    "promotions": {
+      "title": "Promotions",
+      "add": "Create promotion",
+      "search": "Search by code or ID...",
+      "allStatuses": "All statuses",
+      "active": "Active",
+      "inactive": "Inactive",
+      "allTypes": "All types",
+      "percentage": "Percentage",
+      "fixed": "Fixed amount",
+      "id": "ID",
+      "type": "Type",
+      "value": "Value",
+      "expiration": "Expiration",
+      "status": "Status",
+      "code": "Code",
+      "targets": "Targets",
+      "actions": "Actions",
+      "noPromotions": "No promotions found.",
+      "view": "Edit",
+      "delete": "Delete",
+      "confirmDeleteTitle": "Delete promotion",
+      "confirmDeleteMessage": "Delete this promotion? This action cannot be undone.",
+      "confirmDelete": "Delete",
+      "cancelDelete": "Cancel",
+      "deleting": "Deleting...",
+      "cannotDeleteTitle": "Cannot delete",
+      "cannotDeleteMessage": "This promotion has been used in orders and cannot be deleted. You can deactivate it instead.",
+      "deactivateInstead": "Deactivate",
+      "close": "Close",
+      "automatic": "Automatic",
+      "codePromo": "Promo code",
+      "products": "Products",
+      "categories": "Categories",
+      "form": {
+        "back": "Back",
+        "createTitle": "New promotion",
+        "editTitle": "Edit promotion",
+        "typeRemise": "Discount type",
+        "percentage": "Percentage",
+        "fixed": "Fixed amount",
+        "value": "Discount value",
+        "expiration": "Expiration date",
+        "active": "Active",
+        "promoMode": "Application mode",
+        "automatic": "Automatic",
+        "codePromo": "Promo code",
+        "codeLabel": "Promo code",
+        "targetProducts": "Targeted products",
+        "addProducts": "Add",
+        "noProductsSelected": "No products selected.",
+        "targetCategories": "Targeted categories",
+        "addCategories": "Add",
+        "noCategoriesSelected": "No categories selected.",
+        "saving": "Saving...",
+        "save": "Save",
+        "create": "Create promotion",
+        "pickProducts": "Select products",
+        "searchProducts": "Search product...",
+        "pickCategories": "Select categories",
+        "searchCategories": "Search category...",
+        "name": "Name",
+        "noResults": "No results.",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "noExpiration": "No expiration date",
+        "globalOrder": "Apply to entire order",
+        "globalOrderHint": "Applied to the order total",
+        "targetedHint": "Applied to specific products or categories"
+      }
     },
     "users": {
       "title": "Users",
@@ -633,5 +709,107 @@
     "paragraph6": "The user is solely responsible for their use of the information provided on the website and for the security of their own computer equipment. CYNA-IT shall not be held liable for any indirect damages, data loss, or service interruptions caused by a force majeure event or an Internet network malfunction.",
     "subtitle7": "Modifications to Terms and Applicable Law",
     "paragraph7": "CYNA-IT reserves the right to modify these terms at any time to adapt to technical or legal changes. These terms are governed by French law, and any dispute shall be submitted to the exclusive jurisdiction of the courts of Paris."
+  },
+  "user_dashboard": {
+    "account": "Account Informations",
+    "orders": "Orders",
+    "subscriptions": "Subscriptions",
+    "billing": "Billing",
+    "addresses": "Address Book"
+  },
+  "account": {
+    "title": "Account Informations",
+    "editProfile": "Edit User Profile"
+  },
+  "orders": {
+    "title": "Orders",
+    "last_orders": "Last Orders",
+    "searchPlaceholder": "Search for an order (ID, status, amount)...",
+    "noSearchResults": "No order found for \"{search}\".",
+    "noOrders": "You do not have any orders at the moment.",
+    "subscriptionType": {
+      "annuel": "Annual",
+      "mensuel": "Monthly",
+      "unique": "One-time",
+      "unknown": "-"
+    },
+    "allSubscriptions": "All subscriptions",
+    "allStatuses": "All statuses",
+    "columns": {
+      "id": "Order ID",
+      "date": "Date",
+      "amount": "Amount",
+      "subscription": "Subscription",
+      "status": "Status",
+      "invoice": "Invoice"
+    },
+    "status": {
+      "completed": "Paid",
+      "pending": "Pending",
+      "cancelled": "Cancelled",
+      "failed": "Failed"
+    },
+    "viewInvoice": "View invoice"
+  },
+  "user_edition": {
+    "title": "Edit Profile",
+    "editEmailTitle": "Edit Email Address",
+    "newEmailLabel": "New Email Address",
+    "emailPlaceholder": "your@email.com",
+    "updateEmailButton": "Update Email",
+    "editPasswordTitle": "Edit Password",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "passwordPlaceholder": "••••••••",
+    "updatePasswordButton": "Update Password",
+    "successEmailUpdate": "Email address updated successfully.",
+    "successPasswordUpdate": "Password updated successfully.",
+    "errorMismatch": "Passwords do not match.",
+    "errorMissingFields": "Please fill in all required fields.",
+    "errorUpdateFailed": "An error occurred during the update.",
+    "requestResetDescription": "You will receive an email with a secure link to change your password.",
+    "requestResetButton": "Send a reset email",
+    "successResetEmailSent": "A reset email has been sent to you."
+  },
+  "addresses": {
+    "title": "Address Books",
+    "addNew": "Add new address book",
+    "noAddresses": "No address books registered.",
+    "newTitle": "Add a New Address Book",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "address1": "Address 1: Street and number",
+    "address2": "Address 2: Apartment, suite, etc. (optional)",
+    "city": "City",
+    "region": "State / Province",
+    "postalCode": "Postal Code",
+    "country": "Country",
+    "phone": "Mobile Phone Number",
+    "phoneHint": "Used for service or billing-related notifications",
+    "submitNew": "Save Address",
+    "cancel": "Cancel"
+  },
+  "subscriptions": {
+    "title": "My Subscriptions",
+    "status": "Status",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "deactivate": "Deactivate",
+    "deactivating": "Deactivating...",
+    "unknown": "Unknown Subscription",
+    "noSubscriptions": "You do not have any subscriptions at the moment.",
+    "searchPlaceholder": "Search for a subscription...",
+    "noSearchResults": "No subscription found for \"{search}\"."
+  },
+  "billing": {
+    "title": "Billing",
+    "id": "Invoice ID",
+    "date": "Date",
+    "amount": "Amount",
+    "status": "Status",
+    "download": "Download Invoice",
+    "noInvoices": "You do not have any invoices at the moment.",
+    "searchPlaceholder": "Search for an invoice (ID, status, amount)...",
+    "noSearchResults": "No invoice found for \"{search}\"."
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { Home, Package, Layers, Users, BarChart3, ShoppingCart } from "lucide-react";
+import { Home, Package, Layers, Users, BarChart3, ShoppingCart, Percent } from "lucide-react";
 
 import {
   Sidebar,
@@ -22,6 +22,7 @@ const menuItems = [
   { labelKey: "categories", href: "/admin/categories", icon: Layers, exact: false },
   { labelKey: "users", href: "/admin/users", icon: Users, exact: false },
   { labelKey: "orders", href: "/admin/orders", icon: ShoppingCart, exact: false },
+  { labelKey: "promotions", href: "/admin/promotions", icon: Percent, exact: false },
   { labelKey: "sales", href: "/admin/sales", icon: BarChart3, exact: false },
 ] as const;
 
@@ -32,6 +33,7 @@ interface Labels {
   categories: string;
   users: string;
   orders: string;
+  promotions: string;
   sales: string;
 }
 

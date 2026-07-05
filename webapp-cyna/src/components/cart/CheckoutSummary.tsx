@@ -1,0 +1,71 @@
+"use client";
+
+import { useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { Loader2 } from "lucide-react";
+
+import { processCheckout } from "@/lib/checkout/checkout.action";
+import { formatPriceCents } from "@/lib/i18n/format";
+import type { Locale } from "@/lib/i18n/translations";
+
+type CheckoutSummaryProps = {
+  subtotalCents: number;
+};
+
+export default function CheckoutSummary({
+  subtotalCents,
+}: CheckoutSummaryProps) {
+  const t = useTranslations("cart");
+  const locale = useLocale() as Locale;
+  const [isPending, startTransition] = useTransition();
+
+  const handleCheckout = () => {
+    startTransition(async () => {
+      try {
+        // 👇 On récupère le résultat de l'action
+        const result = await processCheckout(locale);
+
+        // 👇 Si on a bien reçu une URL, on redirige l'utilisateur vers Stripe
+        if (result && result.url) {
+          window.location.href = result.url;
+        }
+      } catch (error) {
+        console.error("Erreur de paiement:", error);
+        alert(t("checkoutError"));
+      }
+    });
+  };
+
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex items-center justify-between">
+        <span className="text-base font-semibold text-slate-950">
+          {t("subtotal")}
+        </span>
+        <span className="text-2xl font-bold text-slate-950">
+          {formatPriceCents(subtotalCents, locale)}
+        </span>
+      </div>
+
+      <button
+        onClick={handleCheckout}
+        disabled={isPending || subtotalCents === 0}
+        className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-purple-700 text-base font-semibold text-white transition hover:bg-purple-800 disabled:cursor-not-allowed disabled:opacity-60"
+        type="button"
+      >
+        {isPending ? (
+          <>
+            <Loader2 className="mr-2 size-5 animate-spin" />
+            {t("redirecting")}
+          </>
+        ) : (
+          t("proceedToCheckout")
+        )}
+      </button>
+
+      <p className="mt-2 text-center text-xs text-slate-400">
+        {t("securePayment")}
+      </p>
+    </div>
+  );
+}
