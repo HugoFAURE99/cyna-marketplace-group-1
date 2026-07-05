@@ -7,6 +7,7 @@ import {
   CircleUserRound,
   FileText,
   Info,
+  LifeBuoy,
   LogIn,
   LogOut, // <-- 1. Nouvel icône ajouté
   Mail,
@@ -29,6 +30,7 @@ import {
 import { logout } from "@/app/(auth)/_action/auth.action";
 
 const informationLinks = [
+  { href: "/faq", icon: LifeBuoy, labelKey: "faq" },
   { href: "/terms", icon: FileText, labelKey: "termsOfUse" },
   { href: "/legal", icon: Scale, labelKey: "legalNotices" },
   { href: "/contact", icon: Mail, labelKey: "contact" },

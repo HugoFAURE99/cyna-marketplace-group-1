@@ -31,7 +31,22 @@
     "termsOfUse": "Conditions d'utilisation",
     "legalNotices": "Mentions légales",
     "contact": "Contact",
-    "aboutCyna": "À propos de CYNA"
+    "aboutCyna": "À propos de CYNA",
+    "faq": "Aide & Support"
+  },
+  "chat": {
+    "title": "CynAI",
+    "subtitle": "Votre assistant CYNA",
+    "greeting": "Bonjour, je suis CynAI. Je peux vous aider à explorer nos catégories, trouver un produit précis ou contacter le support.",
+    "placeholder": "Écrivez votre message…",
+    "send": "Envoyer",
+    "open": "Ouvrir le chat CynAI",
+    "close": "Fermer le chat",
+    "error": "Désolé, une erreur est survenue. Réessayez plus tard.",
+    "supportCardTitle": "Aide & Support",
+    "supportCardSubtitle": "FAQ et contacter notre équipe",
+    "ticketCreatedTitle": "Ticket envoyé",
+    "ticketCreatedSubtitle": "Notre équipe vous répondra à {email}."
   },
   "footer": {
     "description": "La marketplace de cybersécurité pour les entreprises modernes.",
@@ -610,6 +625,56 @@
     "landline": "Téléphone fixe",
     "mobile": "Téléphone portable",
     "email": "Adresse Email"
+  },
+  "faq": {
+    "title": "Aide & Support",
+    "subtitle": "Trouvez une réponse rapide ci-dessous, ou ouvrez un ticket auprès de notre équipe.",
+    "questionsTitle": "Questions fréquentes",
+    "items": [
+      {
+        "q": "Qu'est-ce que CYNA ?",
+        "a": "CYNA est une marketplace qui permet aux entreprises d'acheter et de gérer des licences de solutions de cybersécurité SaaS (SOC, EDR, XDR, pare-feu, etc.) en quelques clics."
+      },
+      {
+        "q": "Comment souscrire à un abonnement ?",
+        "a": "Parcourez le catalogue, ouvrez la fiche d'un produit, choisissez votre formule de facturation (mensuelle ou annuelle), puis ajoutez-le au panier pour finaliser votre commande."
+      },
+      {
+        "q": "Quels moyens de paiement acceptez-vous ?",
+        "a": "Les paiements sont traités de manière sécurisée et chiffrée via Stripe. Le règlement s'effectue par carte bancaire."
+      },
+      {
+        "q": "Puis-je gérer mes abonnements depuis mon compte ?",
+        "a": "Oui. Une fois connecté, vous retrouvez l'historique de vos commandes et l'état de vos abonnements dans votre espace personnel."
+      },
+      {
+        "q": "Comment obtenir de l'aide rapidement ?",
+        "a": "Discutez avec notre assistant CynAI en bas à droite de l'écran, ou remplissez le formulaire ci-dessous pour qu'un membre de notre équipe vous recontacte par e-mail."
+      }
+    ]
+  },
+  "support": {
+    "title": "Ouvrir un ticket de support",
+    "subtitle": "Une question ou un problème ? Décrivez-le et notre équipe vous répondra par e-mail.",
+    "subject": "Sujet",
+    "subjectPlaceholder": "Ex. : Problème de facturation",
+    "email": "Adresse e-mail",
+    "emailPlaceholder": "vous@entreprise.com",
+    "message": "Message",
+    "messagePlaceholder": "Décrivez votre demande en quelques lignes…",
+    "submit": "Envoyer le ticket",
+    "submitting": "Envoi…",
+    "success": "Votre ticket a bien été envoyé. Notre équipe vous répondra par e-mail.",
+    "error": "Impossible d'envoyer votre ticket. Veuillez réessayer.",
+    "orderLabel": "Commande concernée (optionnel)",
+    "orderNone": "Aucune",
+    "orderRefPrefix": "Commande liée :",
+    "errors": {
+      "subjectRequired": "Le sujet est obligatoire.",
+      "emailRequired": "L'adresse e-mail est obligatoire.",
+      "emailInvalid": "Veuillez saisir une adresse e-mail valide.",
+      "messageRequired": "Le message est obligatoire."
+    }
   },
   "legal": {
     "legal_title": "Mentions Légales",

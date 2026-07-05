@@ -1,5 +1,6 @@
 import PublicHeader from "@/components/layout/public-header/PublicHeader";
 import PublicFooter from "@/components/layout/public-footer/PublicFooter";
+import CynaChatWidget from "@/components/chat/CynaChatWidget";
 
 export default function PublicLayout({
   children,
@@ -17,6 +18,8 @@ export default function PublicLayout({
         {children}
       </div>
       <PublicFooter />
+      {/* Floating CynAI assistant — public pages only (not the admin layout). */}
+      <CynaChatWidget />
     </div>
   );
 }
