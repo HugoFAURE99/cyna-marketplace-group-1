@@ -13,11 +13,12 @@ import type { HomeCarouselSlide } from "@/lib/home/public-home";
 
 type HomeCarouselProps = {
   slides: HomeCarouselSlide[];
+  buttonHref: string;
 };
 
 const AUTOPLAY_MS = 6000;
 
-export default function HomeCarousel({ slides }: HomeCarouselProps) {
+export default function HomeCarousel({ slides, buttonHref }: HomeCarouselProps) {
   const t = useTranslations("home");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -111,7 +112,7 @@ export default function HomeCarousel({ slides }: HomeCarouselProps) {
                   )}
                   <a
                     className="mt-8 inline-flex h-11 items-center justify-center rounded-md bg-purple-700 px-6 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    href="#top-products"
+                    href={buttonHref}
                     tabIndex={active ? undefined : -1}
                   >
                     {t("exploreServices")}

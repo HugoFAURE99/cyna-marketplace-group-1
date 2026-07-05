@@ -35,7 +35,7 @@ export function UpdatePasswordForm() {
           </AuthMessage>
         )}
         <div className="flex flex-col gap-2">
-          <label htmlFor="password" className="font-medium text-gray-700">
+          <label htmlFor="password" className="font-medium text-slate-700">
             {t("newPasswordLabel")}
           </label>
           <input
@@ -43,12 +43,12 @@ export function UpdatePasswordForm() {
             id="password"
             name="password"
             required
-            className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-black outline-none transition-shadow"
+            className="border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-black outline-none transition-shadow"
             placeholder={t("passwordPlaceholder")}
           />
         </div>
         <div className="flex flex-col gap-2">
-          <label htmlFor="password_confirm" className="font-medium text-gray-700">
+          <label htmlFor="password_confirm" className="font-medium text-slate-700">
             {t("confirmPasswordLabel")}
           </label>
           <input
@@ -56,14 +56,14 @@ export function UpdatePasswordForm() {
             id="password_confirm"
             name="password_confirm"
             required
-            className="border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-black outline-none transition-shadow"
+            className="border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-black outline-none transition-shadow"
             placeholder={t("passwordPlaceholder")}
           />
         </div>
         <button
           type="submit"
           disabled={isPending}
-          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors self-start disabled:opacity-50"
+          className="bg-purple-700 text-white px-4 py-2 rounded-md hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 transition-colors self-start disabled:opacity-50"
         >
           {isPending ? "..." : t("updatePasswordButton")}
         </button>

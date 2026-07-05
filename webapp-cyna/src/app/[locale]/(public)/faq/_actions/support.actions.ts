@@ -21,5 +21,11 @@ export async function submitSupportTicket(input: SupportTicketInput) {
     userId = null;
   }
 
+  // Ticketing is reserved for signed-in users so every ticket is tied to an
+  // account. The UI already hides the form when logged out; this is the guard.
+  if (!userId) {
+    return { ok: false };
+  }
+
   return createSupportTicket(input, { userId, origineChatbot: false });
 }

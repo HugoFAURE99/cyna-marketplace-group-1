@@ -1,6 +1,5 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useTranslations, useLocale } from "next-intl";
 import { useState } from "react";
@@ -51,25 +50,25 @@ export function SubscriptionCard({ subscription, layout = "grid" }: Subscription
 
   if (layout === "list") {
     return (
-      <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 shadow-sm hover:border-gray-300 transition-colors flex flex-col sm:flex-row gap-4 sm:gap-6 justify-between items-start sm:items-center">
+      <div className="bg-white border border-slate-200 rounded-lg p-4 sm:p-6 shadow-sm hover:border-slate-300 transition-colors flex flex-col sm:flex-row gap-4 sm:gap-6 justify-between items-start sm:items-center">
         <div className="flex-1">
           <h3 className="font-bold text-lg mb-2">{name}</h3>
-          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+          <div className="flex flex-wrap gap-4 text-sm text-slate-600">
             <p>
-              <span className="font-medium text-gray-900">{t("status")}:</span>{" "}
-              <span className={`px-2 py-0.5 rounded-md font-semibold text-xs ${subscription.statut_abonnement === 'actif' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+              <span className="font-medium text-slate-900">{t("status")}:</span>{" "}
+              <span className={`px-2 py-0.5 rounded-md font-semibold text-xs ${subscription.statut_abonnement === 'actif' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}`}>
                 {subscription.statut_abonnement}
               </span>
             </p>
             {subscription.date_debut && (
               <p>
-                <span className="font-medium text-gray-900">{t("startDate")}:</span>{" "}
+                <span className="font-medium text-slate-900">{t("startDate")}:</span>{" "}
                 {new Date(subscription.date_debut).toLocaleDateString(locale)}
               </p>
             )}
             {subscription.date_fin && (
               <p>
-                <span className="font-medium text-gray-900">{t("endDate")}:</span>{" "}
+                <span className="font-medium text-slate-900">{t("endDate")}:</span>{" "}
                 {new Date(subscription.date_fin).toLocaleDateString(locale)}
               </p>
             )}
@@ -90,39 +89,38 @@ export function SubscriptionCard({ subscription, layout = "grid" }: Subscription
   }
 
   return (
-    <Card className="h-full flex flex-col hover:border-gray-300 transition-colors">
-      <CardHeader>
-        <CardTitle>{name}</CardTitle>
-        <CardDescription>
-          {t("status")}: <span className={`px-2 py-0.5 rounded-md font-semibold text-xs ml-2 ${subscription.statut_abonnement === 'actif' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-            {subscription.statut_abonnement}
-          </span>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1">
+    <div className="flex h-full flex-col rounded-lg border border-slate-200 bg-white p-5 shadow-sm transition-colors hover:border-slate-300">
+      <h3 className="text-base font-semibold text-slate-900">{name}</h3>
+      <p className="mt-1.5 flex items-center gap-2 text-sm text-slate-600">
+        <span className="font-medium text-slate-900">{t("status")}:</span>
+        <span className={`rounded-md px-2 py-0.5 text-xs font-semibold capitalize ${subscription.statut_abonnement === 'actif' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}`}>
+          {subscription.statut_abonnement}
+        </span>
+      </p>
+
+      <div className="mt-4 flex-1 space-y-1 text-sm text-slate-600">
         {subscription.date_debut && (
-          <p className="text-sm text-gray-600 mb-1">
-            <span className="font-medium text-gray-900">{t("startDate")}:</span>{" "}
+          <p>
+            <span className="font-medium text-slate-900">{t("startDate")}:</span>{" "}
             {new Date(subscription.date_debut).toLocaleDateString(locale)}
           </p>
         )}
         {subscription.date_fin && (
-          <p className="text-sm text-gray-600 mb-1">
-            <span className="font-medium text-gray-900">{t("endDate")}:</span>{" "}
+          <p>
+            <span className="font-medium text-slate-900">{t("endDate")}:</span>{" "}
             {new Date(subscription.date_fin).toLocaleDateString(locale)}
           </p>
         )}
-      </CardContent>
-      <CardFooter>
-        <Button 
-          variant="destructive" 
-          onClick={handleDeactivate} 
-          disabled={loading || subscription.statut_abonnement !== "actif"}
-          className="w-full"
-        >
-          {loading ? t("deactivating") : t("deactivate")}
-        </Button>
-      </CardFooter>
-    </Card>
+      </div>
+
+      <Button
+        variant="destructive"
+        onClick={handleDeactivate}
+        disabled={loading || subscription.statut_abonnement !== "actif"}
+        className="mt-5 w-full"
+      >
+        {loading ? t("deactivating") : t("deactivate")}
+      </Button>
+    </div>
   );
 }

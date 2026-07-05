@@ -16,8 +16,11 @@
     "cartLabel": "Panier",
     "cartItems": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
     "categoriesNav": "Catégories de produits",
+    "categories": "Catégories",
     "allProducts": "Tous les produits",
-    "logIn": "Connexion"
+    "logIn": "Connexion",
+    "searchOpen": "Ouvrir la recherche",
+    "searchClose": "Fermer la recherche"
   },
   "menu": {
     "menu": "Menu",
@@ -27,6 +30,7 @@
     "logIn": "Connexion",
     "signUp": "Inscription",
     "logOut": "Se déconnecter",
+    "myAccount": "Mon compte",
     "connectedAs": "Connecté en tant que",
     "termsOfUse": "Conditions d'utilisation",
     "legalNotices": "Mentions légales",
@@ -46,7 +50,11 @@
     "supportCardTitle": "Aide & Support",
     "supportCardSubtitle": "FAQ et contacter notre équipe",
     "ticketCreatedTitle": "Ticket envoyé",
-    "ticketCreatedSubtitle": "Notre équipe vous répondra à {email}."
+    "ticketCreatedSubtitle": "Notre équipe vous répondra à {email}.",
+    "loginCardTitle": "Connectez-vous pour ouvrir un ticket",
+    "loginCardSubtitle": "Connectez-vous ou créez un compte et j'enregistrerai votre ticket dans votre profil.",
+    "loginCardLogIn": "Connexion",
+    "loginCardSignUp": "Créer un compte"
   },
   "footer": {
     "description": "La marketplace de cybersécurité pour les entreprises modernes.",
@@ -145,6 +153,14 @@
     "maxPrice": "Max",
     "inStockOnly": "En stock uniquement",
     "clearFilters": "Réinitialiser",
+    "sortBy": "Trier par",
+    "sortRelevance": "Pertinence",
+    "sortPriceAsc": "Prix : croissant",
+    "sortPriceDesc": "Prix : décroissant",
+    "sortNewest": "Plus récents",
+    "sortOldest": "Plus anciens",
+    "sortAvailability": "Disponibilité",
+    "sortNameAsc": "Nom : A à Z",
     "suggestions": "Vous pourriez aussi aimer",
     "viewAllResults": "Voir tous les résultats",
     "pagination": "Pages de résultats de recherche",
@@ -669,6 +685,11 @@
     "orderLabel": "Commande concernée (optionnel)",
     "orderNone": "Aucune",
     "orderRefPrefix": "Commande liée :",
+    "accountNote": "Ce ticket est ouvert depuis votre compte, et notre réponse sera envoyée à votre e-mail.",
+    "loginRequiredTitle": "Connectez-vous pour ouvrir un ticket",
+    "loginRequiredBody": "Connectez-vous ou créez un compte pour que votre ticket soit enregistré dans votre profil et que nous puissions vous recontacter.",
+    "logIn": "Connexion",
+    "createAccount": "Créer un compte",
     "errors": {
       "subjectRequired": "Le sujet est obligatoire.",
       "emailRequired": "L'adresse e-mail est obligatoire.",
@@ -720,7 +741,9 @@
   },
   "account": {
     "title": "Informations de compte",
-    "editProfile": "Modifier le profil"
+    "editProfile": "Modifier le profil",
+    "email": "E-mail",
+    "creationDate": "Membre depuis"
   },
   "orders": {
     "title": "Vos Commandes",
@@ -775,6 +798,8 @@
   "addresses": {
     "title": "Carnets d'adresses",
     "addNew": "Ajouter un carnet",
+    "viewList": "Vue liste",
+    "viewGrid": "Vue grille",
     "noAddresses": "Aucun carnet d'adresses enregistré.",
     "newTitle": "Ajouter un nouveau carnet d'adresses",
     "firstName": "Prénom",
@@ -792,6 +817,8 @@
   },
   "subscriptions": {
     "title": "Mes abonnements",
+    "viewList": "Vue liste",
+    "viewGrid": "Vue grille",
     "status": "Statut",
     "startDate": "Date de début",
     "endDate": "Date de fin",
@@ -808,6 +835,7 @@
     "date": "Date",
     "amount": "Montant",
     "status": "Statut",
+    "invoice": "Facture",
     "download": "Télécharger la facture",
     "noInvoices": "Vous n'avez aucune facture pour le moment.",
     "searchPlaceholder": "Rechercher une facture (N°, statut, montant)...",

@@ -9,6 +9,7 @@ import { BotMessageSquare } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import ChatCategoryCard from "@/components/chat/ChatCategoryCard";
+import ChatLoginCard from "@/components/chat/ChatLoginCard";
 import ChatProductCard from "@/components/chat/ChatProductCard";
 import ChatSupportCard from "@/components/chat/ChatSupportCard";
 import ChatTicketForm from "@/components/chat/ChatTicketForm";
@@ -84,6 +85,8 @@ export default function ChatMessage({ message }: { message: ChatUiMessage }) {
                   ))
                 ) : card.kind === "support" ? (
                   <ChatSupportCard />
+                ) : card.kind === "login" ? (
+                  <ChatLoginCard />
                 ) : (
                   <ChatTicketForm email={card.email} orders={card.orders} />
                 )}

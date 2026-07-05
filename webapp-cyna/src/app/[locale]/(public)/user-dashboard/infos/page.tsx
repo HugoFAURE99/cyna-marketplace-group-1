@@ -52,34 +52,38 @@ export default async function Account({
   };
 
   return (
-    <div className="flex flex-col bg-white text-gray-900 font-sans sm:p-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-10 gap-4 sm:gap-20">
-        <h1 className="text-2xl sm:text-3xl font-bold text-black">{t("title")}</h1>
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-950">
+          {t("title")}
+        </h1>
         <Link
           href="/user-dashboard/user-edition"
-          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all w-full sm:w-auto justify-center"
+          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:w-auto"
         >
-          <span className="font-medium">{t("editProfile")}</span>
+          {t("editProfile")}
         </Link>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 sm:p-8 max-w-3xl shadow-sm w-full">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold uppercase m-0 tracking-wide text-gray-800">
-            {user.lastName} <span className="capitalize">{user.firstName}</span>
-          </h2>
-        </div>
+      <div className="w-full max-w-3xl rounded-lg border border-slate-200 bg-white p-6 sm:p-8">
+        <h2 className="text-lg font-semibold capitalize text-slate-900">
+          {user.firstName} {user.lastName}
+        </h2>
 
-        <div className="flex flex-col gap-4 text-lg">
-          <p className="m-0 text-gray-600">
-            <span className="font-semibold text-gray-900">Email : </span>
-            {user.email}
-          </p>
-          <p className="m-0 text-gray-600">
-            <span className="font-semibold text-gray-900">Creation account date : </span>
-            {user.creationDate}
-          </p>
-        </div>
+        <dl className="mt-5 divide-y divide-slate-100 text-sm">
+          <div className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0 sm:flex-row sm:gap-4">
+            <dt className="font-medium text-slate-500 sm:w-40 sm:shrink-0">
+              {t("email")}
+            </dt>
+            <dd className="text-slate-900">{user.email}</dd>
+          </div>
+          <div className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0 sm:flex-row sm:gap-4">
+            <dt className="font-medium text-slate-500 sm:w-40 sm:shrink-0">
+              {t("creationDate")}
+            </dt>
+            <dd className="text-slate-900">{user.creationDate}</dd>
+          </div>
+        </dl>
       </div>
     </div>
   );

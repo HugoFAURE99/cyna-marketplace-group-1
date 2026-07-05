@@ -16,8 +16,11 @@
     "cartLabel": "Cart",
     "cartItems": "{count, plural, =0 {No items} one {# item} other {# items}}",
     "categoriesNav": "Product categories",
+    "categories": "Categories",
     "allProducts": "All products",
-    "logIn": "Log in"
+    "logIn": "Log in",
+    "searchOpen": "Open search",
+    "searchClose": "Close search"
   },
   "menu": {
     "menu": "Menu",
@@ -27,6 +30,7 @@
     "logIn": "Log In",
     "signUp": "Sign Up",
     "logOut": "Log out",
+    "myAccount": "My account",
     "connectedAs": "Connected as",
     "termsOfUse": "Terms of Use",
     "legalNotices": "Legal Notices",
@@ -46,7 +50,11 @@
     "supportCardTitle": "Help & Support",
     "supportCardSubtitle": "FAQ & contact our team",
     "ticketCreatedTitle": "Ticket sent",
-    "ticketCreatedSubtitle": "Our team will reply to {email}."
+    "ticketCreatedSubtitle": "Our team will reply to {email}.",
+    "loginCardTitle": "Sign in to open a ticket",
+    "loginCardSubtitle": "Log in or create an account and I'll save your ticket to your profile.",
+    "loginCardLogIn": "Log in",
+    "loginCardSignUp": "Create account"
   },
   "footer": {
     "description": "Enterprise cybersecurity marketplace for modern businesses.",
@@ -145,6 +153,14 @@
     "maxPrice": "Max",
     "inStockOnly": "In stock only",
     "clearFilters": "Clear",
+    "sortBy": "Sort by",
+    "sortRelevance": "Relevance",
+    "sortPriceAsc": "Price: low to high",
+    "sortPriceDesc": "Price: high to low",
+    "sortNewest": "Newest",
+    "sortOldest": "Oldest",
+    "sortAvailability": "Availability",
+    "sortNameAsc": "Name: A to Z",
     "suggestions": "You might also like",
     "viewAllResults": "See all results",
     "pagination": "Search result pages",
@@ -668,6 +684,11 @@
     "orderLabel": "Related order (optional)",
     "orderNone": "None",
     "orderRefPrefix": "Related order:",
+    "accountNote": "This ticket is opened under your account, and our reply goes to your email.",
+    "loginRequiredTitle": "Sign in to open a ticket",
+    "loginRequiredBody": "Log in or create an account so your ticket is saved to your profile and we can follow up with you.",
+    "logIn": "Log in",
+    "createAccount": "Create account",
     "errors": {
       "subjectRequired": "Subject is required.",
       "emailRequired": "Email address is required.",
@@ -719,7 +740,9 @@
   },
   "account": {
     "title": "Account Informations",
-    "editProfile": "Edit User Profile"
+    "editProfile": "Edit User Profile",
+    "email": "Email",
+    "creationDate": "Member since"
   },
   "orders": {
     "title": "Orders",
@@ -774,6 +797,8 @@
   "addresses": {
     "title": "Address Books",
     "addNew": "Add new address book",
+    "viewList": "List view",
+    "viewGrid": "Grid view",
     "noAddresses": "No address books registered.",
     "newTitle": "Add a New Address Book",
     "firstName": "First Name",
@@ -791,6 +816,8 @@
   },
   "subscriptions": {
     "title": "My Subscriptions",
+    "viewList": "List view",
+    "viewGrid": "Grid view",
     "status": "Status",
     "startDate": "Start Date",
     "endDate": "End Date",
@@ -807,6 +834,7 @@
     "date": "Date",
     "amount": "Amount",
     "status": "Status",
+    "invoice": "Invoice",
     "download": "Download Invoice",
     "noInvoices": "You do not have any invoices at the moment.",
     "searchPlaceholder": "Search for an invoice (ID, status, amount)...",

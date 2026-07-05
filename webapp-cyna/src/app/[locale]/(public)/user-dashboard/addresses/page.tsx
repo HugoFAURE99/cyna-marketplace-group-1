@@ -37,15 +37,17 @@ export default async function Addresses({
   }
 
   return (
-    <div className="flex flex-col bg-white text-gray-900 font-sans sm:p-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-10 gap-4 sm:gap-20">
-        <h1 className="text-2xl sm:text-3xl font-bold text-black">{t("title")}</h1>
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-950">
+          {t("title")}
+        </h1>
         <Link
           href="/user-dashboard/addresses/new"
-          className="flex items-center gap-2 bg-black text-white px-5 py-2.5 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all w-full sm:w-auto justify-center"
+          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:w-auto"
         >
-          <Plus className="w-5 h-5" />
-          <span className="font-medium">{t("addNew")}</span>
+          <Plus className="size-4" />
+          {t("addNew")}
         </Link>
       </div>
 

@@ -14,7 +14,11 @@ import { submitSupportTicket } from "@/app/[locale]/(public)/faq/_actions/suppor
 const fieldClass =
   "w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-200";
 
-export default function SupportTicketForm() {
+export default function SupportTicketForm({
+  defaultEmail = "",
+}: {
+  defaultEmail?: string;
+}) {
   const t = useTranslations("support");
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState(false);
@@ -37,7 +41,7 @@ export default function SupportTicketForm() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { sujet: "", email_contact: "", description: "" },
+    defaultValues: { sujet: "", email_contact: defaultEmail, description: "" },
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -122,6 +126,8 @@ export default function SupportTicketForm() {
       </div>
 
       {serverError && <p className="text-sm text-red-600">{t("error")}</p>}
+
+      <p className="text-xs text-slate-500">{t("accountNote")}</p>
 
       <button
         type="submit"

@@ -94,7 +94,7 @@ export function OrdersList({ orders, locale }: { orders: any[], locale: string }
     <div className="w-full">
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
           <Input
             type="text"
             placeholder={t("searchPlaceholder")}
@@ -132,43 +132,43 @@ export function OrdersList({ orders, locale }: { orders: any[], locale: string }
         </div>
       </div>
 
-      <div className="overflow-x-auto w-full rounded-md border border-gray-100">
+      <div className="overflow-x-auto w-full rounded-md border border-slate-100">
         {filteredOrders.length > 0 ? (
           <table className="w-full text-left border-collapse min-w-200">
             <thead>
-              <tr className="border-b-2 border-gray-100 bg-gray-50/50">
-                <th className="pb-4 pt-4 px-4 font-bold text-gray-700 cursor-pointer" onClick={() => handleSort("id_commande")}>
-                  <div className="flex items-center gap-1 hover:text-black">
+              <tr className="border-b-2 border-slate-100 bg-slate-50/50">
+                <th className="pb-4 pt-4 px-4 font-bold text-slate-700 cursor-pointer" onClick={() => handleSort("id_commande")}>
+                  <div className="flex items-center gap-1 hover:text-slate-900">
                     {t("columns.id")}
                     <ArrowUpDown className="w-4 h-4" />
                   </div>
                 </th>
-                <th className="pb-4 pt-4 px-4 font-bold text-gray-700 cursor-pointer" onClick={() => handleSort("date_commande")}>
-                  <div className="flex items-center gap-1 hover:text-black">
+                <th className="pb-4 pt-4 px-4 font-bold text-slate-700 cursor-pointer" onClick={() => handleSort("date_commande")}>
+                  <div className="flex items-center gap-1 hover:text-slate-900">
                     {t("columns.date")}
                     <ArrowUpDown className="w-4 h-4" />
                   </div>
                 </th>
-                <th className="pb-4 pt-4 px-4 font-bold text-gray-700 cursor-pointer" onClick={() => handleSort("montant_total")}>
-                  <div className="flex items-center gap-1 hover:text-black">
+                <th className="pb-4 pt-4 px-4 font-bold text-slate-700 cursor-pointer" onClick={() => handleSort("montant_total")}>
+                  <div className="flex items-center gap-1 hover:text-slate-900">
                     {t("columns.amount")}
                     <ArrowUpDown className="w-4 h-4" />
                   </div>
                 </th>
-                <th className="pb-4 pt-4 px-4 font-bold text-gray-700">{t("columns.subscription")}</th>
-                <th className="pb-4 pt-4 px-4 font-bold text-gray-700">{t("columns.status")}</th>
-                <th className="pb-4 pt-4 px-4 font-bold text-gray-700">{t("columns.invoice")}</th>
+                <th className="pb-4 pt-4 px-4 font-bold text-slate-700">{t("columns.subscription")}</th>
+                <th className="pb-4 pt-4 px-4 font-bold text-slate-700">{t("columns.status")}</th>
+                <th className="pb-4 pt-4 px-4 font-bold text-slate-700">{t("columns.invoice")}</th>
               </tr>
             </thead>
             <tbody>
               {sortedOrders.map((order) => (
-                <tr key={order.id_commande} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                  <td className="py-4 px-4 text-gray-600">#{order.id_commande}</td>
-                  <td className="py-4 px-4 text-gray-600">
+                <tr key={order.id_commande} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                  <td className="py-4 px-4 text-slate-600">#{order.id_commande}</td>
+                  <td className="py-4 px-4 text-slate-600">
                     {new Date(order.date_commande).toLocaleDateString(locale)}
                   </td>
-                  <td className="py-4 px-4 text-gray-600 font-semibold">{order.montant_total} €</td>
-                  <td className="py-4 px-4 text-gray-600 font-medium capitalize">{getSubscriptionType(order)}</td>
+                  <td className="py-4 px-4 text-slate-600 font-semibold">{order.montant_total} €</td>
+                  <td className="py-4 px-4 text-slate-600 font-medium capitalize">{getSubscriptionType(order)}</td>
                   <td className="py-4 px-4">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${
                       order.statut_commande.toLowerCase() === 'payée' || order.statut_commande.toLowerCase() === 'payee' || order.statut_commande.toLowerCase() === 'completed' || order.statut_commande.toLowerCase() === 'validée' || order.statut_commande.toLowerCase() === 'validee'
@@ -184,12 +184,12 @@ export function OrdersList({ orders, locale }: { orders: any[], locale: string }
                         href={order.url_facture}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm font-medium"
+                        className="text-purple-700 hover:underline text-sm font-medium"
                       >
                         {t("viewInvoice")}
                       </a>
                     ) : (
-                      <span className="text-gray-400 text-sm">-</span>
+                      <span className="text-slate-400 text-sm">-</span>
                     )}
                   </td>
                 </tr>
@@ -197,9 +197,9 @@ export function OrdersList({ orders, locale }: { orders: any[], locale: string }
             </tbody>
           </table>
         ) : search ? (
-          <p className="text-gray-500 py-8">{t("noSearchResults", { search })}</p>
+          <p className="text-slate-500 py-8">{t("noSearchResults", { search })}</p>
         ) : (
-          <p className="text-gray-500 py-8">{t("noOrders")}</p>
+          <p className="text-slate-500 py-8">{t("noOrders")}</p>
         )}
       </div>
     </div>

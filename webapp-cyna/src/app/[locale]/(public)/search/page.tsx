@@ -6,6 +6,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import ProductCard from "@/components/product/ProductCard";
 import SearchFilters from "@/components/search/SearchFilters";
+import SortSelect from "@/components/search/SortSelect";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/lib/i18n/translations";
 import {
@@ -13,6 +14,7 @@ import {
   getCatalogProducts,
   getCatalogTechnicalCharacteristics,
 } from "@/lib/products/public-catalog";
+import { parseSortKey, type SortKey } from "@/lib/products/catalog-sort";
 import { searchCatalog } from "@/lib/products/search-products";
 
 // Results depend on the query string, so never cache.
@@ -28,6 +30,7 @@ type SearchParams = {
   min?: string | string[];
   max?: string | string[];
   instock?: string | string[];
+  sort?: string | string[];
   page?: string | string[];
 };
 
@@ -59,11 +62,12 @@ export default async function SearchPage({
 
   const raw = await searchParams;
   const query = first(raw.q).trim();
-  const categoryId = parsePositiveInt(first(raw.category));
+  const categoryIds = parseIdList(first(raw.category));
   const characteristicIds = parseIdList(first(raw.tech));
   const minPrice = parsePrice(first(raw.min));
   const maxPrice = parsePrice(first(raw.max));
   const inStockOnly = first(raw.instock) === "1";
+  const sort = parseSortKey(first(raw.sort));
   const requestedPage = parsePositiveInt(first(raw.page)) ?? 1;
 
   const t = await getTranslations("search");
@@ -73,11 +77,12 @@ export default async function SearchPage({
       searchCatalog(
         {
           query,
-          categoryId,
+          categoryIds,
           characteristicIds,
           minPrice,
           maxPrice,
           inStockOnly,
+          sort,
         },
         locale,
       ),
@@ -96,11 +101,12 @@ export default async function SearchPage({
   const hrefForPage = (page: number) =>
     buildSearchHref({
       query,
-      categoryId,
+      categoryIds,
       characteristicIds,
       minPrice,
       maxPrice,
       inStockOnly,
+      sort,
       page,
     });
 
@@ -117,10 +123,10 @@ export default async function SearchPage({
     <main className="flex-1">
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="grid gap-6 lg:grid-cols-[250px_minmax(0,1fr)]">
-          <aside className="lg:sticky lg:top-[156px] lg:self-start">
+          <aside className="lg:sticky lg:top-[112px] lg:self-start">
             <SearchFilters
               categories={categories}
-              categoryId={categoryId}
+              categoryIds={categoryIds}
               characteristicIds={characteristicIds}
               inStockOnly={inStockOnly}
               maxPrice={maxPrice}
@@ -130,13 +136,16 @@ export default async function SearchPage({
           </aside>
 
           <div className="space-y-8">
-            <header className="space-y-1">
-              <h1 className="text-2xl font-bold text-slate-950">
-                {hasQuery ? t("resultsFor", { query }) : t("browseTitle")}
-              </h1>
-              <p className="text-sm text-slate-600">
-                {t("resultCount", { count: results.length })}
-              </p>
+            <header className="flex flex-wrap items-end justify-between gap-3">
+              <div className="space-y-1">
+                <h1 className="text-2xl font-bold text-slate-950">
+                  {hasQuery ? t("resultsFor", { query }) : t("browseTitle")}
+                </h1>
+                <p className="text-sm text-slate-600">
+                  {t("resultCount", { count: results.length })}
+                </p>
+              </div>
+              {results.length > 0 && <SortSelect sort={sort} />}
             </header>
 
             <div className="space-y-12">
@@ -226,29 +235,31 @@ function parsePrice(value: string) {
 
 type SearchHrefOptions = {
   query: string;
-  categoryId?: number;
+  categoryIds: number[];
   characteristicIds: number[];
   minPrice?: number;
   maxPrice?: number;
   inStockOnly: boolean;
+  sort: SortKey;
   page: number;
 };
 
 function buildSearchHref({
   query,
-  categoryId,
+  categoryIds,
   characteristicIds,
   minPrice,
   maxPrice,
   inStockOnly,
+  sort,
   page,
 }: SearchHrefOptions) {
   const params = new URLSearchParams();
   if (query) {
     params.set("q", query);
   }
-  if (categoryId !== undefined) {
-    params.set("category", String(categoryId));
+  if (categoryIds.length > 0) {
+    params.set("category", categoryIds.join(","));
   }
   if (characteristicIds.length > 0) {
     params.set("tech", characteristicIds.join(","));
@@ -261,6 +272,9 @@ function buildSearchHref({
   }
   if (inStockOnly) {
     params.set("instock", "1");
+  }
+  if (sort !== "relevance") {
+    params.set("sort", sort);
   }
   if (page > 1) {
     params.set("page", String(page));

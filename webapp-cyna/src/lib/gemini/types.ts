@@ -27,6 +27,7 @@ export type ChatCardPayload =
   | { kind: "product"; items: SearchSuggestion[] }
   | { kind: "category"; items: ChatCategoryItem[] }
   | { kind: "support" }
+  | { kind: "login" }
   | { kind: "ticketForm"; email: string; orders: ChatOrderOption[] };
 
 // NDJSON events streamed from /api/chat to the client (one JSON object per line).

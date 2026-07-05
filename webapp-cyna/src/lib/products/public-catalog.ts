@@ -280,11 +280,11 @@ export function normalizeCatalogProduct(
   };
 }
 
-// Active products in search/catalog order. Pass `categoryId` to filter to one
-// category (done in SQL); out-of-stock products are kept (they get a badge).
+// Active products in search/catalog order. Pass `categoryIds` to restrict to one
+// or more categories (done in SQL); out-of-stock products are kept (badged).
 export async function getCatalogProducts(
   locale: Locale,
-  categoryId?: number,
+  categoryIds?: number[],
 ): Promise<CatalogProduct[]> {
   const supabase = createPublicClient();
   let query = supabase
@@ -292,8 +292,8 @@ export async function getCatalogProducts(
     .select(CATALOG_PRODUCT_SELECT)
     .eq("statut_produit", true);
 
-  if (categoryId !== undefined) {
-    query = query.eq("id_categorie", categoryId);
+  if (categoryIds && categoryIds.length > 0) {
+    query = query.in("id_categorie", categoryIds);
   }
 
   const { data, error } = await query

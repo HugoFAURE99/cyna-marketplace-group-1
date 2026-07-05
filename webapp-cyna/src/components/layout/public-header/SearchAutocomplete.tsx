@@ -17,7 +17,11 @@ import { cn } from "@/lib/utils";
 const MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_MS = 250;
 
-export default function SearchAutocomplete() {
+export default function SearchAutocomplete({
+  onNavigate,
+}: {
+  onNavigate?: () => void;
+}) {
   const t = useTranslations("header");
   const tp = useTranslations("product");
   const ts = useTranslations("search");
@@ -98,6 +102,7 @@ export default function SearchAutocomplete() {
       return;
     }
     setOpen(false);
+    onNavigate?.();
     router.push(`/search?q=${encodeURIComponent(q)}`);
   };
 
@@ -126,6 +131,7 @@ export default function SearchAutocomplete() {
       if (showDropdown && active) {
         event.preventDefault();
         setOpen(false);
+        onNavigate?.();
         router.push(`/products/${active.id_produit}`);
       }
     } else if (event.key === "Escape") {
@@ -216,8 +222,10 @@ export default function SearchAutocomplete() {
                         : "hover:bg-slate-50",
                     )}
                     href={`/products/${product.id_produit}`}
-                    onClick={() => setOpen(false)}
-                    onMouseEnter={() => setActiveIndex(index)}
+                    onClick={() => {
+                      setOpen(false);
+                      onNavigate?.();
+                    }}
                   >
                     <span className="flex size-11 shrink-0 items-center justify-center overflow-hidden rounded bg-slate-100">
                       {product.imageUrl ? (

@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import ContentPage, { ContentSection } from "@/components/layout/ContentPage";
 import type { Locale } from "@/lib/i18n/translations";
-import { Http2ServerRequest } from "http2";
 
 export default async function Legal({
   params,
@@ -12,69 +12,57 @@ export default async function Legal({
   setRequestLocale(locale);
   const t = await getTranslations("legal");
 
+  const publisherRows = [
+    { label: t("webedit_ul1"), value: "CYNA-IT" },
+    { label: t("webedit_ul2"), value: "SARL" },
+    { label: t("webedit_ul3"), value: "10 Rue de Penthièvre, 75008 Paris" },
+    { label: t("webedit_ul4"), value: "913 711 032 00015" },
+    { label: t("webedit_ul5"), value: "G1 Dev" },
+    { label: "Contact", value: "marketing@cyna-it.fr | +33 1 99 00 34 56" },
+  ];
+
+  const hostingRows = [
+    { label: t("hosting_title"), value: "Netlify" },
+    {
+      label: t("hosting_email_ref"),
+      value: "[Insérer l'adresse physique de l'hébergeur en France]",
+    },
+  ];
+
   return (
-    <>
-      <div className="flex justify-center my-10">
-        <div className="p-5 w-250">
-          <h2 className="text-2xl font-bold text-purple-800 mb-10">
-            {t("legal_title")}
-          </h2>
+    <ContentPage title={t("legal_title")} intro={t("legal_paragraph")} width="wide">
+      <ContentSection index={1} title={t("webedit_title")}>
+        <InfoList rows={publisherRows} />
+      </ContentSection>
 
-          <p className="text-lg">{t("legal_paragraph")}</p>
+      <ContentSection index={2} title={t("hosting_title")}>
+        <p>{t("hosting_paragraph")}</p>
+        <InfoList rows={hostingRows} />
+      </ContentSection>
 
-          <h2 className="text-2xl font-bold text-purple-800 my-10">
-            1. {t("webedit_title")}
-          </h2>
-          <ul>
-            <li className="my-6 text-lg">
-              <strong>{t("webedit_ul1")} :</strong>
-              <p>CYNA-IT</p>
-            </li>
-            <li className="my-6 text-lg">
-              <strong>{t("webedit_ul2")} :</strong>
-              <p>SARL</p>
-            </li>
-            <li className="my-6 text-lg">
-              <strong>{t("webedit_ul3")} :</strong>
-              <p>10 Rue de Penthièvre, 75008 Paris</p>
-            </li>
-            <li className="my-6 text-lg">
-              <strong>{t("webedit_ul4")} :</strong>
-              <p>913 711 032 00015</p>
-            </li>
-            <li className="my-6 text-lg">
-              <strong>{t("webedit_ul5")} :</strong>
-              <p>G1 Dev</p>
-            </li>
-            <li className="my-6 text-lg">
-              <strong>Contact :</strong>
-              <p>arketing@cyna-it.fr | Tél : 01 99 00 34 56</p>
-            </li>
-          </ul>
+      <ContentSection index={3} title={t("intelprop_title")}>
+        <p>{t("intelprop_paragraph1")}</p>
+        <p>{t("intelprop_paragraph2")}</p>
+        <p>{t("intelprop_paragraph3")}</p>
+      </ContentSection>
+    </ContentPage>
+  );
+}
 
-          <h2 className="text-2xl font-bold text-purple-800 mt-10 my-10">
-            2. {t("hosting_title")}
-          </h2>
-          <p className="my-5 text-lg  ">{t("hosting_paragraph")}</p>
-          <ul>
-            <li className="my-6 text-lg">
-              <strong>{t("hosting_title")}</strong>
-              <p>Netify</p>
-            </li>
-            <li className="my-6 text-lg">
-              <strong>{t("hosting_email_ref")} :</strong>
-              <p>[Insérer l'adresse physique de l'hébergeur en France]</p>
-            </li>
-          </ul>
-
-          <h2 className="text-2xl font-bold text-purple-800 my-10">
-            3. {t("intelprop_title")}
-          </h2>
-          <p className="text-lg">{t("intelprop_paragraph1")}</p>
-          <p className="my-8 text-lg">{t("intelprop_paragraph2")}</p>
-          <p className="text-lg">{t("intelprop_paragraph3")}</p>
+function InfoList({ rows }: { rows: { label: string; value: string }[] }) {
+  return (
+    <dl className="divide-y divide-slate-100 overflow-hidden rounded-lg border border-slate-200 bg-white">
+      {rows.map((row) => (
+        <div
+          className="flex flex-col gap-1 px-4 py-3 sm:flex-row sm:gap-4"
+          key={row.label}
+        >
+          <dt className="font-semibold text-slate-900 sm:w-56 sm:shrink-0">
+            {row.label}
+          </dt>
+          <dd className="text-slate-700">{row.value}</dd>
         </div>
-      </div>
-    </>
+      ))}
+    </dl>
   );
 }

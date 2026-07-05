@@ -45,7 +45,6 @@ export type PublicProductTariff = {
 export type PublicProductDetail = ProductNeutral & {
   nom_pro: string;
   pro_description: string | null;
-  pro_carac_technique: string | null;
   category: PublicProductCategory | null;
   images: PublicProductImage[];
   specs: string[];
@@ -64,8 +63,26 @@ export type SimilarProduct = Pick<
 // Companion (translation) rows embedded alongside their parent.
 type ProduitTraductionRow = Pick<
   Tables<"produit_traduction">,
-  "langue" | "nom_pro" | "pro_description" | "pro_carac_technique"
+  "langue" | "nom_pro" | "pro_description"
 >;
+
+// Technical specs now come from the dedicated (translated, ordered) tables
+// rather than the legacy `pro_carac_technique` string column.
+type TechnicalCharacteristicQueryRow = Pick<
+  Tables<"produit_caracteristique_technique">,
+  "ordre_affichage"
+> & {
+  caracteristique_technique:
+    | (Pick<Tables<"caracteristique_technique">, "id_caracteristique"> & {
+        caracteristique_technique_traduction:
+          | Pick<
+              Tables<"caracteristique_technique_traduction">,
+              "langue" | "nom_caracteristique"
+            >[]
+          | null;
+      })
+    | null;
+};
 
 type CategorieTraductionRow = Pick<
   Tables<"categorie_traduction">,
@@ -96,6 +113,7 @@ type ProductQueryRow = ProductNeutral & {
   categorie: CategoryQueryRow | null;
   image_produit: PublicProductImage[] | null;
   prix_tarif: TariffQueryRow[] | null;
+  produit_caracteristique_technique: TechnicalCharacteristicQueryRow[] | null;
 };
 
 type SimilarProductQueryRow = Pick<
@@ -118,8 +136,7 @@ const PRODUCT_SELECT = `
   produit_traduction (
     langue,
     nom_pro,
-    pro_description,
-    pro_carac_technique
+    pro_description
   ),
   categorie (
     id_categorie,
@@ -133,6 +150,16 @@ const PRODUCT_SELECT = `
     id_image,
     lien_image_produit,
     ordre_affichage
+  ),
+  produit_caracteristique_technique (
+    ordre_affichage,
+    caracteristique_technique (
+      id_caracteristique,
+      caracteristique_technique_traduction (
+        langue,
+        nom_caracteristique
+      )
+    )
   ),
   prix_tarif (
     id_prix,
@@ -156,8 +183,7 @@ const SIMILAR_PRODUCT_SELECT = `
   produit_traduction (
     langue,
     nom_pro,
-    pro_description,
-    pro_carac_technique
+    pro_description
   ),
   categorie (
     id_categorie,
@@ -174,14 +200,37 @@ const SIMILAR_PRODUCT_SELECT = `
   )
 `;
 
-// Specs are stored as one ";"-separated string; split into a trimmed list.
-export function parseProductSpecs(value: string | null) {
-  return (
-    value
-      ?.split(";")
-      .map((item) => item.trim())
-      .filter(Boolean) ?? []
-  );
+// Build the ordered, translated spec list from the dedicated characteristic
+// tables. Missing translations are skipped; ties fall back to name then id.
+function resolveSpecs(
+  rows: TechnicalCharacteristicQueryRow[] | null,
+  locale: Locale,
+): string[] {
+  return (rows ?? [])
+    .map((link) => {
+      const characteristic = link.caracteristique_technique;
+      const translation = pickTranslation(
+        characteristic?.caracteristique_technique_traduction,
+        locale,
+      );
+      const name = translation?.nom_caracteristique?.trim();
+      if (!characteristic || !name) {
+        return null;
+      }
+      return {
+        id_caracteristique: characteristic.id_caracteristique,
+        nom_caracteristique: name,
+        ordre_affichage: link.ordre_affichage,
+      };
+    })
+    .filter((spec): spec is NonNullable<typeof spec> => spec !== null)
+    .sort(
+      (a, b) =>
+        a.ordre_affichage - b.ordre_affichage ||
+        a.nom_caracteristique.localeCompare(b.nom_caracteristique, locale) ||
+        a.id_caracteristique - b.id_caracteristique,
+    )
+    .map((spec) => spec.nom_caracteristique);
 }
 
 export async function getPublicProductById(productId: number, locale: Locale) {
@@ -267,7 +316,6 @@ function normalizeProduct(
   locale: Locale,
 ): PublicProductDetail {
   const translation = pickTranslation(row.produit_traduction, locale);
-  const specs = translation?.pro_carac_technique ?? null;
 
   return {
     date_ajout: row.date_ajout,
@@ -279,10 +327,9 @@ function normalizeProduct(
     statut_produit: row.statut_produit,
     nom_pro: translation?.nom_pro ?? "",
     pro_description: translation?.pro_description ?? null,
-    pro_carac_technique: specs,
     category: resolveCategory(row.categorie, locale),
     images: sortImages(row.image_produit ?? []),
-    specs: parseProductSpecs(specs),
+    specs: resolveSpecs(row.produit_caracteristique_technique, locale),
     tariffs: sortTariffs(
       (row.prix_tarif ?? []).map((tariff) => resolveTariff(tariff, locale)),
     ),

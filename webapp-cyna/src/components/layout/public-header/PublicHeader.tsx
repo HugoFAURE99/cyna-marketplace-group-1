@@ -5,16 +5,22 @@ import { CircleUserRound, LogIn } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
 import CartButton from "@/components/layout/public-header/CartButton";
-import CategoryNavBar from "@/components/layout/public-header/CategoryNavBar";
+import CategoryMenu from "@/components/layout/public-header/CategoryMenu";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
+import MobileSearch from "@/components/layout/public-header/MobileSearch";
 import PublicMenuSheet from "@/components/layout/public-header/PublicMenuSheet";
 import SearchAutocomplete from "@/components/layout/public-header/SearchAutocomplete";
 import { getCartCount } from "@/lib/cart/cart";
+import { getCatalogCategories } from "@/lib/products/public-catalog";
+import { getLocale } from "next-intl/server";
+import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
 
 export default async function PublicHeader() {
   const t = await getTranslations("header");
+  const locale = (await getLocale()) as Locale;
   const cartCount = await getCartCount();
+  const categories = await getCatalogCategories(locale);
 
   // 2. On récupère la session de l'utilisateur actuel
   const supabase = await createServerClient();
@@ -40,7 +46,7 @@ export default async function PublicHeader() {
           logo and actions, so its gap to each side stays even despite their
           different widths. */}
       <div className="mx-auto flex h-[72px] w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <Link
             aria-label={t("homeAriaLabel")}
             className="inline-flex w-fit shrink-0 items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
@@ -56,34 +62,11 @@ export default async function PublicHeader() {
             />
           </Link>
 
-          {/* Indicateur d'état de connexion (visible sur écrans ≥ sm) */}
           <span
             aria-hidden="true"
             className="hidden h-6 w-px bg-slate-200 sm:block"
           />
-          {user ? (
-            <Link href="/user-dashboard/infos">
-              <span className="hidden max-w-[200px] items-center gap-1.5 text-sm sm:inline-flex">
-                <CircleUserRound
-                  aria-hidden="true"
-                  className="size-5 shrink-0 text-purple-700"
-                />
-
-                <span className="truncate font-semibold text-slate-900">
-                  {displayName}
-                </span>
-
-              </span>
-            </Link>
-          ) : (
-            <Link
-              className="hidden h-9 items-center gap-1.5 rounded-md px-3 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:inline-flex"
-              href="/login"
-            >
-              <LogIn aria-hidden="true" className="size-4" />
-              {t("logIn")}
-            </Link>
-          )}
+          <CategoryMenu categories={categories} />
         </div>
 
         <div className="hidden min-w-0 flex-1 md:block">
@@ -92,16 +75,36 @@ export default async function PublicHeader() {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* État de connexion (visible sur écrans ≥ sm) */}
+          {user ? (
+            <Link
+              className="hidden h-9 max-w-[200px] items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 shadow-xs transition hover:border-purple-200 hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:inline-flex"
+              href="/user-dashboard/infos"
+            >
+              <CircleUserRound
+                aria-hidden="true"
+                className="size-5 shrink-0 text-purple-700"
+              />
+              <span className="truncate">{displayName}</span>
+            </Link>
+          ) : (
+            <Link
+              className="hidden h-9 items-center gap-1.5 rounded-md bg-purple-700 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:inline-flex"
+              href="/login"
+            >
+              <LogIn aria-hidden="true" className="size-4" />
+              {t("logIn")}
+            </Link>
+          )}
+
+          <MobileSearch />
           <LanguageSwitcher />
           <CartButton count={cartCount} />
 
-          {/* 3. On transmet l'état (true si user existe, false sinon) */}
           <PublicMenuSheet isLoggedIn={!!user} userName={displayName} />
         </div>
       </div>
-
-      <CategoryNavBar />
     </header>
   );
 }
