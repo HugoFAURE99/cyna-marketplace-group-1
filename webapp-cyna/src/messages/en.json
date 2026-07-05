@@ -31,7 +31,22 @@
     "termsOfUse": "Terms of Use",
     "legalNotices": "Legal Notices",
     "contact": "Contact",
-    "aboutCyna": "About CYNA"
+    "aboutCyna": "About CYNA",
+    "faq": "Help & Support"
+  },
+  "chat": {
+    "title": "CynAI",
+    "subtitle": "Your CYNA assistant",
+    "greeting": "Hi, I'm CynAI. I can help you explore our categories, find a specific product, or reach support.",
+    "placeholder": "Type your message…",
+    "send": "Send",
+    "open": "Open CynAI chat",
+    "close": "Close chat",
+    "error": "Sorry, something went wrong. Please try again later.",
+    "supportCardTitle": "Help & Support",
+    "supportCardSubtitle": "FAQ & contact our team",
+    "ticketCreatedTitle": "Ticket sent",
+    "ticketCreatedSubtitle": "Our team will reply to {email}."
   },
   "footer": {
     "description": "Enterprise cybersecurity marketplace for modern businesses.",
@@ -533,6 +548,56 @@
     "landline": "Landline",
     "mobile": "Mobile",
     "email": "Email"
+  },
+  "faq": {
+    "title": "Help & Support",
+    "subtitle": "Find a quick answer below, or open a ticket with our team.",
+    "questionsTitle": "Frequently asked questions",
+    "items": [
+      {
+        "q": "What is CYNA?",
+        "a": "CYNA is a marketplace that lets businesses buy and manage cybersecurity SaaS licences (SOC, EDR, XDR, firewalls and more) in just a few clicks."
+      },
+      {
+        "q": "How do I subscribe to a product?",
+        "a": "Browse the catalog, open a product page, choose your billing plan (monthly or annual), then add it to your cart to complete your order."
+      },
+      {
+        "q": "Which payment methods do you accept?",
+        "a": "Payments are processed securely and encrypted through Stripe. You can pay by credit or debit card."
+      },
+      {
+        "q": "Can I manage my subscriptions from my account?",
+        "a": "Yes. Once logged in, you can find your order history and the status of your subscriptions in your personal dashboard."
+      },
+      {
+        "q": "How can I get help quickly?",
+        "a": "Chat with our CynAI assistant at the bottom-right of the screen, or fill in the form below and a member of our team will get back to you by email."
+      }
+    ]
+  },
+  "support": {
+    "title": "Open a support ticket",
+    "subtitle": "Got a question or an issue? Describe it and our team will reply by email.",
+    "subject": "Subject",
+    "subjectPlaceholder": "e.g. Billing issue",
+    "email": "Email address",
+    "emailPlaceholder": "you@company.com",
+    "message": "Message",
+    "messagePlaceholder": "Describe your request in a few lines…",
+    "submit": "Send ticket",
+    "submitting": "Sending…",
+    "success": "Your ticket has been sent. Our team will get back to you by email.",
+    "error": "Could not send your ticket. Please try again.",
+    "orderLabel": "Related order (optional)",
+    "orderNone": "None",
+    "orderRefPrefix": "Related order:",
+    "errors": {
+      "subjectRequired": "Subject is required.",
+      "emailRequired": "Email address is required.",
+      "emailInvalid": "Please enter a valid email address.",
+      "messageRequired": "Message is required."
+    }
   },
   "legal": {
     "legal_title": "Legal Notices",
