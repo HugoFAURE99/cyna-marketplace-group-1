@@ -42,7 +42,7 @@ export default async function HomeIntro({ content }: HomeIntroProps) {
       {content.linkLabel && (
         <Link
           className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-purple-700 transition hover:text-purple-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
-          href="/search"
+          href={content.linkHref ?? "/search"}
         >
           {t("browseAllProducts")}
           <ArrowRight aria-hidden="true" className="size-4" />

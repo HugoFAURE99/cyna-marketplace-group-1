@@ -1,5 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import ContentPage, { ContentSection } from "@/components/layout/ContentPage";
 import type { Locale } from "@/lib/i18n/translations";
 
 export default async function Terms({
@@ -11,43 +12,23 @@ export default async function Terms({
   setRequestLocale(locale);
   const t = await getTranslations("terms");
 
+  const sections = [
+    { title: t("subtitle1"), body: t("paragraph1") },
+    { title: t("subtitle2"), body: t("paragraph2") },
+    { title: t("subtitle3"), body: t("paragraph3") },
+    { title: t("subtitle4"), body: t("paragraph4") },
+    { title: t("subtitle5"), body: t("paragraph5") },
+    { title: t("subtitle6"), body: t("paragraph6") },
+    { title: t("subtitle7"), body: t("paragraph7") },
+  ];
+
   return (
-    <>
-      <div className="flex justify-center my-10">
-        <div className="p-5">
-          <h1 className="text-2xl font-bold text-purple-800 mb-15">
-            {t("title")}
-          </h1>
-          <h2 className="text-xl font-bold text-purple-600 mb-3">
-            {t("subtitle1")}
-          </h2>
-          <p className="w-200 text-lg">{t("paragraph1")}</p>
-          <h2 className="text-xl font-bold text-purple-600 mt-14 mb-3">
-            {t("subtitle2")}
-          </h2>
-          <p className="w-200 text-lg">{t("paragraph2")}</p>
-          <h2 className="text-xl font-bold text-purple-600 mt-14 mb-3">
-            {t("subtitle3")}
-          </h2>
-          <p className="w-200 text-lg">{t("paragraph3")}</p>
-          <h2 className="text-xl font-bold text-purple-600 mt-14 mb-3">
-            {t("subtitle4")}
-          </h2>
-          <p className="w-200 text-lg">{t("paragraph4")}</p>
-          <h2 className="text-xl font-bold text-purple-600 mt-14 mb-3">
-            {t("subtitle5")}
-          </h2>
-          <p className="w-200 text-lg">{t("paragraph5")}</p>
-          <h2 className="text-xl font-bold text-purple-600 mt-14 mb-3">
-            {t("subtitle6")}
-          </h2>
-          <p className="w-200 text-lg">{t("paragraph6")}</p>
-          <h2 className="text-xl font-bold text-purple-600 mt-14 mb-3">
-            {t("subtitle7")}
-          </h2>
-          <p className="w-200 text-lg">{t("paragraph7")}</p>
-        </div>
-      </div>
-    </>
+    <ContentPage title={t("title")} width="wide">
+      {sections.map((section, index) => (
+        <ContentSection index={index + 1} key={index} title={section.title}>
+          <p>{section.body}</p>
+        </ContentSection>
+      ))}
+    </ContentPage>
   );
 }

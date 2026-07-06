@@ -28,7 +28,7 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: any[] }) {
     <div className="w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="relative flex-1 w-full max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
           <Input
             type="text"
             placeholder={t("searchPlaceholder")}
@@ -37,22 +37,22 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: any[] }) {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`px-3 py-1.5 h-auto ${viewMode === 'list' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-3 py-1.5 h-auto ${viewMode === 'list' ? 'bg-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             onClick={() => setViewMode('list')}
-            title="Vue Liste"
+            title={t("viewList")}
           >
             <List className="w-4 h-4" />
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            className={`px-3 py-1.5 h-auto ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+            className={`px-3 py-1.5 h-auto ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             onClick={() => setViewMode('grid')}
-            title="Vue Grille"
+            title={t("viewGrid")}
           >
             <LayoutGrid className="w-4 h-4" />
           </Button>
@@ -67,9 +67,9 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: any[] }) {
             ))}
           </div>
         ) : search ? (
-          <p className="text-gray-500 py-8">{t("noSearchResults", { search })}</p>
+          <p className="text-slate-500 py-8">{t("noSearchResults", { search })}</p>
         ) : (
-          <p className="text-gray-500 py-8">{t("noSubscriptions")}</p>
+          <p className="text-slate-500 py-8">{t("noSubscriptions")}</p>
         )}
       </div>
     </div>

@@ -10,16 +10,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { usePathname, useRouter } from "@/i18n/navigation";
 
-const ALL_CATEGORIES = "all";
 const PRICE_DEBOUNCE_MS = 400;
 
 type SearchFiltersProps = {
@@ -28,7 +20,7 @@ type SearchFiltersProps = {
     id_caracteristique: number;
     nom_caracteristique: string;
   }[];
-  categoryId?: number;
+  categoryIds: number[];
   characteristicIds: number[];
   minPrice?: number;
   maxPrice?: number;
@@ -38,7 +30,7 @@ type SearchFiltersProps = {
 export default function SearchFilters({
   categories,
   technicalCharacteristics,
-  categoryId,
+  categoryIds,
   characteristicIds,
   minPrice,
   maxPrice,
@@ -93,18 +85,13 @@ export default function SearchFilters({
   }, [minInput, maxInput, minPrice, maxPrice, commitParams]);
 
   const hasActiveFilters =
-    categoryId !== undefined ||
+    categoryIds.length > 0 ||
     characteristicIds.length > 0 ||
     minPrice !== undefined ||
     maxPrice !== undefined ||
     inStockOnly;
   const selectedCharacteristicIds = new Set(characteristicIds);
-  const categoryLabels = new Map([
-    [ALL_CATEGORIES, t("allCategories")],
-    ...categories.map(
-      (category) => [String(category.id_categorie), category.cat_nom] as const,
-    ),
-  ]);
+  const selectedCategoryIds = new Set(categoryIds);
 
   const clearFilters = () => {
     setMinInput("");
@@ -118,16 +105,26 @@ export default function SearchFilters({
     });
   };
 
-  const toggleCharacteristic = (id: number, checked: boolean) => {
-    const nextIds = new Set(characteristicIds);
+  const toggleFromSet = (
+    current: number[],
+    id: number,
+    checked: boolean,
+  ): string | undefined => {
+    const nextIds = new Set(current);
     if (checked) {
       nextIds.add(id);
     } else {
       nextIds.delete(id);
     }
+    return [...nextIds].sort((a, b) => a - b).join(",") || undefined;
+  };
 
-    const nextValue = [...nextIds].sort((a, b) => a - b).join(",");
-    commitParams({ tech: nextValue || undefined });
+  const toggleCategory = (id: number, checked: boolean) => {
+    commitParams({ category: toggleFromSet(categoryIds, id, checked) });
+  };
+
+  const toggleCharacteristic = (id: number, checked: boolean) => {
+    commitParams({ tech: toggleFromSet(characteristicIds, id, checked) });
   };
 
   return (
@@ -152,37 +149,31 @@ export default function SearchFilters({
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="filter-category">{t("category")}</Label>
-        <Select
-          onValueChange={(value) =>
-            commitParams({
-              category: value && value !== ALL_CATEGORIES ? value : undefined,
-            })
-          }
-          value={categoryId !== undefined ? String(categoryId) : ALL_CATEGORIES}
-        >
-          <SelectTrigger className="h-10 w-full" id="filter-category">
-            <SelectValue>
-              {(value) => categoryLabels.get(String(value)) ?? t("allCategories")}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem label={t("allCategories")} value={ALL_CATEGORIES}>
-              {t("allCategories")}
-            </SelectItem>
+      {categories.length > 0 && (
+        <fieldset className="space-y-2">
+          <legend className="text-sm font-medium text-slate-950">
+            {t("category")}
+          </legend>
+          <div className="max-h-40 space-y-2 overflow-y-auto pr-1">
             {categories.map((category) => (
-              <SelectItem
+              <label
+                className="flex cursor-pointer items-start gap-2 text-sm text-slate-700"
                 key={category.id_categorie}
-                label={category.cat_nom}
-                value={String(category.id_categorie)}
               >
-                {category.cat_nom}
-              </SelectItem>
+                <input
+                  checked={selectedCategoryIds.has(category.id_categorie)}
+                  className="mt-0.5 size-4 rounded border-slate-300 accent-purple-700"
+                  onChange={(event) =>
+                    toggleCategory(category.id_categorie, event.target.checked)
+                  }
+                  type="checkbox"
+                />
+                <span>{category.cat_nom}</span>
+              </label>
             ))}
-          </SelectContent>
-        </Select>
-      </div>
+          </div>
+        </fieldset>
+      )}
 
       {technicalCharacteristics.length > 0 && (
         <fieldset className="space-y-2">

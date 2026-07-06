@@ -92,6 +92,15 @@ export default function PublicMenuSheet({
                   </span>
                 </div>
 
+                <Link
+                  className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md border border-purple-700 bg-white px-4 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
+                  href="/user-dashboard/infos"
+                  onClick={closeMenu}
+                >
+                  <CircleUserRound aria-hidden="true" className="size-4" />
+                  {t("myAccount")}
+                </Link>
+
                 <form action={logout}>
                   <button
                     type="submit"

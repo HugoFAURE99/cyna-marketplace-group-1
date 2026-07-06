@@ -36,13 +36,13 @@ export function RequestPasswordResetForm() {
             {t(state.successKey as Parameters<typeof t>[0])}
           </AuthMessage>
         )}
-        <p className="text-gray-600 mb-2">
+        <p className="text-slate-600 mb-2">
           {t("requestResetDescription") || "Vous recevrez un email contenant un lien sécurisé pour changer votre mot de passe."}
         </p>
         <button
           type="submit"
           disabled={isPending}
-          className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors self-start disabled:opacity-50"
+          className="bg-purple-700 text-white px-4 py-2 rounded-md hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 transition-colors self-start disabled:opacity-50"
         >
           {isPending ? "..." : t("requestResetButton") || "Envoyer un email de réinitialisation"}
         </button>

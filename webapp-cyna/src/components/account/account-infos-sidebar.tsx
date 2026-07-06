@@ -25,8 +25,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeItem }) => {
               href={item.href}
               className={`block w-full text-left px-5 py-2.5 text-lg transition-all ${
                 activeItem === item.id
-                  ? "bg-[#E1BEE7] text-black font-bold rounded-xl"
-                  : "text-black font-bold hover:bg-gray-100 rounded-xl"
+                  ? "bg-[#E1BEE7] text-black font-bold rounded-lg"
+                  : "text-black font-bold hover:bg-slate-100 rounded-lg"
               }`}
             >
               {item.name}

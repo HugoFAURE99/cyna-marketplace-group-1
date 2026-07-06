@@ -9,8 +9,8 @@ import CartItemCard from "@/components/cart/CartItemCard";
 import CheckoutSummary from "@/components/cart/CheckoutSummary";
 import { Link } from "@/i18n/navigation";
 import { getCartView } from "@/lib/cart/cart";
-import { formatPriceCents } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n/translations";
+import { createServerClient } from "@/lib/supabase/server-client";
 
 export const dynamic = "force-dynamic";
 
@@ -33,6 +33,11 @@ export default async function CartPage({ params }: CartPageProps) {
 
   const t = await getTranslations("cart");
   const { items, subtotalCents } = await getCartView(locale);
+
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <main className="flex-1">
@@ -70,6 +75,7 @@ export default async function CartPage({ params }: CartPageProps) {
 
             <CheckoutSummary subtotalCents={subtotalCents} />
 
+            {!user && (
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-600">
               {t.rich("saveCartPrompt", {
                 login: (chunks) => (
@@ -90,6 +96,7 @@ export default async function CartPage({ params }: CartPageProps) {
                 ),
               })}
             </div>
+            )}
           </div>
         )}
       </div>

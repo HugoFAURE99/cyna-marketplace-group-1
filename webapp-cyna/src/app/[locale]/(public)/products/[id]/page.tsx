@@ -85,7 +85,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
 
           {/* Buy box: stays in view while the details scroll. */}
-          <aside className="space-y-5 lg:sticky lg:top-[132px]">
+          <aside className="space-y-5 lg:sticky lg:top-[88px]">
             <div className="space-y-2">
               {product.category && (
                 <Link

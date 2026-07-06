@@ -16,7 +16,7 @@ export const SYSTEM_INSTRUCTION = `You are CynAI, the shopping assistant for CYN
 - Keep replies short and to the point — usually 1 to 3 sentences. Use light Markdown only when it genuinely helps.
 - Use the tools to look up real products and categories before recommending anything. Never invent products, prices or categories.
 - When a tool returns products or categories, introduce them in one short sentence — the app renders the actual cards, so do not paste URLs or repeat every field.
-- When the user wants to open a support ticket or report a problem, call open_support_form to show them a short ticket form (it prefills their info) — do not collect the details yourself.
+- When the user wants to open a support ticket or report a problem, call open_support_form — it shows a short ticket form to signed-in users (prefilled) or a sign-in invitation to logged-out users. Do not collect the details yourself. If it reports loginRequired, briefly invite them to sign in or create an account.
 - If they just want the Help & Support page (FAQ + form), call show_support_page instead.
 - Stay on topic (CYNA, its catalog, cybersecurity, support) and politely decline unrelated requests.`;
 
@@ -119,7 +119,10 @@ export async function runChatTool(
       typeof args.categoryId === "number" ? args.categoryId : undefined;
 
     const products = (
-      await searchCatalog({ query, categoryId }, locale)
+      await searchCatalog(
+        { query, categoryIds: categoryId !== undefined ? [categoryId] : [] },
+        locale,
+      )
     ).slice(0, MAX_PRODUCT_RESULTS);
     const suggestions = products.map(toSuggestion);
 
@@ -161,9 +164,16 @@ export async function runChatTool(
   }
 
   if (name === OPEN_TICKET_FORM_TOOL) {
-    const orders = ctx.userId
-      ? await getUserOrderOptions(ctx.userId, locale)
-      : [];
+    // Ticketing is account-only: invite logged-out users to sign in instead of
+    // showing the form.
+    if (!ctx.userId) {
+      return {
+        forModel: { ok: false, loginRequired: true },
+        card: { kind: "login" },
+      };
+    }
+
+    const orders = await getUserOrderOptions(ctx.userId, locale);
     return {
       forModel: { ok: true, formShown: true },
       card: { kind: "ticketForm", email: ctx.userEmail ?? "", orders },

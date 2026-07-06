@@ -30,8 +30,13 @@ export type HomeIntroContent = {
   body?: string;
   eyebrow?: string;
   linkLabel?: string;
+  linkHref?: string;
   title?: string;
 };
+
+// Fallback CTA targets used until the matching `texte_general` rows are set.
+export const HOME_CAROUSEL_BUTTON_FALLBACK_HREF = "#top-products";
+export const HOME_INTRO_LINK_FALLBACK_HREF = "/search";
 
 // Companion (translation) rows embedded alongside their parent.
 type ImageCarrouselTraductionRow = Pick<
@@ -62,8 +67,13 @@ const HOME_INTRO_TEXT_KEYS = {
   body: "home_intro_body",
   eyebrow: "home_intro_eyebrow",
   linkLabel: "home_intro_link_label",
+  linkHref: "home_intro_link_href",
   title: "home_intro_title",
 } as const;
+
+// Single CTA target for the hero carousel button, editable from the CMS
+// (`texte_general`) without a schema or admin change.
+const HOME_CAROUSEL_BUTTON_HREF_KEY = "home_carousel_button_href";
 
 export async function getHomeCarouselSlides(
   locale: Locale,
@@ -134,6 +144,7 @@ export async function getHomeIntroContent(
     body: resolve(HOME_INTRO_TEXT_KEYS.body),
     eyebrow: resolve(HOME_INTRO_TEXT_KEYS.eyebrow),
     linkLabel: resolve(HOME_INTRO_TEXT_KEYS.linkLabel),
+    linkHref: resolve(HOME_INTRO_TEXT_KEYS.linkHref),
     title: resolve(HOME_INTRO_TEXT_KEYS.title),
   };
 
@@ -141,6 +152,25 @@ export async function getHomeIntroContent(
   return content.body || content.eyebrow || content.linkLabel || content.title
     ? content
     : null;
+}
+
+export async function getHomeCarouselButtonHref(
+  locale: Locale,
+): Promise<string> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("texte_general")
+    .select("langue, texte")
+    .eq("emplacement_texte", HOME_CAROUSEL_BUTTON_HREF_KEY);
+
+  if (error) {
+    throw new Error(`Erreur chargement lien carousel : ${error.message}`);
+  }
+
+  return (
+    pickTranslation(data, locale)?.texte.trim() ||
+    HOME_CAROUSEL_BUTTON_FALLBACK_HREF
+  );
 }
 
 export async function getHomeCategories(
