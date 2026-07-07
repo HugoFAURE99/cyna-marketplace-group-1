@@ -134,7 +134,8 @@
     "saveCartPrompt": "<login>Connectez-vous</login> ou <register>créez un compte</register> pour sauvegarder votre panier",
     "checkoutError": "Une erreur est survenue lors de la préparation de la commande.",
     "redirecting": "Redirection...",
-    "securePayment": "Paiement sécurisé via Stripe."
+    "securePayment": "Paiement sécurisé via Stripe.",
+    "mixedIntervalsError": "Vous ne pouvez pas mélanger des abonnements mensuels et annuels dans la même commande. Veuillez uniformiser vos choix de facturation."
   },
   "search": {
     "title": "Recherche",

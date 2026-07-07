@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 
 import { processCheckout } from "@/lib/checkout/checkout.action";
 import { formatPriceCents } from "@/lib/i18n/format";
@@ -10,10 +10,12 @@ import type { Locale } from "@/lib/i18n/translations";
 
 type CheckoutSummaryProps = {
   subtotalCents: number;
+  hasMixedIntervals: boolean;
 };
 
 export default function CheckoutSummary({
   subtotalCents,
+  hasMixedIntervals,
 }: CheckoutSummaryProps) {
   const t = useTranslations("cart");
   const locale = useLocale() as Locale;
@@ -47,9 +49,19 @@ export default function CheckoutSummary({
         </span>
       </div>
 
+      {hasMixedIntervals && (
+        <div className="mt-4 flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-red-600" />
+          <p>
+            {/* On utilise purement et simplement next-intl */}
+            {t("mixedIntervalsError")}
+          </p>
+        </div>
+      )}
+
       <button
         onClick={handleCheckout}
-        disabled={isPending || subtotalCents === 0}
+        disabled={isPending || subtotalCents === 0 || hasMixedIntervals}
         className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-purple-700 text-base font-semibold text-white transition hover:bg-purple-800 disabled:cursor-not-allowed disabled:opacity-60"
         type="button"
       >

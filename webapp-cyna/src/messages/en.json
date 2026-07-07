@@ -134,7 +134,8 @@
     "saveCartPrompt": "<login>Log in</login> or <register>create an account</register> to save your cart",
     "checkoutError": "An error occurred while preparing the order.",
     "redirecting": "Redirecting...",
-    "securePayment": "Secure payment via Stripe."
+    "securePayment": "Secure payment via Stripe.",
+    "mixedIntervalsError": "You cannot mix monthly and annual subscriptions in the same order. Please select a single billing cycle for all items."
   },
   "search": {
     "title": "Search",

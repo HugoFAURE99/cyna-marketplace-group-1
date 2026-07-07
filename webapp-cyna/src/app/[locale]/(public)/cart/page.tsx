@@ -39,6 +39,15 @@ export default async function CartPage({ params }: CartPageProps) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // On extrait les types de facturation (en ignorant les achats uniques )
+  const billingCycles = new Set(
+    items
+      .map((item) => item.typeFacturation?.toLowerCase())
+      .filter((type) => type === "mensuel" || type === "annuel")
+  );
+  // Si on a plus d'un type récurrent, c'est mixte.
+  const hasMixedIntervals = billingCycles.size > 1;
+
   return (
     <main className="flex-1">
       <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
@@ -73,29 +82,32 @@ export default async function CartPage({ params }: CartPageProps) {
               ))}
             </div>
 
-            <CheckoutSummary subtotalCents={subtotalCents} />
+            <CheckoutSummary
+              subtotalCents={subtotalCents}
+              hasMixedIntervals={hasMixedIntervals}
+            />
 
             {!user && (
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-600">
-              {t.rich("saveCartPrompt", {
-                login: (chunks) => (
-                  <Link
-                    className="font-semibold text-purple-700 transition hover:text-purple-800"
-                    href="/login"
-                  >
-                    {chunks}
-                  </Link>
-                ),
-                register: (chunks) => (
-                  <Link
-                    className="font-semibold text-purple-700 transition hover:text-purple-800"
-                    href="/register"
-                  >
-                    {chunks}
-                  </Link>
-                ),
-              })}
-            </div>
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center text-sm text-slate-600">
+                {t.rich("saveCartPrompt", {
+                  login: (chunks) => (
+                    <Link
+                      className="font-semibold text-purple-700 transition hover:text-purple-800"
+                      href="/login"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                  register: (chunks) => (
+                    <Link
+                      className="font-semibold text-purple-700 transition hover:text-purple-800"
+                      href="/register"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </div>
             )}
           </div>
         )}
