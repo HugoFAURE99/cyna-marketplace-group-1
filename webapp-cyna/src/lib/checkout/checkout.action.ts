@@ -10,7 +10,7 @@ import Stripe from "stripe";
 
 // Utilisation de ta clé secrète de test (sk_test_...)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2026-05-27.dahlia",
+    apiVersion: "2026-06-24.dahlia",
 });
 
 export async function processCheckout(locale: any) {
