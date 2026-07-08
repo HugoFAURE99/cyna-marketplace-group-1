@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ArrowUpDown } from "lucide-react";
+import { Search, ArrowUpDown, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { getFactureSignedUrl } from "@/lib/facture/facture.actions";
 
 type SortColumn = "id_commande" | "date_commande" | "montant_total" | null;
 type SortDirection = "asc" | "desc";
@@ -16,6 +17,21 @@ export function OrdersList({ orders, locale }: { orders: any[], locale: string }
   const [subscriptionFilter, setSubscriptionFilter] = useState("all");
   const [sortColumn, setSortColumn] = useState<SortColumn>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [loadingInvoice, setLoadingInvoice] = useState<string | null>(null);
+
+  const handleDownload = async (fileName: string) => {
+    try {
+      setLoadingInvoice(fileName);
+      const signedUrl = await getFactureSignedUrl(fileName);
+      if (signedUrl) {
+        window.open(signedUrl, "_blank", "noopener,noreferrer");
+      }
+    } catch (error) {
+      console.error("Failed to get signed URL for invoice:", error);
+    } finally {
+      setLoadingInvoice(null);
+    }
+  };
 
   const handleSort = (column: SortColumn) => {
     if (sortColumn === column) {
@@ -180,14 +196,16 @@ export function OrdersList({ orders, locale }: { orders: any[], locale: string }
                   </td>
                   <td className="py-4 px-4">
                     {order.url_facture ? (
-                      <a
-                        href={order.url_facture}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-purple-700 hover:underline text-sm font-medium"
+                      <button
+                        onClick={() => handleDownload(order.url_facture)}
+                        disabled={loadingInvoice === order.url_facture}
+                        className="inline-flex items-center gap-2 text-purple-700 hover:underline text-sm font-medium disabled:opacity-70 disabled:cursor-not-allowed"
                       >
+                        {loadingInvoice === order.url_facture ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : null}
                         {t("viewInvoice")}
-                      </a>
+                      </button>
                     ) : (
                       <span className="text-slate-400 text-sm">-</span>
                     )}

@@ -2,13 +2,15 @@
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { getFactureSignedUrl } from "@/lib/facture/facture.actions";
 
 export function BillingList({ invoices, locale }: { invoices: any[], locale: string }) {
   const t = useTranslations("billing");
   const tOrders = useTranslations("orders");
   const [search, setSearch] = useState("");
+  const [loadingInvoice, setLoadingInvoice] = useState<string | null>(null);
   
   const getStatusText = (status: string) => {
     if (!status) return "";
@@ -18,6 +20,20 @@ export function BillingList({ invoices, locale }: { invoices: any[], locale: str
     if (s === 'annulée' || s === 'annulee' || s === 'cancelled') return tOrders("status.cancelled");
     if (s === 'failed' || s === 'échouée') return tOrders("status.failed");
     return status;
+  };
+
+  const handleDownload = async (fileName: string) => {
+    try {
+      setLoadingInvoice(fileName);
+      const signedUrl = await getFactureSignedUrl(fileName);
+      if (signedUrl) {
+        window.open(signedUrl, "_blank", "noopener,noreferrer");
+      }
+    } catch (error) {
+      console.error("Failed to get signed URL for invoice:", error);
+    } finally {
+      setLoadingInvoice(null);
+    }
   };
 
   const filteredInvoices = invoices.filter((invoice) => {
@@ -74,14 +90,16 @@ export function BillingList({ invoices, locale }: { invoices: any[], locale: str
                     </td>
                     <td className="py-4 px-4">
                       {invoice.url_facture ? (
-                        <a
-                          href={invoice.url_facture}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-md bg-purple-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-purple-800"
+                        <button
+                          onClick={() => handleDownload(invoice.url_facture)}
+                          disabled={loadingInvoice === invoice.url_facture}
+                          className="inline-flex items-center gap-2 rounded-md bg-purple-700 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-purple-800 disabled:opacity-70 disabled:cursor-not-allowed"
                         >
+                          {loadingInvoice === invoice.url_facture ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : null}
                           {t("download")}
-                        </a>
+                        </button>
                       ) : (
                         <span className="text-slate-400 text-sm">-</span>
                       )}

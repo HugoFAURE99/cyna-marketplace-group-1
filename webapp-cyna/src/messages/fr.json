@@ -748,6 +748,7 @@
   },
   "orders": {
     "title": "Vos Commandes",
+    "invoiceWarning": "Si vous ne parvenez pas à télécharger une facture, veuillez contacter le support.",
     "last_orders": "Dernières Commandes",
     "searchPlaceholder": "Rechercher une commande (ID, statut, montant)...",
     "noSearchResults": "Aucune commande trouvée pour \"{search}\".",
@@ -832,6 +833,7 @@
   },
   "billing": {
     "title": "Facturation",
+    "invoiceWarning": "Si vous ne parvenez pas à télécharger une facture, veuillez contacter le support.",
     "id": "N° Facture",
     "date": "Date",
     "amount": "Montant",

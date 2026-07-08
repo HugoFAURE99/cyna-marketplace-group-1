@@ -747,6 +747,7 @@
   },
   "orders": {
     "title": "Orders",
+    "invoiceWarning": "If you cannot download an invoice, please contact support.",
     "last_orders": "Last Orders",
     "searchPlaceholder": "Search for an order (ID, status, amount)...",
     "noSearchResults": "No order found for \"{search}\".",
@@ -831,6 +832,7 @@
   },
   "billing": {
     "title": "Billing",
+    "invoiceWarning": "If you cannot download an invoice, please contact support.",
     "id": "Invoice ID",
     "date": "Date",
     "amount": "Amount",
