@@ -244,7 +244,7 @@ export default function UsersTableClient({
                     {c.id_commande}
                   </TableCell>
                   <TableCell>
-                    {new Date(c.date_commande).toLocaleDateString()}
+                    {new Date(c.date_commande).toLocaleDateString("fr-FR")}
                   </TableCell>
                   <TableCell>{c.montant_total.toFixed(2)} €</TableCell>
                   <TableCell>
@@ -290,11 +290,11 @@ export default function UsersTableClient({
                     {a.id_abonnement}
                   </TableCell>
                   <TableCell>
-                    {new Date(a.date_debut).toLocaleDateString()}
+                    {new Date(a.date_debut).toLocaleDateString("fr-FR")}
                   </TableCell>
                   <TableCell>
                     {a.date_fin
-                      ? new Date(a.date_fin).toLocaleDateString()
+                      ? new Date(a.date_fin).toLocaleDateString("fr-FR")
                       : "—"}
                   </TableCell>
                   <TableCell>
@@ -376,7 +376,7 @@ export default function UsersTableClient({
                     type="button"
                     onClick={() => handleToggleStatus(user)}
                     disabled={isPending}
-                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${user.is_actif ? "bg-green-500" : "bg-muted"}`}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${user.is_actif ? "bg-primary" : "bg-muted"}`}
                   >
                     <span
                       className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow-sm ring-0 transition-transform ${user.is_actif ? "translate-x-4" : "translate-x-0"}`}

@@ -117,6 +117,21 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ─── Admin backoffice theme (light only, CYNA purple DA) ─── */
+.admin-theme {
+  --primary: oklch(0.496 0.265 301.924); /* purple-700 */
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.496 0.265 301.924);
+  --accent: oklch(0.977 0.014 308.299); /* purple-50 */
+  --accent-foreground: oklch(0.438 0.218 303.724); /* purple-800 */
+  --sidebar: oklch(0.995 0.003 308);
+  --sidebar-primary: oklch(0.496 0.265 301.924);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.977 0.014 308.299);
+  --sidebar-accent-foreground: oklch(0.438 0.218 303.724);
+  --sidebar-ring: oklch(0.496 0.265 301.924);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

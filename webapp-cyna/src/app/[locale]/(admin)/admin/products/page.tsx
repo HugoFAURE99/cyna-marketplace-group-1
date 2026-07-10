@@ -80,7 +80,7 @@ export default async function ProductsPage({
     unsavedLeave: tPriority("unsavedLeave"),
     unsavedStay: tPriority("unsavedStay"),
     confirmRemoveTitle: tFeatured("confirmRemoveTitle"),
-    confirmRemoveMessage: tFeatured("confirmRemoveMessage"),
+    confirmRemoveMessage: tFeatured("confirmRemoveMessage", { name: "{name}" }),
     confirmRemove: tFeatured("confirmRemove"),
     cancelRemove: tFeatured("cancelRemove"),
     cancel: tFeatured("cancel"),

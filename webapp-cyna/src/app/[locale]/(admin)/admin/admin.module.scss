@@ -1,5 +1,26 @@
 .main {
   flex: 1;
   min-width: 0;
-  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in oklch, var(--muted) 40%, var(--background));
+  min-height: 100svh;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--background);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 1.5rem 2rem;
 }

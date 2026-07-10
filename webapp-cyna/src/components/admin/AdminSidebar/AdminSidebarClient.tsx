@@ -1,10 +1,12 @@
 "use client";
 
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Home, Package, Layers, Users, BarChart3, ShoppingCart, Percent } from "lucide-react";
 
 import {
   Sidebar,
+  SidebarHeader,
   SidebarContent,
   SidebarGroup,
   SidebarGroupLabel,
@@ -49,6 +51,21 @@ export default function AdminSidebarClient({ labels }: { labels: Labels }) {
 
   return (
     <Sidebar>
+      <SidebarHeader className="border-b border-sidebar-border px-3 py-4">
+        <Link href="/admin" className="flex items-center gap-2">
+          <Image
+            src="/brand/cyna-logo-v2-header.svg"
+            alt="CYNA"
+            width={96}
+            height={26}
+            className="h-auto w-[96px]"
+            priority
+          />
+          <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+            Admin
+          </span>
+        </Link>
+      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>{labels.backoffice}</SidebarGroupLabel>

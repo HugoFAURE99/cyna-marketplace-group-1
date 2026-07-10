@@ -353,6 +353,11 @@
         "cancel": "Annuler",
         "confirm": "Confirmer",
         "noExpiration": "Pas de date d'expiration",
+        "duration": "Durée de la remise",
+        "durationOnce": "Premier paiement seulement",
+        "durationForever": "À chaque renouvellement",
+        "durationRepeating": "Sur N mois",
+        "durationMonths": "Nombre de mois",
         "globalOrder": "Sur toute la commande",
         "globalOrderHint": "Appliquée sur le total de la commande",
         "targetedHint": "Appliquée sur des produits ou catégories spécifiques"

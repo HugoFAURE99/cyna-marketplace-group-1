@@ -223,6 +223,7 @@ export type Database = {
                     is_actif: boolean
                     lib_code: string
                     type_promo: string | null
+                    stripe_promotion_code_id: string | null
                 }
                 Insert: {
                     id_code_promo?: number
@@ -230,6 +231,7 @@ export type Database = {
                     is_actif?: boolean
                     lib_code: string
                     type_promo?: string | null
+                    stripe_promotion_code_id?: string | null
                 }
                 Update: {
                     id_code_promo?: number
@@ -237,6 +239,7 @@ export type Database = {
                     is_actif?: boolean
                     lib_code?: string
                     type_promo?: string | null
+                    stripe_promotion_code_id?: string | null
                 }
                 Relationships: [
                     {
@@ -662,6 +665,9 @@ export type Database = {
                     lien_image_promo: string | null
                     type_remise: string
                     valeur_remise: number
+                    stripe_coupon_id: string | null
+                    stripe_duration: string
+                    duree_mois: number | null
                 }
                 Insert: {
                     date_expiration: string
@@ -671,6 +677,9 @@ export type Database = {
                     lien_image_promo?: string | null
                     type_remise: string
                     valeur_remise: number
+                    stripe_coupon_id?: string | null
+                    stripe_duration?: string
+                    duree_mois?: number | null
                 }
                 Update: {
                     date_expiration?: string
@@ -680,6 +689,9 @@ export type Database = {
                     lien_image_promo?: string | null
                     type_remise?: string
                     valeur_remise?: number
+                    stripe_coupon_id?: string | null
+                    stripe_duration?: string
+                    duree_mois?: number | null
                 }
                 Relationships: []
             }

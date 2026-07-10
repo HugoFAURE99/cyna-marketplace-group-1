@@ -52,6 +52,8 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
   const [isGlobal, setIsGlobal] = useState(
     promotion ? promotion.produits.length === 0 && promotion.categories.length === 0 : false
   );
+  const [duration, setDuration] = useState(promotion?.stripe_duration || "once");
+  const [dureeMois, setDureeMois] = useState(String(promotion?.duree_mois ?? ""));
 
   const [selectedProducts, setSelectedProducts] = useState<SimpleItem[]>(
     promotion?.produits.map((p) => ({ id: p.id_produit, nom: p.nom })) || []
@@ -79,6 +81,9 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
         code_promo: isCodePromo ? codePromo : null,
         produit_ids: isGlobal ? [] : selectedProducts.map((p) => p.id),
         categorie_ids: isGlobal ? [] : selectedCategories.map((c) => c.id),
+        stripe_duration: duration,
+        duree_mois:
+          duration === "repeating" && dureeMois ? Number(dureeMois) : null,
       };
 
       if (isEdit && promotion) {
@@ -152,7 +157,7 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
               <button
                 type="button"
                 onClick={() => setNoExpiration(!noExpiration)}
-                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${noExpiration ? "bg-green-500" : "bg-muted"}`}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${noExpiration ? "bg-primary" : "bg-muted"}`}
               >
                 <span
                   className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow-sm ring-0 transition-transform ${noExpiration ? "translate-x-4" : "translate-x-0"}`}
@@ -169,12 +174,41 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
           <button
             type="button"
             onClick={() => setIsActif(!isActif)}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${isActif ? "bg-green-500" : "bg-muted"}`}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${isActif ? "bg-primary" : "bg-muted"}`}
           >
             <span
               className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow-sm ring-0 transition-transform ${isActif ? "translate-x-4" : "translate-x-0"}`}
             />
           </button>
+        </div>
+
+        {/* Discount duration (Stripe) */}
+        <div className="flex gap-4">
+          <div className="flex-1">
+            <Label>{t("duration")}</Label>
+            <select
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+            >
+              <option value="once">{t("durationOnce")}</option>
+              <option value="forever">{t("durationForever")}</option>
+              <option value="repeating">{t("durationRepeating")}</option>
+            </select>
+          </div>
+          {duration === "repeating" && (
+            <div className="flex-1">
+              <Label>{t("durationMonths")}</Label>
+              <Input
+                type="number"
+                min="1"
+                value={dureeMois}
+                onChange={(e) => setDureeMois(e.target.value)}
+                required
+                className="mt-1"
+              />
+            </div>
+          )}
         </div>
 
         {/* Code promo / Automatique toggle */}
@@ -227,7 +261,7 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
           <button
             type="button"
             onClick={() => setIsGlobal(!isGlobal)}
-            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${isGlobal ? "bg-green-500" : "bg-muted"}`}
+            className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${isGlobal ? "bg-primary" : "bg-muted"}`}
           >
             <span
               className={`pointer-events-none block h-4 w-4 rounded-full bg-white shadow-sm ring-0 transition-transform ${isGlobal ? "translate-x-4" : "translate-x-0"}`}

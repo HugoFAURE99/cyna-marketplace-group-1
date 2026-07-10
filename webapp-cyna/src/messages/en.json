@@ -353,6 +353,11 @@
         "cancel": "Cancel",
         "confirm": "Confirm",
         "noExpiration": "No expiration date",
+        "duration": "Discount duration",
+        "durationOnce": "First payment only",
+        "durationForever": "Every renewal",
+        "durationRepeating": "For N months",
+        "durationMonths": "Number of months",
         "globalOrder": "Apply to entire order",
         "globalOrderHint": "Applied to the order total",
         "targetedHint": "Applied to specific products or categories"

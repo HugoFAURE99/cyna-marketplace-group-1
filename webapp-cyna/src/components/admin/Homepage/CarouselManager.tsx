@@ -146,7 +146,7 @@ function SortableSlideRow({
             type="button"
             onClick={onToggle}
             className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-              slide.est_actif ? "bg-green-500" : "bg-muted"
+              slide.est_actif ? "bg-primary" : "bg-muted"
             }`}
           >
             <span

@@ -231,7 +231,7 @@ export default function OrdersTableClient({
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">{t.date}</span>
             <span className="text-sm font-medium">
-              {new Date(detail.date_commande).toLocaleString()}
+              {new Date(detail.date_commande).toLocaleString("fr-FR")}
             </span>
           </div>
           <div className="flex justify-between">
@@ -418,7 +418,7 @@ export default function OrdersTableClient({
                   #{order.id_commande}
                 </TableCell>
                 <TableCell>
-                  {new Date(order.date_commande).toLocaleDateString()}
+                  {new Date(order.date_commande).toLocaleDateString("fr-FR")}
                 </TableCell>
                 <TableCell>
                   <div>

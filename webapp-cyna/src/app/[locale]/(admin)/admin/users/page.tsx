@@ -31,7 +31,7 @@ export default async function UsersPage({
     user: tUsers("user"),
     delete: tUsers("delete"),
     confirmDeleteTitle: tUsers("confirmDeleteTitle"),
-    confirmDeleteMessage: tUsers("confirmDeleteMessage"),
+    confirmDeleteMessage: tUsers("confirmDeleteMessage", { name: "{name}" }),
     confirmDelete: tUsers("confirmDelete"),
     cancelDelete: tUsers("cancelDelete"),
     deleting: tUsers("deleting"),
