@@ -829,7 +829,12 @@
     "unknown": "Abonnement inconnu",
     "noSubscriptions": "Vous n'avez aucun abonnement pour le moment.",
     "searchPlaceholder": "Rechercher un abonnement...",
-    "noSearchResults": "Aucun abonnement trouvé pour \"{search}\"."
+    "noSearchResults": "Aucun abonnement trouvé pour \"{search}\".",
+    "expiringSoon": "Votre abonnement va bientôt expirer (nb de jours restant {days})",
+    "confirmDeactivateTitle": "Confirmer la désactivation",
+    "confirmDeactivateMessage": "Êtes-vous sûr de vouloir désactiver cet abonnement ?",
+    "confirm": "Confirmer",
+    "cancel": "Annuler"
   },
   "billing": {
     "title": "Facturation",

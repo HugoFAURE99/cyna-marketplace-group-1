@@ -828,7 +828,12 @@
     "unknown": "Unknown Subscription",
     "noSubscriptions": "You do not have any subscriptions at the moment.",
     "searchPlaceholder": "Search for a subscription...",
-    "noSearchResults": "No subscription found for \"{search}\"."
+    "noSearchResults": "No subscription found for \"{search}\".",
+    "expiringSoon": "Your subscription will expire soon ({days} days remaining)",
+    "confirmDeactivateTitle": "Confirm deactivation",
+    "confirmDeactivateMessage": "Are you sure you want to deactivate this subscription?",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "billing": {
     "title": "Billing",
