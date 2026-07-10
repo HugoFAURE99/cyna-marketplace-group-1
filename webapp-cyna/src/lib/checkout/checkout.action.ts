@@ -44,7 +44,7 @@ export async function processCheckout(locale: any) {
         .from("commande")
         .insert({
             montant_total: cartView.subtotalCents / 100, // On stocke en euros (ou devise de base)
-            statut_commande: "En attente",
+            statut_commande: "en_cours",
             mail_utilisateur_invite: user ? user.email : null
         })
         .select("id_commande")
@@ -71,6 +71,42 @@ export async function processCheckout(locale: any) {
         throw new Error("Impossible de sauvegarder le détail de la commande.");
     }
 
+    //GESTION DES PROMOTIONS AUTOMATIQUES
+    // ==========================================
+
+    const cartProductIds = cartView.items.map((item) => item.productId);
+
+    // Recherche des promos auto (non code) actives et valides
+    const { data: autoPromos, error: promoError } = await supabaseAdmin
+        .from("promotion")
+        .select(`
+            id_promotion,
+            stripe_coupon_id,
+            lien_produit_promo ( id_produit )
+        `)
+        .eq("is_actif", true)
+        .eq("is_code_promo", false)
+        .gte("date_expiration", new Date().toISOString());
+
+    let autoPromoStripeCouponId: string | null = null;
+
+    if (!promoError && autoPromos && autoPromos.length > 0) {
+        const appliedPromo = autoPromos.find((promo) => {
+            // Si aucun produit n'est ciblé, la promo s'applique à tout le site
+            if (!promo.lien_produit_promo || promo.lien_produit_promo.length === 0) {
+                return true;
+            }
+            // Sinon, on vérifie si un des produits du panier est concerné par la promo
+            const targetedProductIds = promo.lien_produit_promo.map((lp: any) => lp.id_produit);
+            return cartProductIds.some((cartId) => targetedProductIds.includes(cartId));
+        });
+
+        if (appliedPromo) {
+            autoPromoStripeCouponId = appliedPromo.stripe_coupon_id;
+            console.log(` Promo automatique appliquée : ${autoPromoStripeCouponId}`);
+        }
+    }
+
     // 5. Configuration de la session Stripe
     const lineItems = cartView.items.map((item) => ({
         price: item.stripePriceId, // C'est ici qu'on utilise la donnée !
@@ -83,8 +119,6 @@ export async function processCheckout(locale: any) {
         phone_number_collection: { enabled: true },//stripe demande le numero de telephone
         line_items: lineItems,
         mode: "subscription", // Important pour les abonnements
-
-        allow_promotion_codes: true,
 
         success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/${locale}?payment=success`,
         cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cart`,
@@ -104,7 +138,14 @@ export async function processCheckout(locale: any) {
                 }))
             ),
         },
-    };
+    }
+    if (autoPromoStripeCouponId) {
+        // Force l'application de la promo automatique (bloque la saisie d'un code)
+        sessionConfig.discounts = [{ coupon: autoPromoStripeCouponId }];
+    } else {
+        // Laisse la possibilité au client de taper un code promo
+        sessionConfig.allow_promotion_codes = true;
+    }
 
     if (stripeCustomerId) {
         sessionConfig.customer = stripeCustomerId;

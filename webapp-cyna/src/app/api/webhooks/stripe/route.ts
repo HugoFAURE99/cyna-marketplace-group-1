@@ -87,19 +87,61 @@ export async function POST(req: Request) {
                     console.log(" Facture PDF sécurisée dans le Bucket Privé.");
                 }
             }
+            // ==========================================
+            // ÉTAPE B : RÉCUPÉRATION DE LA PROMOTION ET DU MONTANT RÉEL
+            // ==========================================
+            // On demande à Stripe la session détaillée pour avoir accès aux réductions
+            const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+                expand: ["total_details.breakdown", "discounts"],
+            });
+
+            const montantReel = (fullSession.amount_total ?? 0) / 100;
+            const discountObject = fullSession.discounts?.[0];
+
+            // Sécurisation de l'extraction des IDs (Stripe peut renvoyer un objet complet ou juste la chaîne)
+            const appliedPromoCodeId = discountObject?.promotion_code
+                ? (typeof discountObject.promotion_code === 'string' ? discountObject.promotion_code : discountObject.promotion_code.id)
+                : null;
+
+            const appliedCouponId = discountObject?.coupon
+                ? (typeof discountObject.coupon === 'string' ? discountObject.coupon : discountObject.coupon.id)
+                : null;
+
+            let idPromotion: number | null = null;
+
+            // Recherche de l'ID interne de notre promotion via Supabase
+            if (appliedPromoCodeId) {
+                const { data } = await supabase
+                    .from("code_promo")
+                    .select("id_promotion")
+                    .eq("stripe_promotion_code_id", appliedPromoCodeId)
+                    .maybeSingle();
+                idPromotion = data?.id_promotion ?? null;
+            } else if (appliedCouponId) {
+                const { data } = await supabase
+                    .from("promotion")
+                    .select("id_promotion")
+                    .eq("stripe_coupon_id", appliedCouponId)
+                    .maybeSingle();
+                idPromotion = data?.id_promotion ?? null;
+            }
 
             // ==========================================
-            // ÉTAPE B : MISE À JOUR DE LA COMMANDE
+            // ÉTAPE C : MISE À JOUR DE LA COMMANDE
             // ==========================================
             type UpdateCommandeData = {
                 statut_commande: string;
                 url_facture: string | null;
-                mail_utilisateur_invite?: string; // Le "?" signifie que c'est optionnel
+                mail_utilisateur_invite?: string;
+                montant_total: number;
+                id_promotion: number | null;
             };
 
             const dataToUpdate: UpdateCommandeData = {
-                statut_commande: "Validée",
+                statut_commande: "payee",
                 url_facture: fileNameKey,
+                montant_total: montantReel,
+                id_promotion: idPromotion,
             };
 
             // Si c'est un invité, on ajoute l'e-mail
@@ -113,10 +155,10 @@ export async function POST(req: Request) {
                 .eq("id_commande", idCommande);
 
             if (commandeError) throw commandeError;
-            console.log(` Commande N°${idCommande} validée en BDD .`);
+            console.log(` Commande N°${idCommande} validée en BDD (Montant: ${montantReel}€).`);
 
             // ==========================================
-            // ÉTAPE C : ENREGISTREMENT DE L'ADRESSE (Point 2)
+            // ÉTAPE D : ENREGISTREMENT DE L'ADRESSE (Point 2)
             // ==========================================
             if (address) {
                 const nameParts = customerName ? customerName.split(" ") : [];
@@ -147,7 +189,7 @@ export async function POST(req: Request) {
             }
 
             // ==========================================
-            // ÉTAPE D : CRÉATION DE L'ABONNEMENT SAAS (MULTI-LICENCES)
+            // ÉTAPE E : CRÉATION DE L'ABONNEMENT SAAS (MULTI-LICENCES)
             // ==========================================
             if (session.subscription) {
                 const subscription: any = await stripe.subscriptions.retrieve(session.subscription as string);
@@ -198,7 +240,7 @@ export async function POST(req: Request) {
                 }
             }
             // ==========================================
-            // ÉTAPE E : SAUVEGARDE DE L'ID CLIENT STRIPE (Point 3)
+            // ÉTAPE F : SAUVEGARDE DE L'ID CLIENT STRIPE (Point 3)
             // ==========================================
             if (idCompte !== "invite" && stripeCustomerId) {
                 const { error: userUpdateError } = await supabase
