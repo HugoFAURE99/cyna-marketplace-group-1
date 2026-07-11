@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "invoices:backfill": "node --env-file=.env.local scripts/backfill-stripe-invoices.mjs",
     "start": "next start",
     "lint": "eslint"
   },

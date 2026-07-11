@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, LayoutGrid, List } from "lucide-react";
-import { SubscriptionCard } from "@/components/account/subscription-card";
+import { SubscriptionCard, type AccountSubscription } from "@/components/account/subscription-card";
 import { useTranslations } from "next-intl";
 
-export function SubscriptionsList({ subscriptions }: { subscriptions: any[] }) {
+export function SubscriptionsList({ subscriptions }: { subscriptions: AccountSubscription[] }) {
   const t = useTranslations("subscriptions");
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
@@ -18,7 +18,7 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: any[] }) {
     const prodTrad = sub.prix_tarif?.produit?.produit_traduction?.[0]?.nom_pro;
     const planName = prodTrad || sub.prix_tarif?.prix_tarif_traduction?.[0]?.nom_prix_tarif || "";
     return (
-      (sub.statut && sub.statut.toLowerCase().includes(term)) ||
+      sub.statut_abonnement.toLowerCase().includes(term) ||
       planName.toLowerCase().includes(term) ||
       (sub.id_abonnement && sub.id_abonnement.toString().includes(term))
     );
@@ -67,9 +67,9 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: any[] }) {
             ))}
           </div>
         ) : search ? (
-          <p className="text-slate-500 py-8">{t("noSearchResults", { search })}</p>
+          <p className="px-4 py-8 text-slate-500">{t("noSearchResults", { search })}</p>
         ) : (
-          <p className="text-slate-500 py-8">{t("noSubscriptions")}</p>
+          <p className="px-4 py-8 text-slate-500">{t("noSubscriptions")}</p>
         )}
       </div>
     </div>

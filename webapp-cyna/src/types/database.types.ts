@@ -76,6 +76,7 @@ export type Database = {
                     code_postal: string
                     id_adresse: number
                     id_compte: string | null
+                    is_default: boolean
                     is_deleted: boolean
                     mail_utilisateur_invite: string | null
                     nom: string
@@ -92,6 +93,7 @@ export type Database = {
                     code_postal: string
                     id_adresse?: number
                     id_compte?: string | null
+                    is_default?: boolean
                     is_deleted?: boolean
                     mail_utilisateur_invite?: string | null
                     nom: string
@@ -108,6 +110,7 @@ export type Database = {
                     code_postal?: string
                     id_adresse?: number
                     id_compte?: string | null
+                    is_default?: boolean
                     is_deleted?: boolean
                     mail_utilisateur_invite?: string | null
                     nom?: string
@@ -255,37 +258,119 @@ export type Database = {
                 Row: {
                     date_commande: string
                     id_commande: number
+                    id_compte: string | null
                     id_promotion: number | null
                     mail_utilisateur_invite: string | null
                     montant_total: number
                     statut_commande: string
+                    stock_decremented_at: string | null
+                    stripe_checkout_session_id: string | null
                     url_facture: string | null
                 }
                 Insert: {
                     date_commande?: string
                     id_commande?: number
+                    id_compte?: string | null
                     id_promotion?: number | null
                     mail_utilisateur_invite?: string | null
                     montant_total: number
                     statut_commande?: string
+                    stock_decremented_at?: string | null
+                    stripe_checkout_session_id?: string | null
                     url_facture?: string | null
                 }
                 Update: {
                     date_commande?: string
                     id_commande?: number
+                    id_compte?: string | null
                     id_promotion?: number | null
                     mail_utilisateur_invite?: string | null
                     montant_total?: number
                     statut_commande?: string
+                    stock_decremented_at?: string | null
+                    stripe_checkout_session_id?: string | null
                     url_facture?: string | null
                 }
                 Relationships: [
+                    {
+                        foreignKeyName: "commande_id_compte_fkey"
+                        columns: ["id_compte"]
+                        isOneToOne: false
+                        referencedRelation: "utilisateur"
+                        referencedColumns: ["id_compte"]
+                    },
                     {
                         foreignKeyName: "commande_id_promotion_fkey"
                         columns: ["id_promotion"]
                         isOneToOne: false
                         referencedRelation: "promotion"
                         referencedColumns: ["id_promotion"]
+                    },
+                ]
+            }
+            facture: {
+                Row: {
+                    created_at: string
+                    date_facture: string
+                    devise: string
+                    email_client: string | null
+                    hosted_invoice_url: string | null
+                    id_commande: number | null
+                    id_compte: string | null
+                    id_facture: number
+                    montant_total: number
+                    statut: string
+                    storage_path: string | null
+                    stripe_invoice_id: string
+                    stripe_subscription_id: string | null
+                    updated_at: string
+                }
+                Insert: {
+                    created_at?: string
+                    date_facture: string
+                    devise?: string
+                    email_client?: string | null
+                    hosted_invoice_url?: string | null
+                    id_commande?: number | null
+                    id_compte?: string | null
+                    id_facture?: number
+                    montant_total?: number
+                    statut: string
+                    storage_path?: string | null
+                    stripe_invoice_id: string
+                    stripe_subscription_id?: string | null
+                    updated_at?: string
+                }
+                Update: {
+                    created_at?: string
+                    date_facture?: string
+                    devise?: string
+                    email_client?: string | null
+                    hosted_invoice_url?: string | null
+                    id_commande?: number | null
+                    id_compte?: string | null
+                    id_facture?: number
+                    montant_total?: number
+                    statut?: string
+                    storage_path?: string | null
+                    stripe_invoice_id?: string
+                    stripe_subscription_id?: string | null
+                    updated_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "facture_id_commande_fkey"
+                        columns: ["id_commande"]
+                        isOneToOne: false
+                        referencedRelation: "commande"
+                        referencedColumns: ["id_commande"]
+                    },
+                    {
+                        foreignKeyName: "facture_id_compte_fkey"
+                        columns: ["id_compte"]
+                        isOneToOne: false
+                        referencedRelation: "utilisateur"
+                        referencedColumns: ["id_compte"]
                     },
                 ]
             }
@@ -723,6 +808,7 @@ export type Database = {
                     description: string | null
                     email_contact: string
                     id_compte: string | null
+                    id_commande: number | null
                     id_support: string
                     origine_chatbot: boolean | null
                     status: string | null
@@ -734,6 +820,7 @@ export type Database = {
                     description?: string | null
                     email_contact: string
                     id_compte?: string | null
+                    id_commande?: number | null
                     id_support?: string
                     origine_chatbot?: boolean | null
                     status?: string | null
@@ -745,12 +832,20 @@ export type Database = {
                     description?: string | null
                     email_contact?: string
                     id_compte?: string | null
+                    id_commande?: number | null
                     id_support?: string
                     origine_chatbot?: boolean | null
                     status?: string | null
                     sujet?: string
                 }
                 Relationships: [
+                    {
+                        foreignKeyName: "ticket_support_id_commande_fkey"
+                        columns: ["id_commande"]
+                        isOneToOne: false
+                        referencedRelation: "commande"
+                        referencedColumns: ["id_commande"]
+                    },
                     {
                         foreignKeyName: "ticket_support_id_compte_fkey"
                         columns: ["id_compte"]
@@ -793,6 +888,7 @@ export type Database = {
         }
         Functions: {
             est_admin: { Args: never; Returns: boolean }
+            finalize_paid_order: { Args: { p_order_id: number }; Returns: boolean }
         }
         Enums: {
             langue: "fr" | "en"

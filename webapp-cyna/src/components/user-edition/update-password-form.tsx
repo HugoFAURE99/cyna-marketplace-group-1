@@ -46,6 +46,7 @@ export function UpdatePasswordForm() {
             className="border border-slate-300 rounded-md p-2 focus:ring-2 focus:ring-black outline-none transition-shadow"
             placeholder={t("passwordPlaceholder")}
           />
+          <p className="text-xs text-slate-500">{t("passwordRequirements")}</p>
         </div>
         <div className="flex flex-col gap-2">
           <label htmlFor="password_confirm" className="font-medium text-slate-700">

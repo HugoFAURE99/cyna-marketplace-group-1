@@ -3,8 +3,8 @@ import type { Locale } from "@/lib/i18n/translations";
 
 import { createServerClient } from "@/lib/supabase/server-client";
 
-import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
+import { AccountToast } from "@/components/account/account-toast";
 
 // Typage des données utilisateur (à remplacer plus tard par un fetch API/DB)
 interface UserProfile {
@@ -16,8 +16,10 @@ interface UserProfile {
 
 export default async function Account({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
+  searchParams: Promise<{ updated?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -38,6 +40,7 @@ export default async function Account({
   }
 
   const t = await getTranslations("account");
+  const { updated } = await searchParams;
 
   const [firstName, ...lastNameParts] = (dbUser?.nom_complet || "").split(" ");
   const lastName = lastNameParts.join(" ");
@@ -53,6 +56,7 @@ export default async function Account({
 
   return (
     <div className="space-y-8">
+      {updated === "password" && <AccountToast message={t("passwordUpdated")} />}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold tracking-tight text-slate-950">
           {t("title")}

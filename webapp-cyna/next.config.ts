@@ -6,6 +6,13 @@ import { fileURLToPath } from "node:url";
 const appDir = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [{
+      source: "/:locale(en|fr)/contact",
+      destination: "/:locale/faq#contact",
+      permanent: true,
+    }];
+  },
   // The Git repo root is one level above the Next app; keep Turbopack's
   // package/CSS resolution rooted in this app directory.
   turbopack: {

@@ -1,10 +1,11 @@
-import { ChevronDown, LogIn, UserPlus } from "lucide-react";
+import { ChevronDown, LogIn, Mail, MapPin, UserPlus } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import SupportTicketForm from "@/components/support/SupportTicketForm";
 import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
+import { getUserOrderOptions } from "@/lib/support/orders";
 
 type FaqItem = { q: string; a: string };
 
@@ -23,6 +24,7 @@ export default async function FaqPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  const orders = user ? await getUserOrderOptions(user.id, locale) : [];
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-12">
@@ -52,7 +54,23 @@ export default async function FaqPage({
         ))}
       </div>
 
-      <div className="mt-12 rounded-xl border border-slate-200 bg-slate-50 p-6">
+      <section className="mt-12 rounded-xl border border-slate-200 bg-white p-6" id="contact">
+        <h2 className="text-xl font-semibold text-slate-900">{t("contactTitle")}</h2>
+        <p className="mt-1 text-sm leading-6 text-slate-600">{t("contactIntro")}</p>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <a className="flex items-start gap-3 rounded-lg border border-slate-200 p-4 transition hover:border-purple-300" href="mailto:support.cyna@gmail.com">
+            <Mail aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-purple-700" />
+            <span><span className="block text-xs font-semibold uppercase tracking-wide text-slate-400">{t("contactEmail")}</span><span className="mt-1 block text-sm font-medium text-slate-900">support.cyna@gmail.com</span></span>
+          </a>
+          <div className="flex items-start gap-3 rounded-lg border border-slate-200 p-4">
+            <MapPin aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-purple-700" />
+            <span><span className="block text-xs font-semibold uppercase tracking-wide text-slate-400">{t("projectLocation")}</span><span className="mt-1 block text-sm font-medium text-slate-900">Institut Limayrac<br />50 rue de Limayrac<br />31079 Toulouse Cedex 5</span></span>
+          </div>
+        </div>
+        <p className="mt-4 text-xs leading-5 text-slate-500">{t("schoolDisclaimer")}</p>
+      </section>
+
+      <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-6">
         <h2 className="text-xl font-semibold text-slate-900">
           {tSupport("title")}
         </h2>
@@ -61,7 +79,7 @@ export default async function FaqPage({
             <p className="mt-1 mb-5 text-sm text-slate-600">
               {tSupport("subtitle")}
             </p>
-            <SupportTicketForm defaultEmail={user.email ?? ""} />
+            <SupportTicketForm defaultEmail={user.email ?? ""} orders={orders} />
           </>
         ) : (
           <>

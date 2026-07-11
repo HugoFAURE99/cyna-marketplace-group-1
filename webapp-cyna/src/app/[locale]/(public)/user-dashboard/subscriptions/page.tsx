@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
 import { SubscriptionsList } from "@/components/account/subscriptions-list";
+import type { AccountSubscription } from "@/components/account/subscription-card";
 
 export default async function Subscriptions({
   params,
@@ -18,7 +19,7 @@ export default async function Subscriptions({
     data: { user: authUser },
   } = await supabase.auth.getUser();
 
-  let subscriptions: any[] = [];
+  let subscriptions: AccountSubscription[] = [];
 
   if (authUser) {
     const { data } = await supabase
@@ -42,7 +43,7 @@ export default async function Subscriptions({
       .order("date_debut", { ascending: false });
 
     if (data) {
-      subscriptions = data;
+      subscriptions = data as unknown as AccountSubscription[];
     }
   }
 

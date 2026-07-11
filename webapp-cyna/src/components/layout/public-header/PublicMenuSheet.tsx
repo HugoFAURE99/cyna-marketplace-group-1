@@ -10,8 +10,9 @@ import {
   LifeBuoy,
   LogIn,
   LogOut, // <-- 1. Nouvel icône ajouté
-  Mail,
   Menu,
+  Package,
+  RefreshCw,
   Scale,
   UserPlus,
   X,
@@ -33,7 +34,6 @@ const informationLinks = [
   { href: "/faq", icon: LifeBuoy, labelKey: "faq" },
   { href: "/terms", icon: FileText, labelKey: "termsOfUse" },
   { href: "/legal", icon: Scale, labelKey: "legalNotices" },
-  { href: "/contact", icon: Mail, labelKey: "contact" },
   { href: "/about", icon: Info, labelKey: "aboutCyna" },
 ] as const;
 
@@ -100,6 +100,18 @@ export default function PublicMenuSheet({
                   <CircleUserRound aria-hidden="true" className="size-4" />
                   {t("myAccount")}
                 </Link>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <Link className="flex flex-col items-center gap-1 rounded-md border border-slate-200 px-2 py-2 text-center text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-purple-700" href="/user-dashboard/orders" onClick={closeMenu}>
+                    <Package aria-hidden="true" className="size-4" />{t("orders")}
+                  </Link>
+                  <Link className="flex flex-col items-center gap-1 rounded-md border border-slate-200 px-2 py-2 text-center text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-purple-700" href="/user-dashboard/subscriptions" onClick={closeMenu}>
+                    <RefreshCw aria-hidden="true" className="size-4" />{t("subscriptions")}
+                  </Link>
+                  <Link className="flex flex-col items-center gap-1 rounded-md border border-slate-200 px-2 py-2 text-center text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-purple-700" href="/faq" onClick={closeMenu}>
+                    <LifeBuoy aria-hidden="true" className="size-4" />{t("faq")}
+                  </Link>
+                </div>
 
                 <form action={logout}>
                   <button

@@ -55,13 +55,11 @@ export default function ChatTicketForm({ email, orders }: ChatTicketFormProps) {
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(false);
-    const orderLine = values.orderId
-      ? `\n\n${t("orderRefPrefix")} #${values.orderId}`
-      : "";
     const result = await submitChatSupportTicket({
       sujet: values.sujet,
       email_contact: values.email_contact,
-      description: values.description + orderLine,
+      description: values.description,
+      orderId: values.orderId ? Number(values.orderId) : undefined,
     });
     if (result.ok) {
       setSentEmail(values.email_contact);
