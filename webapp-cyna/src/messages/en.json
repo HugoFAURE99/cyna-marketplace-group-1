@@ -752,6 +752,7 @@
   },
   "orders": {
     "title": "Orders",
+    "invoiceWarning": "If you cannot download an invoice, please contact support.",
     "last_orders": "Last Orders",
     "searchPlaceholder": "Search for an order (ID, status, amount)...",
     "noSearchResults": "No order found for \"{search}\".",
@@ -818,7 +819,11 @@
     "phone": "Mobile Phone Number",
     "phoneHint": "Used for service or billing-related notifications",
     "submitNew": "Save Address",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "types": {
+      "facturation": "Billing",
+      "livraison": "Shipping"
+    }
   },
   "subscriptions": {
     "title": "My Subscriptions",
@@ -832,10 +837,16 @@
     "unknown": "Unknown Subscription",
     "noSubscriptions": "You do not have any subscriptions at the moment.",
     "searchPlaceholder": "Search for a subscription...",
-    "noSearchResults": "No subscription found for \"{search}\"."
+    "noSearchResults": "No subscription found for \"{search}\".",
+    "expiringSoon": "Your subscription will expire soon ({days} days remaining)",
+    "confirmDeactivateTitle": "Confirm deactivation",
+    "confirmDeactivateMessage": "Are you sure you want to deactivate this subscription?",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   },
   "billing": {
     "title": "Billing",
+    "invoiceWarning": "If you cannot download an invoice, please contact support.",
     "id": "Invoice ID",
     "date": "Date",
     "amount": "Amount",

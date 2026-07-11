@@ -53,6 +53,13 @@ export default async function Billing({
       <h1 className="text-3xl font-bold tracking-tight text-slate-950 mb-6 sm:mb-10">{t("title")}</h1>
 
       <BillingList invoices={invoices} locale={locale} />
+      
+      {/* Message d'avertissement pour les factures */}
+      <div className="w-full flex justify-end mt-4 px-4 sm:px-0">
+        <p className="text-red-500 text-sm font-medium max-w-sm text-right">
+          {t("invoiceWarning")}
+        </p>
+      </div>
     </div>
   );
 }

@@ -753,6 +753,7 @@
   },
   "orders": {
     "title": "Vos Commandes",
+    "invoiceWarning": "Si vous ne parvenez pas à télécharger une facture, veuillez contacter le support.",
     "last_orders": "Dernières Commandes",
     "searchPlaceholder": "Rechercher une commande (ID, statut, montant)...",
     "noSearchResults": "Aucune commande trouvée pour \"{search}\".",
@@ -819,7 +820,11 @@
     "phone": "Numéro de téléphone mobile",
     "phoneHint": "Utilisé pour d'éventuelles notifications liées aux services ou à la facturation",
     "submitNew": "Enregistrer l'adresse",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "types": {
+      "facturation": "Facturation",
+      "livraison": "Livraison"
+    }
   },
   "subscriptions": {
     "title": "Mes abonnements",
@@ -833,10 +838,16 @@
     "unknown": "Abonnement inconnu",
     "noSubscriptions": "Vous n'avez aucun abonnement pour le moment.",
     "searchPlaceholder": "Rechercher un abonnement...",
-    "noSearchResults": "Aucun abonnement trouvé pour \"{search}\"."
+    "noSearchResults": "Aucun abonnement trouvé pour \"{search}\".",
+    "expiringSoon": "Votre abonnement va bientôt expirer (nb de jours restant {days})",
+    "confirmDeactivateTitle": "Confirmer la désactivation",
+    "confirmDeactivateMessage": "Êtes-vous sûr de vouloir désactiver cet abonnement\u00A0?",
+    "confirm": "Confirmer",
+    "cancel": "Annuler"
   },
   "billing": {
     "title": "Facturation",
+    "invoiceWarning": "Si vous ne parvenez pas à télécharger une facture, veuillez contacter le support.",
     "id": "N° Facture",
     "date": "Date",
     "amount": "Montant",
