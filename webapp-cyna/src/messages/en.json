@@ -814,7 +814,11 @@
     "phone": "Mobile Phone Number",
     "phoneHint": "Used for service or billing-related notifications",
     "submitNew": "Save Address",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "types": {
+      "facturation": "Billing",
+      "livraison": "Shipping"
+    }
   },
   "subscriptions": {
     "title": "My Subscriptions",

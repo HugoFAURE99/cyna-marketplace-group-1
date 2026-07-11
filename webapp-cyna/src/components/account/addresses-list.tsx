@@ -76,7 +76,7 @@ export function AddressesList({ addresses }: { addresses: any[] }) {
                 </h3>
                 {addr.type_adresse && (
                   <span className="bg-slate-100 text-slate-600 text-xs px-2 py-1 rounded-md uppercase font-semibold whitespace-nowrap">
-                    {addr.type_adresse}
+                    {addr.type_adresse.toLowerCase() === "facturation" ? t("types.facturation") : addr.type_adresse.toLowerCase() === "livraison" ? t("types.livraison") : addr.type_adresse}
                   </span>
                 )}
               </div>

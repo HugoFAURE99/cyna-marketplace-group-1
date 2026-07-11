@@ -66,9 +66,9 @@ export function SubscriptionCard({ subscription, layout = "grid" }: Subscription
 
   const modal = showConfirm && (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-lg p-6 shadow-xl w-full max-w-md animate-in fade-in zoom-in duration-200">
+      <div className="bg-white rounded-lg p-6 shadow-xl w-full max-w-[480px] animate-in fade-in zoom-in duration-200">
         <h3 className="text-xl font-bold text-slate-900 mb-2">{t("confirmDeactivateTitle")}</h3>
-        <p className="text-slate-600 mb-6">{t("confirmDeactivateMessage")}</p>
+        <p className="text-slate-600 mb-6 text-pretty">{t("confirmDeactivateMessage")}</p>
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={() => setShowConfirm(false)} disabled={loading}>
             {t("cancel")}

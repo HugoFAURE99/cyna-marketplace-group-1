@@ -815,7 +815,11 @@
     "phone": "Numéro de téléphone mobile",
     "phoneHint": "Utilisé pour d'éventuelles notifications liées aux services ou à la facturation",
     "submitNew": "Enregistrer l'adresse",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "types": {
+      "facturation": "Facturation",
+      "livraison": "Livraison"
+    }
   },
   "subscriptions": {
     "title": "Mes abonnements",
@@ -832,7 +836,7 @@
     "noSearchResults": "Aucun abonnement trouvé pour \"{search}\".",
     "expiringSoon": "Votre abonnement va bientôt expirer (nb de jours restant {days})",
     "confirmDeactivateTitle": "Confirmer la désactivation",
-    "confirmDeactivateMessage": "Êtes-vous sûr de vouloir désactiver cet abonnement ?",
+    "confirmDeactivateMessage": "Êtes-vous sûr de vouloir désactiver cet abonnement\u00A0?",
     "confirm": "Confirmer",
     "cancel": "Annuler"
   },
