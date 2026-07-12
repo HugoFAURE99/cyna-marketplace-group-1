@@ -25,16 +25,15 @@ export default async function Addresses({
   let addresses: Tables<"adresse">[] = [];
 
   if (authUser) {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("adresse")
       .select("*")
       .eq("id_compte", authUser.id)
       .eq("is_deleted", false)
       .order("id_adresse", { ascending: false });
 
-    if (data) {
-      addresses = data;
-    }
+    if (error) throw new Error(`ADDRESS_LIST_QUERY_FAILED: ${error.message}`);
+    addresses = data ?? [];
   }
 
   return (

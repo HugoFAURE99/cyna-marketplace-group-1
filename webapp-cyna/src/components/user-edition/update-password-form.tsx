@@ -64,7 +64,7 @@ export function UpdatePasswordForm() {
         <button
           type="submit"
           disabled={isPending}
-          className="bg-purple-700 text-white px-4 py-2 rounded-md hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 transition-colors self-start disabled:opacity-50"
+          className="min-h-11 cursor-pointer self-start rounded-md bg-purple-700 px-4 py-2 text-white transition-colors hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? "..." : t("updatePasswordButton")}
         </button>

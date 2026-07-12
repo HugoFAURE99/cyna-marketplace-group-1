@@ -1,4 +1,4 @@
--- Seed: addresses, orders, subscriptions for user b2dc5095-1e82-4a9a-8c4d-159bdb2a3dc8
+-- DEVELOPMENT ONLY: addresses, orders, subscriptions for a fixed test user.
 -- Run in Supabase SQL Editor
 
 DO $$

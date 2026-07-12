@@ -128,7 +128,7 @@ export default function HomeCarousel({ slides, buttonHref }: HomeCarouselProps) 
         <>
           <button
             aria-label={t("carouselPrevious")}
-            className="absolute left-3 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-950 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:left-4 sm:inline-flex"
+            className="absolute left-3 top-1/2 z-10 hidden size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-950 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white active:scale-95 sm:left-4 sm:inline-flex"
             onClick={goToPrevious}
             type="button"
           >
@@ -136,7 +136,7 @@ export default function HomeCarousel({ slides, buttonHref }: HomeCarouselProps) 
           </button>
           <button
             aria-label={t("carouselNext")}
-            className="absolute right-3 top-1/2 z-10 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-950 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-4 sm:inline-flex"
+            className="absolute right-3 top-1/2 z-10 hidden size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white/85 text-slate-950 shadow-sm transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white active:scale-95 sm:right-4 sm:inline-flex"
             onClick={goToNext}
             type="button"
           >

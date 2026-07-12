@@ -9,6 +9,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import type { Locale } from "@/lib/i18n/translations";
+import { cn } from "@/lib/utils";
 
 type FlagProps = { className?: string };
 
@@ -19,7 +20,13 @@ const FLAGS: Record<string, (props: FlagProps) => ReactElement> = {
 
 const FLAG_CLASS = "h-4 w-6 rounded-[3px] shadow-sm ring-1 ring-black/10";
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({
+  fullWidth = false,
+  label,
+}: {
+  fullWidth?: boolean;
+  label?: string;
+} = {}) {
   const t = useTranslations("common");
   const locale = useLocale();
   const router = useRouter();
@@ -61,29 +68,36 @@ export default function LanguageSwitcher() {
   const otherLocales = routing.locales.filter((loc) => loc !== locale);
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className={cn("relative", fullWidth && "w-full")} ref={containerRef}>
       <button
         aria-expanded={open}
-        aria-haspopup="listbox"
+        aria-controls="language-options"
         aria-label={t("languageSwitcher")}
-        className="flex size-9 items-center justify-center rounded-full transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+        className={cn(
+          "flex min-h-11 cursor-pointer items-center justify-center transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 active:bg-slate-200",
+          fullWidth ? "w-full justify-between rounded-md px-3" : "size-11 rounded-full",
+        )}
         onClick={() => setOpen((value) => !value)}
         type="button"
       >
-        {CurrentFlag && <CurrentFlag className={FLAG_CLASS} />}
+        {label && <span className="text-sm font-medium text-slate-700">{label}</span>}
+        <span className={cn("flex items-center", label && "gap-2")}>
+          {CurrentFlag && <CurrentFlag className={FLAG_CLASS} />}
+          {label && <span className="text-xs font-semibold uppercase text-slate-500">{locale}</span>}
+        </span>
       </button>
 
       {open && (
         <ul
-          className="absolute right-0 z-50 mt-2 w-[5.75rem] overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg"
-          role="listbox"
+          className={cn("absolute right-0 z-50 mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg", fullWidth ? "w-full" : "w-[5.75rem]")}
+          id="language-options"
         >
           {otherLocales.map((loc) => {
             const Flag = FLAGS[loc];
             return (
-              <li aria-selected={false} key={loc} role="option">
+              <li key={loc}>
                 <button
-                  className="flex w-full items-center gap-2 px-2.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-900"
+                  className="flex min-h-11 w-full cursor-pointer items-center gap-2 px-2.5 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purple-700 active:bg-purple-50"
                   onClick={() => switchTo(loc)}
                   type="button"
                 >

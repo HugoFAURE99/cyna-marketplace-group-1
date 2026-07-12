@@ -1,4 +1,4 @@
--- Seed 10 test products for pagination testing
+-- DEVELOPMENT ONLY: seed 10 test products for pagination testing.
 -- Uses the first category found in the database
 -- Run with: psql <connection_string> -f scripts/seed-test-products.sql
 -- Or paste into Supabase SQL Editor

@@ -1,4 +1,4 @@
--- Seed data for sales dashboard charts
+-- DEVELOPMENT ONLY: seed data for sales dashboard charts.
 -- Run this in the Supabase SQL Editor
 -- Prerequisites: products and prix_tarif must already exist
 

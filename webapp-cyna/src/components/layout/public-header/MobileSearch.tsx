@@ -32,7 +32,7 @@ export default function MobileSearch() {
         aria-controls="mobile-search-panel"
         aria-expanded={open}
         aria-label={open ? t("searchClose") : t("searchOpen")}
-        className="inline-flex size-11 items-center justify-center rounded-md text-slate-950 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+        className="inline-flex size-11 cursor-pointer items-center justify-center rounded-md text-slate-950 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 active:bg-slate-200"
         onClick={() => setOpen((value) => !value)}
         type="button"
       >

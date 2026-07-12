@@ -27,6 +27,16 @@ export default function ChatPanel({
   const t = useTranslations("chat");
   const [input, setInput] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [onClose]);
 
   useEffect(() => {
     const element = scrollRef.current;
@@ -48,10 +58,11 @@ export default function ChatPanel({
   return (
     <div
       role="dialog"
-      aria-label={t("title")}
+      aria-labelledby="cynai-dialog-title"
       className="fixed bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4rem)] left-3 z-40 flex h-[min(70vh,560px)] w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-900/5 animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 sm:bottom-24 sm:left-6 sm:w-[384px]"
     >
       <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
+        <h2 className="sr-only" id="cynai-dialog-title">{t("title")}</h2>
         <div className="flex items-center gap-1.5">
           <Image
             src="/brand/cyna-logo-v2-header.svg"
@@ -68,7 +79,7 @@ export default function ChatPanel({
           type="button"
           onClick={onClose}
           aria-label={t("close")}
-          className="inline-flex size-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          className="inline-flex size-11 cursor-pointer items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-200"
         >
           <X aria-hidden="true" className="size-5" />
         </button>
@@ -99,6 +110,7 @@ export default function ChatPanel({
         className="flex items-center gap-2 border-t border-slate-100 px-3 py-3"
       >
         <input
+          ref={inputRef}
           value={input}
           onChange={(event) => setInput(event.target.value)}
           placeholder={t("placeholder")}
@@ -109,7 +121,7 @@ export default function ChatPanel({
           type="submit"
           disabled={isStreaming || !input.trim()}
           aria-label={t("send")}
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-purple-700 text-white transition hover:bg-purple-800 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-purple-700 text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 focus-visible:ring-offset-2 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Send aria-hidden="true" className="size-4" />
         </button>

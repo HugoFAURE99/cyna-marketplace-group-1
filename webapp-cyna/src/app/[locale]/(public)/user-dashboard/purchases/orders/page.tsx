@@ -40,9 +40,8 @@ export default async function PurchaseOrders({ params }: { params: Promise<{ loc
           )
         )
       `)
-      .eq("id_compte", user.id)
       .order("date_commande", { ascending: false });
-    if (error) console.error("[purchases/orders] query failed", error);
+    if (error) throw new Error(`ORDER_LIST_QUERY_FAILED: ${error.message}`);
     orders = (data ?? []) as unknown as AccountOrder[];
   }
   return <OrdersList locale={locale} orders={orders} />;

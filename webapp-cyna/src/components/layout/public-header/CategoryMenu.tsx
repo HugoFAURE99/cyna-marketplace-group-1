@@ -53,8 +53,8 @@ export default function CategoryMenu({
     <div className="relative" ref={containerRef}>
       <button
         aria-expanded={open}
-        aria-haspopup="menu"
-        className="inline-flex h-9 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-sm font-medium text-slate-700 transition hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:px-3"
+        aria-controls="category-navigation"
+        className="inline-flex h-11 cursor-pointer items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 text-sm font-medium text-slate-700 transition hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100 sm:px-3"
         onClick={() => setOpen((value) => !value)}
         type="button"
       >
@@ -67,15 +67,15 @@ export default function CategoryMenu({
       </button>
 
       {open && (
-        <div
+        <nav
+          aria-label={t("categories")}
           className="absolute left-0 top-[calc(100%+0.5rem)] z-50 max-h-[70vh] w-60 overflow-auto rounded-md border border-slate-200 bg-white p-1 shadow-lg"
-          role="menu"
+          id="category-navigation"
         >
           <Link
             className={cn(itemClass, "font-medium")}
             href="/search"
             onClick={() => setOpen(false)}
-            role="menuitem"
           >
             {t("allProducts")}
           </Link>
@@ -88,12 +88,11 @@ export default function CategoryMenu({
               href={`/search?category=${category.id_categorie}`}
               key={category.id_categorie}
               onClick={() => setOpen(false)}
-              role="menuitem"
             >
               {category.cat_nom}
             </Link>
           ))}
-        </div>
+        </nav>
       )}
     </div>
   );

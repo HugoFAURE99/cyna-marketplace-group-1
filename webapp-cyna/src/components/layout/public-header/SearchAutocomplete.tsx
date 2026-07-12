@@ -189,7 +189,7 @@ export default function SearchAutocomplete({
         />
         <button
           aria-label={t("searchButton")}
-          className="absolute right-3 top-1/2 inline-flex size-6 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+          className="absolute right-0 top-1/2 inline-flex size-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 active:bg-slate-200"
           type="submit"
         >
           <Search aria-hidden="true" className="size-5" />
@@ -269,7 +269,7 @@ export default function SearchAutocomplete({
 
           {results.length > 0 && (
             <button
-              className="flex w-full items-center justify-between border-t border-slate-100 px-4 py-2.5 text-sm font-medium text-purple-700 transition hover:bg-purple-50"
+              className="flex min-h-11 w-full cursor-pointer items-center justify-between border-t border-slate-100 px-4 py-2.5 text-sm font-medium text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-purple-700 active:bg-purple-100"
               onClick={() => goToSearch(query)}
               type="button"
             >

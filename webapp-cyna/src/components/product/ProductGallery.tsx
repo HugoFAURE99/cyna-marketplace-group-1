@@ -72,7 +72,7 @@ export default function ProductGallery({
           <>
             <Button
               aria-label="Previous image"
-              className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/85 text-slate-950 hover:bg-white"
+              className="absolute left-3 top-1/2 size-11 -translate-y-1/2 rounded-full bg-white/85 text-slate-950 hover:bg-white"
               onClick={goToPrevious}
               size="icon-sm"
               type="button"
@@ -82,7 +82,7 @@ export default function ProductGallery({
             </Button>
             <Button
               aria-label="Next image"
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/85 text-slate-950 hover:bg-white"
+              className="absolute right-3 top-1/2 size-11 -translate-y-1/2 rounded-full bg-white/85 text-slate-950 hover:bg-white"
               onClick={goToNext}
               size="icon-sm"
               type="button"
@@ -101,7 +101,7 @@ export default function ProductGallery({
               aria-label={`Show image ${index + 1}`}
               aria-pressed={safeSelectedIndex === index}
               className={cn(
-                "h-20 w-20 shrink-0 rounded-lg border bg-cover bg-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2",
+                "h-20 w-20 shrink-0 cursor-pointer rounded-lg border bg-cover bg-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 active:scale-95",
                 safeSelectedIndex === index
                   ? "border-transparent shadow-md shadow-slate-900/20"
                   : "border-transparent shadow-sm hover:border-slate-200 hover:shadow-md",
