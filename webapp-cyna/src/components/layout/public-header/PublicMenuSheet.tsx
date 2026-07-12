@@ -32,13 +32,13 @@ export default function PublicMenuSheet({ categories, isLoggedIn = false }: { ca
           <div className="min-w-0 space-y-2">
             {isLoggedIn ? <>
               <Link className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-3 text-sm font-semibold text-white hover:bg-purple-800" href="/user-dashboard/infos" onClick={close}><UserRound aria-hidden="true" className="size-4" />{t("myAccount")}</Link>
-              <form action={logout}><button className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-purple-200 px-3 text-sm font-semibold text-purple-700 hover:bg-purple-50" onClick={close} type="submit"><LogOut aria-hidden="true" className="size-4" />{t("logOut")}</button></form>
+              <form action={logout}><button className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-purple-200 px-3 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100" onClick={close} type="submit"><LogOut aria-hidden="true" className="size-4" />{t("logOut")}</button></form>
             </> : <>
               <Link className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-3 text-sm font-semibold text-white hover:bg-purple-800" href="/login" onClick={close}><LogIn aria-hidden="true" className="size-4" />{t("logIn")}</Link>
               <Link className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-purple-700 px-3 text-sm font-semibold text-purple-700 hover:bg-purple-50" href="/register" onClick={close}><UserPlus aria-hidden="true" className="size-4" />{t("signUp")}</Link>
             </>}
           </div>
-          <SheetClose aria-label={t("closeMenu")} className="inline-flex size-11 items-center justify-center rounded-md border border-slate-200 text-slate-700 hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"><X aria-hidden="true" className="size-6" /></SheetClose>
+          <SheetClose aria-label={t("closeMenu")} className="inline-flex size-11 cursor-pointer items-center justify-center rounded-md border border-slate-200 text-slate-700 transition hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100"><X aria-hidden="true" className="size-6" /></SheetClose>
         </div>
 
         <nav aria-label={tHeader("categories")} className="mt-7 md:hidden">
@@ -47,7 +47,7 @@ export default function PublicMenuSheet({ categories, isLoggedIn = false }: { ca
         </nav>
 
         <nav aria-label={t("information")} className="mt-7"><p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">{t("information")}</p><ul className="space-y-1">{informationLinks.map((item) => <li key={item.href}><Link className="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-purple-50 hover:text-purple-700" href={item.href} onClick={close}><item.icon aria-hidden="true" className="size-4" />{t(item.labelKey)}</Link></li>)}</ul></nav>
-        <div className="mt-7 flex items-center justify-between rounded-md border border-slate-200 px-3 py-2 md:hidden"><span className="text-sm font-medium">{t("language")}</span><LanguageSwitcher /></div>
+        <div className="mt-7 rounded-md border border-slate-200 md:hidden"><LanguageSwitcher fullWidth label={t("language")} /></div>
       </div>
       <div className="border-t border-slate-100 px-5 py-4"><Link aria-label={tHeader("homeAriaLabel")} href="/" onClick={close}><Image alt="CYNA" className="h-auto w-[100px]" height={27} src="/brand/cyna-logo-v2-header.svg" width={100} /></Link></div>
     </SheetContent>

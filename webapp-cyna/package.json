@@ -5,7 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "invoices:backfill": "node --env-file=.env.local scripts/backfill-stripe-invoices.mjs",
+    "invoices:backfill": "node --env-file=.env.local scripts/maintenance/backfill-stripe-invoices.mjs",
+    "db:types": "npm run db:types:local",
+    "db:types:local": "supabase gen types typescript --local > src/types/database.types.ts",
+    "db:types:linked": "supabase gen types typescript --linked > src/types/database.types.ts",
+    "db:types:check": "node scripts/check-supabase-types.mjs --local",
+    "db:types:check:linked": "node scripts/check-supabase-types.mjs --linked",
     "start": "next start",
     "lint": "eslint",
     "smoke:routes": "node scripts/smoke-customer-routes.mjs"
@@ -52,6 +57,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
     "tailwindcss": "^4",
+    "supabase": "2.109.1",
     "typescript": "^5"
   }
 }

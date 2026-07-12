@@ -3,7 +3,7 @@
 // Floating CynAI entry point: a bottom-left button that toggles the chat panel.
 // No overlay/blur — the panel just floats above the page with a soft shadow, so
 // the site stays fully visible and usable. z-40 keeps it below the menu sheet.
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { MessageCircle, X } from "lucide-react";
 
@@ -13,6 +13,7 @@ import { useCynaChat } from "@/components/chat/useCynaChat";
 export default function CynaChatWidget() {
   const t = useTranslations("chat");
   const [open, setOpen] = useState(false);
+  const launcherRef = useRef<HTMLButtonElement>(null);
   const { messages, isStreaming, sendMessage } = useCynaChat();
 
   return (
@@ -22,10 +23,14 @@ export default function CynaChatWidget() {
           messages={messages}
           isStreaming={isStreaming}
           onSend={sendMessage}
-          onClose={() => setOpen(false)}
+          onClose={() => {
+            setOpen(false);
+            requestAnimationFrame(() => launcherRef.current?.focus());
+          }}
         />
       )}
       <button
+        ref={launcherRef}
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}

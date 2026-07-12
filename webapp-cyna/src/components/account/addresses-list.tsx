@@ -41,15 +41,15 @@ export function AddressesList({ addresses }: { addresses: Tables<"adresse">[] })
             {address.telephone && <p className="mt-2 text-sm">{address.telephone}</p>}
           </address>
           <div className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-            <Link className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 px-3 text-sm font-medium text-slate-700 hover:bg-slate-50" href={`/user-dashboard/addresses/${address.id_adresse}/edit`}>
+            <Link className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-slate-200 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100" href={`/user-dashboard/addresses/${address.id_adresse}/edit`}>
               <Edit3 aria-hidden="true" className="size-4" />{t("edit")}
             </Link>
             {!address.is_default && (
-              <button className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-200 px-3 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50" disabled={isPending} onClick={() => startTransition(() => setDefaultAddress(address.id_adresse))} type="button">
+              <button className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-slate-200 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50" disabled={isPending} onClick={() => startTransition(() => setDefaultAddress(address.id_adresse))} type="button">
                 <Star aria-hidden="true" className="size-4" />{t("makeDefault")}
               </button>
             )}
-            <button className="inline-flex min-h-11 items-center gap-2 rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 disabled:opacity-50" disabled={isPending} onClick={() => {
+            <button className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-slate-300 px-3 text-sm font-medium text-slate-700 transition hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100 disabled:cursor-not-allowed disabled:opacity-50" disabled={isPending} onClick={() => {
               if (window.confirm(t("deleteConfirm"))) startTransition(() => deleteAddress(address.id_adresse));
             }} type="button">
               <Trash2 aria-hidden="true" className="size-4" />{t("delete")}

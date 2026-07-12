@@ -11,6 +11,7 @@ import { CheckCircle2 } from "lucide-react";
 
 import { submitSupportTicket } from "@/app/[locale]/(public)/faq/_actions/support.actions";
 import type { ChatOrderOption } from "@/lib/gemini/types";
+import { SUPPORT_TICKET_CATEGORIES } from "@/lib/support/constants";
 
 const fieldClass =
   "min-h-11 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-200";
@@ -36,6 +37,7 @@ export default function SupportTicketForm({
       .min(1, t("errors.emailRequired"))
       .email(t("errors.emailInvalid")),
     description: z.string().trim().min(1, t("errors.messageRequired")),
+    categorie: z.enum(SUPPORT_TICKET_CATEGORIES),
     orderId: z.string().optional(),
   });
   type FormValues = z.infer<typeof schema>;
@@ -47,7 +49,7 @@ export default function SupportTicketForm({
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { sujet: "", email_contact: defaultEmail, description: "", orderId: "" },
+    defaultValues: { sujet: "", email_contact: defaultEmail, description: "", categorie: "other", orderId: "" },
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -56,6 +58,7 @@ export default function SupportTicketForm({
       sujet: values.sujet,
       email_contact: values.email_contact,
       description: values.description,
+      categorie: values.categorie,
       orderId: values.orderId ? Number(values.orderId) : undefined,
     });
     if (result.ok) {
@@ -80,6 +83,13 @@ export default function SupportTicketForm({
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <div className="space-y-1.5">
+        <label htmlFor="ticket-category" className="text-sm font-medium text-slate-800">{t("category")}</label>
+        <select id="ticket-category" className={fieldClass} {...register("categorie")}>
+          {SUPPORT_TICKET_CATEGORIES.map((category) => <option key={category} value={category}>{t(`categories.${category}`)}</option>)}
+        </select>
+      </div>
+
       <div className="space-y-1.5">
         <label
           htmlFor="ticket-subject"
@@ -153,7 +163,7 @@ export default function SupportTicketForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+        className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
       >
         {isSubmitting ? t("submitting") : t("submit")}
       </button>

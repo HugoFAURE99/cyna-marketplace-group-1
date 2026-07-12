@@ -62,7 +62,7 @@ export default function CheckoutSummary({
       <button
         onClick={handleCheckout}
         disabled={isPending || subtotalCents === 0 || hasMixedIntervals}
-        className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-md bg-purple-700 text-base font-semibold text-white transition hover:bg-purple-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 inline-flex h-12 w-full cursor-pointer items-center justify-center rounded-md bg-purple-700 text-base font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-60"
         type="button"
       >
         {isPending ? (

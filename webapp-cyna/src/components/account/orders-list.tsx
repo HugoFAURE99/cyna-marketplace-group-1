@@ -106,7 +106,7 @@ export function OrdersList({ orders, locale }: { orders: AccountOrder[]; locale:
           <p className="text-slate-600">{search ? t("noSearchResults", { search }) : t("noOrders")}</p>
           <div className="mt-4 flex flex-col justify-center gap-3 sm:flex-row">
             <Link className="inline-flex min-h-11 items-center justify-center rounded-md bg-purple-700 px-4 text-sm font-semibold text-white" href="/search">{t("browseProducts")}</Link>
-            <Link className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-semibold text-slate-700" href="/faq">{t("contactSupport")}</Link>
+            <Link className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-md border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100" href="/faq#contact">{t("contactSupport")}</Link>
           </div>
         </div>
       ) : Object.entries(grouped).sort(([a], [b]) => Number(b) - Number(a)).map(([groupYear, groupOrders]) => (
@@ -158,11 +158,11 @@ function Filter({ label, onChange, options, render = (value) => value, value }: 
 }
 
 function SortableHead({ active, ascending, label, onClick }: { active: boolean; ascending: boolean; label: string; onClick: () => void }) {
-  return <th aria-sort={active ? (ascending ? "ascending" : "descending") : "none"} className="px-4 py-3 font-semibold"><button className="rounded-sm hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700" onClick={onClick} type="button">{label}</button></th>;
+  return <th aria-sort={active ? (ascending ? "ascending" : "descending") : "none"} className="px-4 py-3 font-semibold"><button className="min-h-11 cursor-pointer rounded-sm px-2 transition hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100" onClick={onClick} type="button">{label}</button></th>;
 }
 
 function ExpandButton({ open, onClick, t }: { open: boolean; onClick: () => void; t: ReturnType<typeof useTranslations<"orders">> }) {
-  return <button aria-expanded={open} className="inline-flex min-h-11 items-center gap-2 rounded-md px-3 text-sm font-semibold text-purple-700 hover:bg-purple-50" onClick={onClick} type="button">{open ? t("hideDetails") : t("details")}{open ? <ChevronUp aria-hidden="true" className="size-4" /> : <ChevronDown aria-hidden="true" className="size-4" />}</button>;
+  return <button aria-expanded={open} className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-3 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100" onClick={onClick} type="button">{open ? t("hideDetails") : t("details")}{open ? <ChevronUp aria-hidden="true" className="size-4" /> : <ChevronDown aria-hidden="true" className="size-4" />}</button>;
 }
 
 function OrderDetails({ locale, order, t }: { locale: string; order: AccountOrder; t: ReturnType<typeof useTranslations<"orders">> }) {

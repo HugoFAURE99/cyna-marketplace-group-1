@@ -29,6 +29,7 @@ export default async function UserDashboardLayout({
   const items = [
     { title: t("account"), url: "/user-dashboard/infos", icon: "user" },
     { title: t("purchases"), url: "/user-dashboard/purchases", icon: "package" },
+    { title: t("tickets"), url: "/user-dashboard/tickets", icon: "messages" },
     { title: t("addresses"), url: "/user-dashboard/addresses", icon: "map-pin" },
   ];
 

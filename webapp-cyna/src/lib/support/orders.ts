@@ -25,7 +25,7 @@ export async function getUserOrderOptions(userId: string, locale: Locale): Promi
   const { data, error } = await supabase.from("commande").select(`
     id_commande, date_commande,
     ligne_commande (prix_tarif (produit (produit_traduction (langue, nom_pro))))
-  `).eq("id_compte", user.id).order("date_commande", { ascending: false }).limit(MAX_ORDERS);
+  `).order("date_commande", { ascending: false }).limit(MAX_ORDERS);
   if (error || !data) return [];
 
   const t = await getTranslations({ locale, namespace: "support" });

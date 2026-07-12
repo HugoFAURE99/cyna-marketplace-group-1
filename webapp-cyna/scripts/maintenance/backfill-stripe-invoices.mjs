@@ -1,4 +1,4 @@
-// One-shot recovery for invoices created before the invoice webhook existed.
+// MANUAL MAINTENANCE ONLY: recovery for invoices created before the webhook.
 // Run deliberately with: npm run invoices:backfill
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";

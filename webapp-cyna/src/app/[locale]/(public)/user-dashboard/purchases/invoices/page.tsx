@@ -21,7 +21,7 @@ export default async function PurchaseInvoices({ params }: { params: Promise<{ l
       .from("facture")
       .select("*")
       .order("date_facture", { ascending: false });
-    if (error) console.error("[purchases/invoices] query failed", error);
+    if (error) throw new Error(`INVOICE_LIST_QUERY_FAILED: ${error.message}`);
     invoices = data ?? [];
   }
   return <div className="space-y-6"><BillingList invoices={invoices} locale={locale} /><p className="flex flex-wrap items-center gap-2 text-xs text-slate-500"><Info aria-hidden="true" className="size-4" /><span>{t("invoiceWarning")}</span><Link className="font-medium text-purple-700 hover:underline" href="/faq#contact">{t("supportLink")}</Link></p></div>;

@@ -243,7 +243,7 @@ export default function CartItemCard({ item }: CartItemCardProps) {
 
             <button
               aria-label={tc("remove", { name: item.name })}
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-slate-600 transition hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:opacity-50"
+              className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-slate-600 transition hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isPending}
               onClick={handleRemove}
               type="button"
@@ -300,7 +300,7 @@ export default function CartItemCard({ item }: CartItemCardProps) {
               <div className="flex h-9 items-center overflow-hidden rounded-md border border-input bg-white shadow-xs">
                 <button
                   aria-label={tc("decreaseLicenseUsers")}
-                  className="inline-flex h-full w-9 items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex h-full w-11 cursor-pointer items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={isPending || draftUserCount <= MIN_LICENSE_USERS}
                   onKeyDown={(event) => handleStepKeyDown(event, -1)}
                   type="button"
@@ -338,7 +338,7 @@ export default function CartItemCard({ item }: CartItemCardProps) {
                 />
                 <button
                   aria-label={tc("increaseLicenseUsers")}
-                  className="inline-flex h-full w-9 items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex h-full w-11 cursor-pointer items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={isPending || draftUserCount >= MAX_LICENSE_USERS}
                   onKeyDown={(event) => handleStepKeyDown(event, 1)}
                   type="button"

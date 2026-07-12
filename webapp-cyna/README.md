@@ -36,13 +36,19 @@ Ne jamais exposer les clés `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY` ou 
 
 ## Base de données
 
-Appliquer les migrations de `supabase/migrations` dans l'ordre. La migration `20260712090000_user_side_polish.sql` ajoute :
+`supabase/migrations/20260712235959_latest_schema.sql` est l'unique schéma de
+référence. Il décrit uniquement la structure finale (tables, contraintes,
+index, fonctions, triggers et RLS) et ne contient ni seed ni transformation de
+données.
 
-- la propriété et la session Stripe des commandes ;
-- la finalisation transactionnelle et idempotente du stock ;
-- les adresses de facturation par défaut ;
-- la relation ticket–commande ;
-- l'historique des factures initiales et de renouvellement.
+Ce fichier est destiné à une installation vide. **Ne pas l'exécuter sur le
+projet Supabase peuplé existant**, dont le schéma a déjà été appliqué
+manuellement et dont le registre de migrations est vide.
+
+Créer séparément les buckets Storage suivants :
+
+- `product-images`, `category-images` et `carousel-images` en lecture publique ;
+- `invoice-pdf` privé, utilisé uniquement via le service role et des URL signées.
 
 Après déploiement de la migration et du webhook, les anciennes factures Stripe peuvent être récupérées volontairement avec :
 
@@ -51,6 +57,28 @@ npm run invoices:backfill
 ```
 
 Cette commande écrit dans la base et le bucket configurés par `.env.local`. Elle n'est jamais lancée automatiquement.
+
+Les fichiers de `supabase/seeds/development` sont non idempotents, contiennent
+des identifiants de démonstration et ne doivent jamais être exécutés sur un
+environnement partagé ou de production.
+
+### Types Supabase
+
+`src/types/database.types.ts` est généré et ne doit pas être modifié à la main.
+
+```bash
+# Après la création d'une base locale vide avec le schéma final
+npm run db:types
+npm run db:types:check
+
+# Vérification explicite après déploiement sur le projet lié
+npm run db:types:linked
+npm run db:types:check:linked
+```
+
+Toute migration doit inclure la régénération des types. La vérification locale
+est la référence CI ; la génération liée sert à détecter une dérive après
+déploiement.
 
 ## Stripe en local
 
@@ -65,6 +93,13 @@ Reporter le secret `whsec_…` affiché dans `STRIPE_WEBHOOK_SECRET`. Le webhook
 - `invoice.finalized` et `invoice.paid` ;
 - `invoice.payment_failed` et `invoice.voided`.
 - `customer.subscription.updated` et `customer.subscription.deleted`.
+
+En démonstration/déploiement, créer également un endpoint Stripe actif vers
+`https://<domaine>/api/webhooks/stripe` avec ces événements, puis définir son
+secret de signature dans `STRIPE_WEBHOOK_SECRET`. Sans endpoint, Stripe encaisse
+le paiement mais la commande reste `En attente`, le stock n'est pas finalisé et
+les lignes de `facture` ne sont pas créées. Stripe CLI ne couvre que les tests
+locaux pendant l'exécution de `stripe listen`.
 
 Carte de test Stripe : `4242 4242 4242 4242`, date future et CVC quelconque.
 
@@ -84,6 +119,8 @@ Le build de production est la vérification de référence. Le dépôt contient 
 - `src/lib` : accès Supabase/Stripe, panier, support et règles métier ;
 - `src/messages` : traductions françaises et anglaises ;
 - `supabase/migrations` : schéma, RLS et fonctions SQL.
+- `supabase/seeds/development` : données locales non destinées à la production ;
+- `scripts/maintenance` : opérations manuelles, jamais lancées au déploiement.
 
 ## Sécurité et périmètre
 

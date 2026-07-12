@@ -27,7 +27,7 @@ export function InvoiceDownloadButton({ invoiceId }: { invoiceId: number }) {
   return (
     <span className="inline-flex flex-col items-start gap-1">
       <button
-        className="inline-flex min-h-11 items-center gap-2 rounded-md bg-purple-700 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-800 disabled:opacity-60"
+        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md bg-purple-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-60"
         disabled={loading}
         onClick={download}
         type="button"

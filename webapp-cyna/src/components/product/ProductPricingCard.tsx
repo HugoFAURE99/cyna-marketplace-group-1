@@ -157,7 +157,7 @@ export default function ProductPricingCard({
                 <button
                   aria-pressed={isSelected}
                   className={cn(
-                    "rounded-lg border px-4 py-3 text-center transition",
+                    "cursor-pointer rounded-lg border px-4 py-3 text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100",
                     isSelected
                       ? "border-purple-700 bg-purple-50 text-slate-950 ring-1 ring-purple-700"
                       : "border-slate-300 bg-white text-slate-950 hover:border-purple-300",
@@ -184,10 +184,10 @@ export default function ProductPricingCard({
           >
             {t("numberOfUsers")}
           </label>
-          <div className="mt-2 flex h-11 w-full max-w-[220px] items-center overflow-hidden rounded-md border border-input bg-white shadow-xs">
+          <div className="mt-2 flex h-11 w-full items-center overflow-hidden rounded-md border border-input bg-white shadow-xs">
             <button
               aria-label={t("decreaseUsers")}
-              className="inline-flex h-full w-11 items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-full w-11 cursor-pointer items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
               disabled={userCount <= MIN_LICENSE_USERS}
               onKeyDown={(event) => handleStepKeyDown(event, -1)}
               type="button"
@@ -197,7 +197,7 @@ export default function ProductPricingCard({
             </button>
             <Input
               aria-label={t("numberOfUsers")}
-              className="h-10 rounded-none border-0 px-1 text-center shadow-none focus-visible:border-transparent focus-visible:ring-0"
+              className="h-10 min-w-0 flex-1 rounded-none border-0 px-1 text-center shadow-none focus-visible:border-transparent focus-visible:ring-0"
               id="product-user-count"
               inputMode="numeric"
               max={MAX_LICENSE_USERS}
@@ -222,7 +222,7 @@ export default function ProductPricingCard({
             />
             <button
               aria-label={t("increaseUsers")}
-              className="inline-flex h-full w-11 items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="inline-flex h-full w-11 cursor-pointer items-center justify-center text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
               disabled={userCount >= MAX_LICENSE_USERS}
               onKeyDown={(event) => handleStepKeyDown(event, 1)}
               type="button"

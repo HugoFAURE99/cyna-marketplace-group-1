@@ -154,7 +154,7 @@ export default async function NewAddress({
           <div className="flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center">
             <button
               type="submit"
-              className="inline-flex h-11 w-full items-center justify-center rounded-md bg-purple-700 px-6 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:w-auto"
+              className="inline-flex h-11 w-full cursor-pointer items-center justify-center rounded-md bg-purple-700 px-6 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-900 sm:w-auto"
             >
               {t("submitNew")}
             </button>

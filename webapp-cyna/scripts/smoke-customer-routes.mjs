@@ -8,6 +8,7 @@ const accountRoutes = [
   "/user-dashboard/orders", "/user-dashboard/billing", "/user-dashboard/subscriptions",
   "/user-dashboard/purchases", "/user-dashboard/purchases/orders",
   "/user-dashboard/purchases/subscriptions", "/user-dashboard/purchases/invoices",
+  "/user-dashboard/tickets",
 ];
 
 const failures = [];
