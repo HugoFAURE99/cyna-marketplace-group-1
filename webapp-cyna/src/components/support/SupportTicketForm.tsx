@@ -10,14 +10,17 @@ import { useTranslations } from "next-intl";
 import { CheckCircle2 } from "lucide-react";
 
 import { submitSupportTicket } from "@/app/[locale]/(public)/faq/_actions/support.actions";
+import type { ChatOrderOption } from "@/lib/gemini/types";
 
 const fieldClass =
   "w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-200";
 
 export default function SupportTicketForm({
   defaultEmail = "",
+  orders = [],
 }: {
   defaultEmail?: string;
+  orders?: ChatOrderOption[];
 }) {
   const t = useTranslations("support");
   const [submitted, setSubmitted] = useState(false);
@@ -31,6 +34,7 @@ export default function SupportTicketForm({
       .min(1, t("errors.emailRequired"))
       .email(t("errors.emailInvalid")),
     description: z.string().trim().min(1, t("errors.messageRequired")),
+    orderId: z.string().optional(),
   });
   type FormValues = z.infer<typeof schema>;
 
@@ -41,12 +45,17 @@ export default function SupportTicketForm({
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { sujet: "", email_contact: defaultEmail, description: "" },
+    defaultValues: { sujet: "", email_contact: defaultEmail, description: "", orderId: "" },
   });
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(false);
-    const result = await submitSupportTicket(values);
+    const result = await submitSupportTicket({
+      sujet: values.sujet,
+      email_contact: values.email_contact,
+      description: values.description,
+      orderId: values.orderId ? Number(values.orderId) : undefined,
+    });
     if (result.ok) {
       reset();
       setSubmitted(true);
@@ -86,6 +95,16 @@ export default function SupportTicketForm({
           <p className="text-xs text-red-600">{errors.sujet.message}</p>
         )}
       </div>
+
+      {orders.length > 0 && (
+        <div className="space-y-1.5">
+          <label htmlFor="ticket-order" className="text-sm font-medium text-slate-800">{t("orderLabel")}</label>
+          <select id="ticket-order" className={fieldClass} {...register("orderId")}>
+            <option value="">{t("orderNone")}</option>
+            {orders.map((order) => <option key={order.id} value={order.id}>{order.label}</option>)}
+          </select>
+        </div>
+      )}
 
       <div className="space-y-1.5">
         <label

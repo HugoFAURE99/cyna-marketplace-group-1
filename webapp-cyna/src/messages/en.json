@@ -28,15 +28,18 @@
     "closeMenu": "Close menu",
     "information": "Information",
     "logIn": "Log In",
-    "signUp": "Sign Up",
+    "signUp": "Create account",
     "logOut": "Log out",
     "myAccount": "My account",
     "connectedAs": "Connected as",
     "termsOfUse": "Terms of Use",
     "legalNotices": "Legal Notices",
     "contact": "Contact",
+    "faq": "Help",
     "aboutCyna": "About CYNA",
-    "faq": "Help & Support"
+    "faq": "Help",
+    "orders": "Orders",
+    "subscriptions": "Subscriptions"
   },
   "chat": {
     "title": "CynAI",
@@ -47,7 +50,7 @@
     "open": "Open CynAI chat",
     "close": "Close chat",
     "error": "Sorry, something went wrong. Please try again later.",
-    "supportCardTitle": "Help & Support",
+    "supportCardTitle": "Help",
     "supportCardSubtitle": "FAQ & contact our team",
     "ticketCreatedTitle": "Ticket sent",
     "ticketCreatedSubtitle": "Our team will reply to {email}.",
@@ -62,6 +65,7 @@
     "legal": "Legal",
     "followUs": "Follow Us",
     "aboutCyna": "About CYNA",
+    "faq": "Help",
     "contact": "Contact",
     "termsOfUse": "Terms of Use",
     "legalNotices": "Legal Notices",
@@ -182,16 +186,18 @@
       "loading": "Logging in...",
       "noAccount": "Don't have an account?",
       "createAccount": "Create an account",
-      "rememberMe": "Se souvenir de moi",
+      "rememberMe": "Remember me",
       "registerSuccess": "Account created successfully! Please log in.",
       "errorInvalidCredentials": "Invalid email or password.",
       "checkEmail": "Registration successful! Please check your inbox to confirm your email.",
       "updatePasswordSuccess": "Your password has been updated. You can now log in.",
       "invalidLink": "This link is invalid or has expired. Please try again.",
-      "errorMissingFields": "All fields are required."
+      "errorMissingFields": "All fields are required.",
+      "errorUnconfirmed": "Confirm your email address before signing in.",
+      "errorUnavailable": "Sign-in is temporarily unavailable. Please try again."
     },
     "register": {
-      "title": "Register",
+      "title": "Create account",
       "subtitle": "Create a new account",
       "username": "Username",
       "email": "Email",
@@ -201,12 +207,13 @@
       "loading": "Creating account...",
       "haveAccount": "Already have an account?",
       "logIn": "Log in",
-      "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.",
+      "passwordRequirements": "Password must be at least 8 characters long.",
       "errorMismatch": "Passwords do not match.",
       "errorTooShort": "Password must be at least 8 characters long.",
       "errorMissingFields": "All fields are required.",
       "errorEmailTaken": "This email address is already in use",
-      "errorComplexity": "Password must contain at least one uppercase, one lowercase, one number, and one special character."
+      "errorComplexity": "Password must contain at least one uppercase, one lowercase, one number, and one special character.",
+      "errorUnavailable": "Your account could not be created. Please try again."
     },
     "resetPassword": {
       "title": "Forgot Password",
@@ -216,7 +223,8 @@
       "loading": "Sending...",
       "backToLogin": "Back to login",
       "resetEmailSent": "A reset email has been sent. Please check your inbox (and spam folder!).",
-      "errorMissingFields": "Please enter your email address."
+      "errorMissingFields": "Please enter your email address.",
+      "errorUnavailable": "The reset email could not be sent. Please try again."
     },
     "updatePassword": {
       "title": "New Password",
@@ -225,9 +233,10 @@
       "confirmPassword": "Confirm Password",
       "submit": "Update Password",
       "loading": "Updating...",
-      "passwordRequirements": "Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.",
+      "passwordRequirements": "Password must be at least 8 characters long.",
       "errorMissingFields": "All fields are required.",
       "errorMismatch": "Passwords do not match.",
+      "errorTooShort": "Password must be at least 8 characters long.",
       "errorUpdateFailed": "Could not update your password. The link may have expired."
     }
   },
@@ -637,9 +646,9 @@
   },
   "about": {
     "title": "About CYNA",
-    "article": "Founded in 2021 following emergency responses to major cyberattacks, Cyna is a French managed cybersecurity company that designs and operates cutting-edge sovereign solutions, including SOC, EDR, and XDR.",
-    "article2": "Historically marketed through a direct distribution network, its services are now entering a new era with the launch of an innovative e-commerce platform designed to simplify access to its subscriptions on an international scale.",
-    "article3": "Tailored to pragmatically meet the needs of SMEs, mid-caps, and managed service providers (MSPs), Cyna's solutions rely on a highly secure infrastructure, data hosting based exclusively in France, and an elite team of experts providing continuous proactive surveillance 24/7."
+    "article": "CYNA is an educational cybersecurity marketplace designed and developed by a team of four Bachelor students at Institut Limayrac in Toulouse.",
+    "article2": "The project demonstrates a modern e-commerce journey for discovering cybersecurity software, managing a cart, purchasing licences through Stripe, and following orders and subscriptions from a customer account.",
+    "article3": "CYNA is a school prototype, not a cybersecurity company or a production security platform. The products and business information shown are demonstration content and no SOC, EDR, XDR, monitoring or security service is actually operated by the student team."
   },
   "contact": {
     "title": "Contacting Us   ",
@@ -648,9 +657,14 @@
     "email": "Email"
   },
   "faq": {
-    "title": "Help & Support",
+    "title": "Help",
     "subtitle": "Find a quick answer below, or open a ticket with our team.",
     "questionsTitle": "Frequently asked questions",
+    "contactTitle": "Contact the project team",
+    "contactIntro": "For a question about the marketplace, its billing demo or a support request, contact the student team.",
+    "contactEmail": "Support email",
+    "projectLocation": "Project location",
+    "schoolDisclaimer": "CYNA is a student project developed at Institut Limayrac. The institute does not operate or endorse this marketplace as a commercial cybersecurity service.",
     "items": [
       {
         "q": "What is CYNA?",
@@ -704,7 +718,11 @@
   },
   "legal": {
     "legal_title": "Legal Notices",
-    "legal_paragraph": "In accordance with the provisions of Article 6 of Law No. 2004-575 of June 21, 2004, on Confidence in the Digital Economy (LCEN), users of this website are hereby informed of the identities of the various parties involved in its creation and maintenance",
+    "legal_paragraph": "CYNA is an educational prototype. This page identifies the student project, its contact channel and the third-party services used for the demonstration.",
+    "projectOwner": "CYNA student team — four students",
+    "projectStatus": "Educational project, not a commercial company",
+    "notApplicable": "Not applicable",
+    "studentTeam": "CYNA project team",
     "webedit_title": "Website Editing",
     "webedit_ul1": "Website Owner",
     "webedit_ul2": "Legal Form",
@@ -712,30 +730,31 @@
     "webedit_ul4": "Registration Number",
     "webedit_ul5": "Publisher",
     "hosting_title": "Hosting",
-    "hosting_paragraph": "In accordance with the requirements for digital sovereignty and the protection of critical data specified for all of our SaaS security solutions, the website and its databases are hosted exclusively within.",
+    "hosting_paragraph": "The demonstration uses third-party hosting and cloud services. No claim is made that the application or its data are hosted exclusively in France or meet production cybersecurity certification requirements.",
+    "hostingValue": "Next.js application with Supabase and Stripe demonstration services",
     "hosting_referent": "Hosting Referent",
     "hosting_email_ref": "Email for Hosting Referent",
     "intelprop_title": "Intellectual Property Rights",
-    "intelprop_paragraph1": "CYNA-IT owns the intellectual property rights or holds the rights to use all elements accessible on the website, including trademarks, text, images, graphics, logos, videos, software architectures, icons.",
-    "intelprop_paragraph2": "Any reproduction, display, modification, publication, or adaptation of all or part of the website's content, regardless of the means or method used, is prohibited without the prior written authorization of the company.",
-    "intelprop_paragraph3": "Any unauthorized use of the website or any of the elements it contains shall be considered an act of infringement and shall be prosecuted in accordance with the provisions of Articles L.335-2 et seq. of the Intellectual Property Code."
+    "intelprop_paragraph1": "The application source code and original project content were produced for an educational assignment by the student team.",
+    "intelprop_paragraph2": "Third-party names, product examples, libraries and services remain the property of their respective owners. Their presence does not imply a commercial partnership.",
+    "intelprop_paragraph3": "The catalog is fictional demonstration content and does not grant licences to real cybersecurity products."
   },
   "terms": {
     "title": "Terms of Service",
     "subtitle1": "Purpose and Acceptance of Terms",
-    "paragraph1": "The purpose of this document is to define the conditions for accessing and using the CYNA-IT e-commerce platform. Accessing the catalog and subscribing to our SaaS services implies full and unreserved acceptance of these terms by the user.",
+    "paragraph1": "These terms describe the use of CYNA, an educational marketplace prototype intended for demonstration and assessment, not for the commercial delivery of cybersecurity services.",
     "subtitle2": "Access to SaaS Services and Account Creation",
-    "paragraph2": "Access to certain features, including purchasing subscriptions, managing the cart, and viewing order history, requires the creation of a secure user account. The user agrees to provide accurate information, maintain the confidentiality of their login credentials, and report any unauthorized use of their account.",
+    "paragraph2": "A demonstration account is required for order history, invoices and subscriptions. Users should not enter sensitive or production data and remain responsible for their test credentials.",
     "subtitle3": "Intellectual Property",
-    "paragraph3": "All content, trademarks, logos, graphics, source codes, and architectures of the software solutions (SOC, EDR, XDR) featured on this website are the exclusive property of CYNA-IT. Any unauthorized reproduction, modification, or distribution of these elements is strictly prohibited and will be subject to legal action.",
+    "paragraph3": "Original project code and content were created by the student team. Third-party names, libraries and example products remain the property of their respective owners.",
     "subtitle4": "Orders, Subscriptions, and Payments",
-    "paragraph4": "Pricing, billing, and automatic renewal terms for SaaS services are detailed during the cart validation process. Financial transactions are processed in an encrypted manner through secure, certified payment gateways.",
+    "paragraph4": "Payments use Stripe test mode. Displayed prices, orders, invoices and renewals do not represent commercial offers or real cybersecurity licences.",
     "subtitle5": "Platform Availability",
-    "paragraph5": "CYNA-IT makes every effort to ensure continuous access to its e-commerce platform and support tools, such as the Chatbot. However, the company reserves the right to temporarily suspend access to the website for technical maintenance or updates, without any entitlement to compensation.",
+    "paragraph5": "Availability is not guaranteed. The student team may suspend or reset the prototype, chatbot, catalog and test data for maintenance or demonstrations.",
     "subtitle6": "Liability and Warranties",
-    "paragraph6": "The user is solely responsible for their use of the information provided on the website and for the security of their own computer equipment. CYNA-IT shall not be held liable for any indirect damages, data loss, or service interruptions caused by a force majeure event or an Internet network malfunction.",
+    "paragraph6": "CYNA must not be relied on to protect systems, monitor threats or provide professional advice. It has no production security infrastructure or service-level agreement.",
     "subtitle7": "Modifications to Terms and Applicable Law",
-    "paragraph7": "CYNA-IT reserves the right to modify these terms at any time to adapt to technical or legal changes. These terms are governed by French law, and any dispute shall be submitted to the exclusive jurisdiction of the courts of Paris."
+    "paragraph7": "These notices may change as the school project evolves. Questions can be sent to support.cyna@gmail.com."
   },
   "user_dashboard": {
     "account": "Account Informations",
@@ -748,7 +767,8 @@
     "title": "Account Informations",
     "editProfile": "Edit User Profile",
     "email": "Email",
-    "creationDate": "Member since"
+    "creationDate": "Member since",
+    "passwordUpdated": "Your password has been updated successfully."
   },
   "orders": {
     "title": "Orders",
@@ -795,6 +815,8 @@
     "successEmailUpdate": "Email address updated successfully.",
     "successPasswordUpdate": "Password updated successfully.",
     "errorMismatch": "Passwords do not match.",
+    "errorTooShort": "Password must be at least 8 characters long.",
+    "passwordRequirements": "Use at least 8 characters.",
     "errorMissingFields": "Please fill in all required fields.",
     "errorUpdateFailed": "An error occurred during the update.",
     "requestResetDescription": "You will receive an email with a secure link to change your password.",
@@ -819,6 +841,13 @@
     "phone": "Mobile Phone Number",
     "phoneHint": "Used for service or billing-related notifications",
     "submitNew": "Save Address",
+    "edit": "Edit",
+    "editTitle": "Edit billing address",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this address?",
+    "default": "Default",
+    "makeDefault": "Use as default billing address",
+    "saveChanges": "Save changes",
     "cancel": "Cancel",
     "types": {
       "facturation": "Billing",
@@ -844,15 +873,35 @@
     "confirm": "Confirm",
     "cancel": "Cancel"
   },
+  "orderConfirmed": {
+    "title": "Order confirmed",
+    "subtitle": "Your payment has been confirmed and your licenses are being prepared. You can find the order and its invoices in your account.",
+    "orderNumber": "Order",
+    "date": "Date",
+    "status": "Payment status",
+    "paid": "Paid",
+    "summary": "Order summary",
+    "productFallback": "Cybersecurity service",
+    "licenses": "{count, plural, one {# license} other {# licenses}}",
+    "total": "Total",
+    "invoiceNote": "Your Stripe invoice may take a few moments to appear in the Billing section while it is finalized.",
+    "viewOrders": "View my orders",
+    "viewSubscriptions": "View my subscriptions",
+    "signIn": "Sign in",
+    "createAccount": "Create account"
+  },
   "billing": {
     "title": "Billing",
-    "invoiceWarning": "If you cannot download an invoice, please contact support.",
+    "invoiceWarning": "An invoice may take a few moments to become available. Contact support if it remains unavailable.",
+    "supportLink": "Open support",
     "id": "Invoice ID",
     "date": "Date",
     "amount": "Amount",
     "status": "Status",
     "invoice": "Invoice",
-    "download": "Download Invoice",
+    "download": "Download invoice",
+    "unavailable": "PDF pending",
+    "downloadError": "The invoice could not be opened. Please try again shortly.",
     "noInvoices": "You do not have any invoices at the moment.",
     "searchPlaceholder": "Search for an invoice (ID, status, amount)...",
     "noSearchResults": "No invoice found for \"{search}\"."

@@ -4,9 +4,21 @@ import { Button } from "@/components/ui/button";
 import { useTranslations, useLocale } from "next-intl";
 import { useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "@/types/database.types";
+
+export type AccountSubscription = {
+  id_abonnement: number;
+  statut_abonnement: string;
+  date_debut: string;
+  date_fin: string | null;
+  prix_tarif: {
+    prix_tarif_traduction?: { langue: string; nom_prix_tarif: string | null }[];
+    produit?: { produit_traduction?: { langue: string; nom_pro: string }[] } | null;
+  } | null;
+};
 
 export interface SubscriptionCardProps {
-  subscription: any;
+  subscription: AccountSubscription;
   layout?: "grid" | "list";
 }
 
@@ -15,8 +27,9 @@ export function SubscriptionCard({ subscription, layout = "grid" }: Subscription
   const locale = useLocale();
   const [loading, setLoading] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [status, setStatus] = useState(subscription.statut_abonnement);
 
-  const supabase = createBrowserClient(
+  const supabase = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
@@ -32,7 +45,7 @@ export function SubscriptionCard({ subscription, layout = "grid" }: Subscription
       .eq("id_abonnement", subscription.id_abonnement);
       
     if (!error) {
-      subscription.statut_abonnement = "désactivé";
+      setStatus("désactivé");
     } else {
       console.error("Failed to deactivate subscription", error);
     }
@@ -42,15 +55,14 @@ export function SubscriptionCard({ subscription, layout = "grid" }: Subscription
   };
 
   // Find the translated name
-  const prodTraductions = (subscription as any).prix_tarif?.produit?.produit_traduction || [];
-  const prodTranslation = prodTraductions.find((tr: any) => tr.langue === locale) || prodTraductions[0];
+  const prodTraductions = subscription.prix_tarif?.produit?.produit_traduction || [];
+  const prodTranslation = prodTraductions.find((translation) => translation.langue === locale) || prodTraductions[0];
   const prodName = prodTranslation?.nom_pro;
 
-  const traductions = (subscription as any).prix_tarif?.prix_tarif_traduction || [];
-  const translation = traductions.find((tr: any) => tr.langue === locale) || traductions[0];
+  const traductions = subscription.prix_tarif?.prix_tarif_traduction || [];
+  const translation = traductions.find((item) => item.langue === locale) || traductions[0];
   const name = prodName || translation?.nom_prix_tarif || t("unknown");
 
-  const status = subscription.statut_abonnement || subscription.statut || "";
   const isActive = status.toLowerCase() === "actif" || status.toLowerCase() === "active";
 
   let daysRemaining = null;

@@ -4,6 +4,7 @@ import { createServerClient } from "@/lib/supabase/server-client";
 import { Link } from "@/i18n/navigation";
 import { Plus } from "lucide-react";
 import { AddressesList } from "@/components/account/addresses-list";
+import type { Tables } from "@/types/database.types";
 
 export default async function Addresses({
   params,
@@ -21,7 +22,7 @@ export default async function Addresses({
     data: { user: authUser },
   } = await supabase.auth.getUser();
 
-  let addresses: any[] = [];
+  let addresses: Tables<"adresse">[] = [];
 
   if (authUser) {
     const { data } = await supabase

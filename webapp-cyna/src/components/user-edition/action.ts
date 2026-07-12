@@ -1,106 +1,82 @@
-'use server'
+"use server";
 
-import { createServerClient } from '@/lib/supabase/server-client'
-import { createAdminClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 
-type ActionState = {
-  errorKey?: string;
-  successKey?: string;
-  rawError?: string;
-};
+import { validatePassword } from "@/lib/auth/password-policy";
+import { createAdminClient } from "@/lib/supabase/server";
+import { createServerClient } from "@/lib/supabase/server-client";
+
+type ActionState = { errorKey?: string; successKey?: string; rawError?: string };
 
 export async function updateEmail(
   _prevState: ActionState | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionState | null> {
-  const email = formData.get('email') as string;
-
-  if (!email) {
-    return { errorKey: "errorMissingFields" };
-  }
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email) return { errorKey: "errorMissingFields" };
 
   const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (!user) {
-    return { errorKey: "errorUpdateFailed" };
-  }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { errorKey: "errorUpdateFailed" };
 
   const { error } = await supabase.auth.updateUser({ email });
+  if (error) return { errorKey: "errorUpdateFailed" };
 
-  if (error) {
-    return { errorKey: "errorUpdateFailed" };
-  }
-
-  // Also update 'utilisateur' table for consistency
-  const supabaseAdmin = createAdminClient();
-  await supabaseAdmin
-    .from('utilisateur')
+  const admin = createAdminClient();
+  const { error: profileError } = await admin
+    .from("utilisateur")
     .update({ adresse_mail: email })
-    .eq('id_compte', user.id);
+    .eq("id_compte", user.id);
+  if (profileError) return { errorKey: "errorUpdateFailed" };
 
-  // Update 'commande' table so they don't lose their past orders
-  if (user.email) {
-    await supabaseAdmin
-      .from('commande')
-      .update({ mail_utilisateur_invite: email })
-      .eq('mail_utilisateur_invite', user.email);
-  }
-
-  revalidatePath('/user-dashboard/user-edition');
-  revalidatePath('/user-dashboard/infos'); // Just in case it's shown there
-  revalidatePath('/user-dashboard/orders');
-  revalidatePath('/user-dashboard/billing');
-
+  revalidatePath("/user-dashboard");
   return { successKey: "successEmailUpdate" };
 }
 
 export async function updateDashboardPassword(
   _prevState: ActionState | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<ActionState | null> {
-  const password = formData.get('password') as string;
-  const confirmPassword = formData.get('password_confirm') as string;
-
-  if (!password || !confirmPassword) {
-    return { errorKey: "errorMissingFields" };
-  }
-
-  if (password !== confirmPassword) {
-    return { errorKey: "errorMismatch" };
-  }
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("password_confirm") ?? "");
+  if (!password || !confirmPassword) return { errorKey: "errorMissingFields" };
+  if (password !== confirmPassword) return { errorKey: "errorMismatch" };
+  const passwordError = validatePassword(password);
+  if (passwordError) return { errorKey: passwordError };
 
   const supabase = await createServerClient();
-
   const { error } = await supabase.auth.updateUser({ password });
-
   if (error) {
-    return { errorKey: "errorUpdateFailed" };
+    return {
+      errorKey: error.code === "weak_password" ? "errorTooShort" : "errorUpdateFailed",
+    };
   }
-
-  return { successKey: "successPasswordUpdate" };
+  const locale = await getLocale();
+  redirect(`/${locale}/user-dashboard/infos?updated=password`);
 }
 
 export async function requestPasswordResetEmail(
   _prevState: ActionState | null,
-  formData: FormData
+  _formData: FormData,
 ): Promise<ActionState | null> {
+  void _prevState;
+  void _formData;
   const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user || !user.email) {
-    return { errorKey: "errorUpdateFailed" };
-  }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user?.email) return { errorKey: "errorUpdateFailed" };
 
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?next=/user-dashboard/update-password`,
   });
-
   if (error) {
-    console.error("Supabase Reset Password Error:", error);
+    console.error("[auth] reset e-mail failed", error);
     return { errorKey: "errorUpdateFailed", rawError: error.message };
   }
-
   return { successKey: "successResetEmailSent" };
 }

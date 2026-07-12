@@ -12,6 +12,7 @@ export const supportTicketSchema = z.object({
   sujet: z.string().trim().min(1).max(200),
   email_contact: z.string().trim().min(1).max(254).email(),
   description: z.string().trim().max(5000).optional(),
+  orderId: z.number().int().positive().optional(),
 });
 
 export type SupportTicketInput = z.infer<typeof supportTicketSchema>;
@@ -30,11 +31,22 @@ export async function createSupportTicket(
   }
 
   const description = parsed.data.description?.trim();
+  if (parsed.data.orderId) {
+    if (!options.userId) return { ok: false };
+    const ownership = await createAdminClient()
+      .from("commande")
+      .select("id_commande")
+      .eq("id_commande", parsed.data.orderId)
+      .eq("id_compte", options.userId)
+      .maybeSingle();
+    if (ownership.error || !ownership.data) return { ok: false };
+  }
   const payload: TablesInsert<"ticket_support"> = {
     sujet: parsed.data.sujet,
     email_contact: parsed.data.email_contact,
     description: description && description.length > 0 ? description : null,
     id_compte: options.userId ?? null,
+    id_commande: parsed.data.orderId ?? null,
     origine_chatbot: options.origineChatbot ?? false,
   };
 

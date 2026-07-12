@@ -4,7 +4,6 @@ import CategoryGrid from "@/components/home/CategoryGrid";
 import HomeCarousel from "@/components/home/HomeCarousel";
 import HomeIntro from "@/components/home/HomeIntro";
 import ProductGrid from "@/components/home/ProductGrid";
-import PaymentSuccessBanner from "@/components/home/PaymentSuccessBanner";
 import {
   getHomeCarouselButtonHref,
   getHomeCarouselSlides,
@@ -19,16 +18,11 @@ export const dynamic = "force-dynamic";
 
 export default async function Home({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
-  searchParams: Promise<{ payment?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-
-  const sp = await searchParams;
-  const isPaymentSuccess = sp.payment === "success";
 
   // Load every home section in parallel.
   const [slides, carouselButtonHref, introContent, products, categories] =
@@ -42,7 +36,6 @@ export default async function Home({
 
   return (
     <main className="flex-1">
-      <PaymentSuccessBanner isSuccess={isPaymentSuccess} />
       <HomeCarousel slides={slides} buttonHref={carouselButtonHref} />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 py-12 sm:px-6 lg:px-8">
         <HomeIntro content={introContent} />

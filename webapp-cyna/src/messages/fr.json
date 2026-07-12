@@ -28,15 +28,18 @@
     "closeMenu": "Fermer le menu",
     "information": "Informations",
     "logIn": "Connexion",
-    "signUp": "Inscription",
+    "signUp": "Créer un compte",
     "logOut": "Se déconnecter",
     "myAccount": "Mon compte",
     "connectedAs": "Connecté en tant que",
     "termsOfUse": "Conditions d'utilisation",
     "legalNotices": "Mentions légales",
     "contact": "Contact",
+    "faq": "Aide",
     "aboutCyna": "À propos de CYNA",
-    "faq": "Aide & Support"
+    "faq": "Aide",
+    "orders": "Commandes",
+    "subscriptions": "Abonnements"
   },
   "chat": {
     "title": "CynAI",
@@ -47,7 +50,7 @@
     "open": "Ouvrir le chat CynAI",
     "close": "Fermer le chat",
     "error": "Désolé, une erreur est survenue. Réessayez plus tard.",
-    "supportCardTitle": "Aide & Support",
+    "supportCardTitle": "Aide",
     "supportCardSubtitle": "FAQ et contacter notre équipe",
     "ticketCreatedTitle": "Ticket envoyé",
     "ticketCreatedSubtitle": "Notre équipe vous répondra à {email}.",
@@ -62,6 +65,7 @@
     "legal": "Légal",
     "followUs": "Suivez-nous",
     "aboutCyna": "À propos de CYNA",
+    "faq": "Aide",
     "contact": "Contact",
     "termsOfUse": "Conditions d'utilisation",
     "legalNotices": "Mentions légales",
@@ -188,10 +192,12 @@
       "checkEmail": "Inscription réussie ! Veuillez vérifier votre boîte de réception pour confirmer votre e-mail.",
       "updatePasswordSuccess": "Votre mot de passe a été mis à jour. Vous pouvez maintenant vous connecter.",
       "invalidLink": "Ce lien est invalide ou a expiré. Veuillez réessayer.",
-      "errorMissingFields": "Tous les champs sont requis."
+      "errorMissingFields": "Tous les champs sont requis.",
+      "errorUnconfirmed": "Confirmez votre adresse e-mail avant de vous connecter.",
+      "errorUnavailable": "La connexion est temporairement indisponible. Veuillez réessayer."
     },
     "register": {
-      "title": "Inscription",
+      "title": "Créer un compte",
       "subtitle": "Créer un nouveau compte",
       "username": "Nom d'utilisateur",
       "email": "E-mail",
@@ -201,12 +207,13 @@
       "loading": "Création du compte...",
       "haveAccount": "Vous avez déjà un compte ?",
       "logIn": "Se connecter",
-      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.",
+      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères.",
       "errorMismatch": "Les mots de passe ne correspondent pas.",
       "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
       "errorMissingFields": "Tous les champs sont requis.",
       "errorEmailTaken": "Cette adresse e-mail est déjà utilisée.",
-      "errorComplexity": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial."
+      "errorComplexity": "Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre et un caractère spécial.",
+      "errorUnavailable": "Le compte n'a pas pu être créé. Veuillez réessayer."
     },
     "resetPassword": {
       "title": "Mot de passe oublié",
@@ -216,7 +223,8 @@
       "loading": "Envoi...",
       "backToLogin": "Retour à la connexion",
       "resetEmailSent": "Un e-mail de réinitialisation a été envoyé. Vérifiez votre boîte de réception (et vos spams !).",
-      "errorMissingFields": "Veuillez saisir votre adresse e-mail."
+      "errorMissingFields": "Veuillez saisir votre adresse e-mail.",
+      "errorUnavailable": "L'e-mail de réinitialisation n'a pas pu être envoyé. Veuillez réessayer."
     },
     "updatePassword": {
       "title": "Nouveau mot de passe",
@@ -225,9 +233,10 @@
       "confirmPassword": "Confirmer le mot de passe",
       "submit": "Mettre à jour le mot de passe",
       "loading": "Mise à jour...",
-      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.",
+      "passwordRequirements": "Le mot de passe doit contenir au moins 8 caractères.",
       "errorMissingFields": "Tous les champs sont requis.",
       "errorMismatch": "Les mots de passe ne correspondent pas.",
+      "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
       "errorUpdateFailed": "Impossible de mettre à jour votre mot de passe. Le lien a peut-être expiré."
     }
   },
@@ -638,9 +647,9 @@
   },
   "about": {
     "title": "A propos de CYNA",
-    "article": "Fondée en 2021 à la suite d'interventions d'urgence face à des cyberattaques majeures, Cyna est une entreprise française spécialisée dans la cybersécurité managée qui conçoit et opère des solutions souveraines de pointe, telles que le SOC, l'EDR et le XDR.",
-    "article2": "Historiquement commercialisés via un réseau de distribution direct, ses services entrent aujourd'hui dans une nouvelle ère grâce au lancement d'une plateforme e-commerce innovante destinée à simplifier l'accès à ses abonnements à l'échelle internationale.",
-    "article3": "Pensées pour répondre avec pragmatisme aux besoins des PME, des ETI et des prestataires de services (MSP), les solutions de Cyna reposent sur une infrastructure hautement sécurisée, un hébergement des données exclusivement basé en France, et une cellule d'experts d'élite assurant une surveillance proactive continue 24h/24 et 7j/7."
+    "article": "CYNA est une marketplace pédagogique consacrée aux logiciels de cybersécurité, imaginée et développée par une équipe de quatre étudiants en Bachelor à l'Institut Limayrac de Toulouse.",
+    "article2": "Le projet démontre un parcours e-commerce moderne : découverte de solutions, gestion du panier, achat de licences via Stripe, puis suivi des commandes et abonnements depuis un espace client.",
+    "article3": "CYNA est un prototype scolaire, et non une entreprise de cybersécurité ou une plateforme de production. Les produits et informations commerciales sont fictifs : l'équipe étudiante n'opère aucun SOC, EDR, XDR, service de surveillance ou infrastructure sécurisée."
   },
   "contact": {
     "title": "Nous Contacter",
@@ -649,9 +658,14 @@
     "email": "Adresse Email"
   },
   "faq": {
-    "title": "Aide & Support",
+    "title": "Aide",
     "subtitle": "Trouvez une réponse rapide ci-dessous, ou ouvrez un ticket auprès de notre équipe.",
     "questionsTitle": "Questions fréquentes",
+    "contactTitle": "Contacter l'équipe projet",
+    "contactIntro": "Pour une question sur la marketplace, sa démonstration de facturation ou une demande de support, contactez l'équipe étudiante.",
+    "contactEmail": "E-mail de support",
+    "projectLocation": "Lieu du projet",
+    "schoolDisclaimer": "CYNA est un projet étudiant développé à l'Institut Limayrac. L'établissement n'exploite pas et ne cautionne pas cette marketplace comme un service commercial de cybersécurité.",
     "items": [
       {
         "q": "Qu'est-ce que CYNA ?",
@@ -705,7 +719,11 @@
   },
   "legal": {
     "legal_title": "Mentions Légales",
-    "legal_paragraph": "Conformément aux dispositions de l'article 6 de la loi n° 2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN), il est précisé aux utilisateurs du site internet l'identité des différents intervenants dans le cadre de sa réalisation et de son suivi :",
+    "legal_paragraph": "CYNA est un prototype pédagogique. Cette page présente l'équipe projet, son contact et les services tiers utilisés pour la démonstration.",
+    "projectOwner": "Équipe étudiante CYNA — quatre étudiants",
+    "projectStatus": "Projet pédagogique, sans société commerciale",
+    "notApplicable": "Non applicable",
+    "studentTeam": "Équipe projet CYNA",
     "webedit_title": "Édition du site",
     "webedit_ul1": "Propriétaire du site",
     "webedit_ul2": "Forme juridique",
@@ -713,30 +731,31 @@
     "webedit_ul4": "Numéro d'immatriculation (SIRET)",
     "webedit_ul5": "Directeur de la publication",
     "hosting_title": "Hébergement",
-    "hosting_paragraph": "Conformément aux exigences de souveraineté numérique et de protection des données critiques spécifiées pour l'ensemble de nos solutions de sécurité SaaS, le site internet ainsi que ses bases de données sont exclusivement hébergés sur le territoire français.",
+    "hosting_paragraph": "La démonstration utilise des services tiers d'hébergement et de cloud. Aucune affirmation n'est faite quant à un hébergement exclusivement français ou à une certification de cybersécurité de niveau production.",
+    "hostingValue": "Application Next.js avec services de démonstration Supabase et Stripe",
     "hosting_referent": "Hébergeur",
     "hosting_email_ref": "Adresse de l'hébergeur",
     "intelprop_title": "Propriété intellectuelle et contrefaçons",
-    "intelprop_paragraph1": "CYNA-IT est propriétaire des droits de propriété intellectuelle ou détient les droits d'usage sur tous les éléments accessibles sur le site internet, notamment les marques, textes, images, graphismes, logos, vidéos, architectures logicielles, icônes.",
-    "intelprop_paragraph2": "Toute reproduction, représentation, modification, publication, adaptation de tout ou partie des éléments du site, quel que soit le moyen ou le procédé utilisé, est interdite, sauf autorisation écrite préalable de l'entreprise.",
-    "intelprop_paragraph3": "Toute exploitation non autorisée du site ou de l'un quelconque des éléments qu'il contains sera considérée comme constitutive d'une contrefaçon et poursuivie conformément aux dispositions des articles L.335-2 et suivants du Code de Propriété Intellectuelle."
+    "intelprop_paragraph1": "Le code source de l'application et les contenus originaux du projet ont été réalisés dans un cadre pédagogique par l'équipe étudiante.",
+    "intelprop_paragraph2": "Les noms, exemples de produits, bibliothèques et services tiers restent la propriété de leurs titulaires respectifs. Leur présence n'implique aucun partenariat commercial.",
+    "intelprop_paragraph3": "Le catalogue est un contenu fictif de démonstration et ne fournit aucune licence de véritables produits de cybersécurité."
   },
   "terms": {
     "title": "Conditions Générales d'Utilisation",
     "subtitle1": "Objet et acceptation des conditions",
-    "paragraph1": "Le présent document a pour objet de définir les conditions d'accès et d'utilisation de la plateforme e-commerce de CYNA-IT. L’accès au catalogue et la souscription à nos services SaaS impliquent l'acceptation pleine et sans réserve de ces conditions par l'utilisateur.",
+    "paragraph1": "Ces conditions décrivent l'utilisation de CYNA, prototype pédagogique destiné à la démonstration et à l'évaluation, et non à la fourniture commerciale de services de cybersécurité.",
     "subtitle2": "Accès aux services SaaS et création de compte",
-    "paragraph2": "L'accès à certaines fonctionnalités, notamment l'achat d'abonnements, la gestion du panier et l'historique des commandes, nécessite la création d'un compte utilisateur sécurisé. L'utilisateur s'engage à fournir des informations exactes, à maintenir la confidentialité de ses identifiants de connexion et à signaler toute utilisation frauduleuse de son compte.",
+    "paragraph2": "Un compte de démonstration est nécessaire pour consulter commandes, factures et abonnements. L'utilisateur ne doit pas saisir de données sensibles ou de production et reste responsable de ses identifiants de test.",
     "subtitle3": "Propriété intellectuelle",
-    "paragraph3": "L'ensemble des contenus, marques, logos, graphismes, codes sources et architectures des solutions logicielles (SOC, EDR, XDR) présents sur le site sont la propriété exclusive de CYNA-IT. Toute reproduction, modification ou distribution non autorisée de ces éléments est strictement interdite et fera l'objet de poursuites.",
+    "paragraph3": "Le code et les contenus originaux ont été créés par l'équipe étudiante. Les noms, bibliothèques et exemples de produits tiers restent la propriété de leurs titulaires.",
     "subtitle4": "Commandes, abonnements et paiements",
-    "paragraph4": "Les modalités de tarification, de facturation et de renouvellement automatique des services SaaS sont détaillées lors du processus de validation du panier. Les transactions financières sont traitées de manière chiffrée via des passerelles de paiement sécurisées et certifiées.",
+    "paragraph4": "Les paiements utilisent le mode test de Stripe. Les prix, commandes, factures et renouvellements ne constituent ni des offres commerciales ni de véritables licences de cybersécurité.",
     "subtitle5": "Disponibilité de la plateforme",
-    "paragraph5": "CYNA-IT met en œuvre tous les moyens nécessaires pour assurer un accès continu à sa plateforme e-commerce et à ses outils d'assistance comme le Chatbot. Toutefois, l'entreprise se réserve le droit de suspendre temporairement l'accès au site pour des raisons de maintenance technique ou de mise à jour, sans que cela n'ouvre droit à une indemnisation.",
+    "paragraph5": "La disponibilité n'est pas garantie. L'équipe étudiante peut suspendre ou réinitialiser le prototype, son chatbot, son catalogue et ses données de test pour maintenance ou démonstration.",
     "subtitle6": "Responsabilité et garanties",
-    "paragraph6": "L'utilisateur est seul responsable de l'utilisation qu'il fait des informations fournies sur le site et de la sécurité de son propre matériel informatique. CYNA-IT ne pourra être tenue responsable des dommages indirects, des pertes de données ou des interruptions de service causés par un événement de force majeure ou un dysfonctionnement du réseau Internet.",
+    "paragraph6": "CYNA ne doit pas être utilisé pour protéger un système, surveiller des menaces ou obtenir un conseil professionnel. Le projet n'a aucune infrastructure de sécurité de production ni engagement de service.",
     "subtitle7": "Modification des conditions et droit applicable",
-    "paragraph7": "CYNA-IT met en œuvre tous les moyens nécessaires pour assurer un accès continu à sa plateforme e-commerce et à ses outils d'assistance comme le Chatbot. Toutefois, l'entreprise se réserve le droit de suspendre temporairement l'accès au site pour des raisons de maintenance technique ou de mise à jour, sans que cela n'ouvre droit à une indemnisation."
+    "paragraph7": "Ces informations peuvent évoluer avec le projet scolaire. Toute question peut être envoyée à support.cyna@gmail.com."
   },
   "user_dashboard": {
     "account": "Informations de compte",
@@ -749,7 +768,8 @@
     "title": "Informations de compte",
     "editProfile": "Modifier le profil",
     "email": "E-mail",
-    "creationDate": "Membre depuis"
+    "creationDate": "Membre depuis",
+    "passwordUpdated": "Votre mot de passe a bien été mis à jour."
   },
   "orders": {
     "title": "Vos Commandes",
@@ -796,6 +816,8 @@
     "successEmailUpdate": "Adresse email mise à jour avec succès.",
     "successPasswordUpdate": "Mot de passe mis à jour avec succès.",
     "errorMismatch": "Les mots de passe ne correspondent pas.",
+    "errorTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
+    "passwordRequirements": "Utilisez au moins 8 caractères.",
     "errorMissingFields": "Veuillez remplir tous les champs obligatoires.",
     "errorUpdateFailed": "Une erreur est survenue lors de la mise à jour.",
     "requestResetDescription": "Vous recevrez un email contenant un lien sécurisé pour changer votre mot de passe.",
@@ -820,6 +842,13 @@
     "phone": "Numéro de téléphone mobile",
     "phoneHint": "Utilisé pour d'éventuelles notifications liées aux services ou à la facturation",
     "submitNew": "Enregistrer l'adresse",
+    "edit": "Modifier",
+    "editTitle": "Modifier l'adresse de facturation",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer cette adresse ?",
+    "default": "Par défaut",
+    "makeDefault": "Utiliser comme adresse de facturation par défaut",
+    "saveChanges": "Enregistrer les modifications",
     "cancel": "Annuler",
     "types": {
       "facturation": "Facturation",
@@ -845,15 +874,35 @@
     "confirm": "Confirmer",
     "cancel": "Annuler"
   },
+  "orderConfirmed": {
+    "title": "Commande confirmée",
+    "subtitle": "Votre paiement est confirmé et vos licences sont en cours de préparation. Retrouvez la commande et ses factures dans votre compte.",
+    "orderNumber": "Commande",
+    "date": "Date",
+    "status": "État du paiement",
+    "paid": "Payé",
+    "summary": "Récapitulatif de la commande",
+    "productFallback": "Service de cybersécurité",
+    "licenses": "{count, plural, one {# licence} other {# licences}}",
+    "total": "Total",
+    "invoiceNote": "Votre facture Stripe peut mettre quelques instants à apparaître dans la section Facturation pendant sa finalisation.",
+    "viewOrders": "Voir mes commandes",
+    "viewSubscriptions": "Voir mes abonnements",
+    "signIn": "Se connecter",
+    "createAccount": "Créer un compte"
+  },
   "billing": {
     "title": "Facturation",
-    "invoiceWarning": "Si vous ne parvenez pas à télécharger une facture, veuillez contacter le support.",
+    "invoiceWarning": "Une facture peut mettre quelques instants à apparaître. Contactez le support si elle reste indisponible.",
+    "supportLink": "Ouvrir le support",
     "id": "N° Facture",
     "date": "Date",
     "amount": "Montant",
     "status": "Statut",
     "invoice": "Facture",
     "download": "Télécharger la facture",
+    "unavailable": "PDF en préparation",
+    "downloadError": "La facture n'a pas pu être ouverte. Veuillez réessayer dans quelques instants.",
     "noInvoices": "Vous n'avez aucune facture pour le moment.",
     "searchPlaceholder": "Rechercher une facture (N°, statut, montant)...",
     "noSearchResults": "Aucune facture trouvée pour \"{search}\"."

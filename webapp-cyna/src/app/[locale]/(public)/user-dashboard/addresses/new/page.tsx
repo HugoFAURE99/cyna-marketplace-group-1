@@ -15,7 +15,7 @@ export default async function NewAddress({
   const t = await getTranslations("addresses");
 
   return (
-    <div className="flex flex-col p-6 lg:p-10">
+    <div className="flex flex-col">
       <div className="flex items-center gap-4 mb-10">
         <Link 
           href="/user-dashboard/addresses"
@@ -26,7 +26,7 @@ export default async function NewAddress({
         <h1 className="text-3xl font-bold tracking-tight text-slate-950 m-0">{t("newTitle")}</h1>
       </div>
 
-      <div className="max-w-2xl bg-white border border-slate-200 rounded-lg p-8 shadow-sm">
+      <div className="max-w-2xl rounded-lg border border-slate-200 bg-white p-6 sm:p-8">
         <form action={addAddress} className="flex flex-col gap-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
@@ -110,13 +110,12 @@ export default async function NewAddress({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
               <label htmlFor="region" className="font-medium text-slate-700">
-                {t("region")} <span className="text-red-500">*</span>
+                {t("region")}
               </label>
               <input
                 type="text"
                 id="region"
                 name="region"
-                required
                 className="border border-slate-300 rounded-md p-3 focus:ring-2 focus:ring-black outline-none transition-shadow"
               />
             </div>
@@ -136,17 +135,21 @@ export default async function NewAddress({
 
           <div className="flex flex-col gap-2">
             <label htmlFor="telephone" className="font-medium text-slate-700">
-              {t("phone")} <span className="text-red-500">*</span>
+              {t("phone")}
             </label>
             <input
               type="tel"
               id="telephone"
               name="telephone"
-              required
               className="border border-slate-300 rounded-md p-3 focus:ring-2 focus:ring-black outline-none transition-shadow"
             />
             <p className="text-sm text-slate-500 mt-1">{t("phoneHint")}</p>
           </div>
+
+          <label className="flex items-center gap-2 text-sm text-slate-600">
+            <input name="is_default" type="checkbox" />
+            {t("makeDefault")}
+          </label>
 
           <div className="flex items-center gap-4 mt-6 pt-6 border-t border-slate-100">
             <button

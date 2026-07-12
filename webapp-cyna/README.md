@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CYNA — application web
 
-## Getting Started
+Marketplace pédagogique bilingue construite avec Next.js 16, React 19, Supabase, Stripe Checkout et Gemini. Les paiements, abonnements, produits et factures sont des données de démonstration.
 
-First, run the development server:
+## Installation
+
+Prérequis : Node.js 20+, npm, un projet Supabase et un compte Stripe de test.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Créer `.env.local` avec :
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```dotenv
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+STRIPE_SECRET_KEY=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+STRIPE_WEBHOOK_SECRET=
+GEMINI_API_KEY=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Ne jamais exposer les clés `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY` ou `STRIPE_WEBHOOK_SECRET` au navigateur.
 
-## Learn More
+## Base de données
 
-To learn more about Next.js, take a look at the following resources:
+Appliquer les migrations de `supabase/migrations` dans l'ordre. La migration `20260712090000_user_side_polish.sql` ajoute :
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- la propriété et la session Stripe des commandes ;
+- la finalisation transactionnelle et idempotente du stock ;
+- les adresses de facturation par défaut ;
+- la relation ticket–commande ;
+- l'historique des factures initiales et de renouvellement.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Après déploiement de la migration et du webhook, les anciennes factures Stripe peuvent être récupérées volontairement avec :
 
-## Deploy on Vercel
+```bash
+npm run invoices:backfill
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Cette commande écrit dans la base et le bucket configurés par `.env.local`. Elle n'est jamais lancée automatiquement.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Stripe en local
+
+```bash
+stripe login
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
+```
+
+Reporter le secret `whsec_…` affiché dans `STRIPE_WEBHOOK_SECRET`. Le webhook traite notamment :
+
+- `checkout.session.completed` ;
+- `invoice.finalized` et `invoice.paid` ;
+- `invoice.payment_failed` et `invoice.voided`.
+
+Carte de test Stripe : `4242 4242 4242 4242`, date future et CVC quelconque.
+
+## Vérification
+
+```bash
+npm run build
+npm run lint
+```
+
+Le build de production est la vérification de référence. Le dépôt contient encore des erreurs ESLint préexistantes principalement dans le back-office ; les fichiers du parcours utilisateur modifiés doivent rester propres au lint ciblé.
+
+## Architecture
+
+- `src/app/[locale]/(public)` : pages publiques et espace client ;
+- `src/app/api/webhooks/stripe` : finalisation des commandes, stock, abonnements et factures ;
+- `src/lib` : accès Supabase/Stripe, panier, support et règles métier ;
+- `src/messages` : traductions françaises et anglaises ;
+- `supabase/migrations` : schéma, RLS et fonctions SQL.
+
+## Sécurité et périmètre
+
+Le projet utilise les sessions Supabase, des actions serveur, les signatures de webhook Stripe et un bucket privé pour les PDF. Il reste un prototype scolaire et ne revendique aucune certification, disponibilité, souveraineté d'hébergement ou aptitude à protéger un système réel. Le back-office n'est pas couvert par la passe de finition utilisateur actuelle.
