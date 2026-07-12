@@ -7,7 +7,8 @@
     "build": "next build",
     "invoices:backfill": "node --env-file=.env.local scripts/backfill-stripe-invoices.mjs",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "smoke:routes": "node scripts/smoke-customer-routes.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",

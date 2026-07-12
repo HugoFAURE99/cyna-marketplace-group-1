@@ -45,7 +45,7 @@ export default async function EditAddressPage({ params }: { params: Promise<{ id
           ))}
         </div>
         <label className="flex items-center gap-2 text-sm text-slate-600"><input defaultChecked={address.is_default} name="is_default" type="checkbox" />{t("makeDefault")}</label>
-        <div className="flex gap-3"><button className="rounded-md bg-purple-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-800" type="submit">{t("saveChanges")}</button><Link className="rounded-md border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700" href="/user-dashboard/addresses">{t("cancel")}</Link></div>
+        <div className="flex flex-col gap-3 sm:flex-row"><button className="min-h-11 w-full rounded-md bg-purple-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-800 sm:w-auto" type="submit">{t("saveChanges")}</button><Link className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 sm:w-auto" href="/user-dashboard/addresses">{t("cancel")}</Link></div>
       </form>
     </div>
   );

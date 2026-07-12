@@ -256,36 +256,45 @@ export type Database = {
             }
             commande: {
                 Row: {
+                    billing_address_snapshot: Json | null
                     date_commande: string
                     id_commande: number
                     id_compte: string | null
                     id_promotion: number | null
                     mail_utilisateur_invite: string | null
                     montant_total: number
+                    payment_method_brand: string | null
+                    payment_method_last4: string | null
                     statut_commande: string
                     stock_decremented_at: string | null
                     stripe_checkout_session_id: string | null
                     url_facture: string | null
                 }
                 Insert: {
+                    billing_address_snapshot?: Json | null
                     date_commande?: string
                     id_commande?: number
                     id_compte?: string | null
                     id_promotion?: number | null
                     mail_utilisateur_invite?: string | null
                     montant_total: number
+                    payment_method_brand?: string | null
+                    payment_method_last4?: string | null
                     statut_commande?: string
                     stock_decremented_at?: string | null
                     stripe_checkout_session_id?: string | null
                     url_facture?: string | null
                 }
                 Update: {
+                    billing_address_snapshot?: Json | null
                     date_commande?: string
                     id_commande?: number
                     id_compte?: string | null
                     id_promotion?: number | null
                     mail_utilisateur_invite?: string | null
                     montant_total?: number
+                    payment_method_brand?: string | null
+                    payment_method_last4?: string | null
                     statut_commande?: string
                     stock_decremented_at?: string | null
                     stripe_checkout_session_id?: string | null

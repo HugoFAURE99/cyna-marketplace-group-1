@@ -7,9 +7,14 @@ Marketplace pédagogique bilingue construite avec Next.js 16, React 19, Supabase
 Prérequis : Node.js 20+, npm, un projet Supabase et un compte Stripe de test.
 
 ```bash
+cd webapp-cyna
 npm install
 npm run dev
 ```
+
+Le serveur Next.js doit être lancé depuis `webapp-cyna`. La racine Turbopack est
+également fixée dans `next.config.ts` afin que les manifestes de routes et la
+résolution CSS ne dépendent pas du dépôt parent.
 
 Créer `.env.local` avec :
 
@@ -21,6 +26,9 @@ SUPABASE_SERVICE_ROLE_KEY=
 STRIPE_SECRET_KEY=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 STRIPE_WEBHOOK_SECRET=
+# Optionnel : configuration Stripe Portal existante. Sans cette valeur,
+# l'application réutilise ou crée une configuration sûre à la première ouverture.
+STRIPE_CUSTOMER_PORTAL_CONFIGURATION_ID=
 GEMINI_API_KEY=
 ```
 
@@ -56,6 +64,7 @@ Reporter le secret `whsec_…` affiché dans `STRIPE_WEBHOOK_SECRET`. Le webhook
 - `checkout.session.completed` ;
 - `invoice.finalized` et `invoice.paid` ;
 - `invoice.payment_failed` et `invoice.voided`.
+- `customer.subscription.updated` et `customer.subscription.deleted`.
 
 Carte de test Stripe : `4242 4242 4242 4242`, date future et CVC quelconque.
 

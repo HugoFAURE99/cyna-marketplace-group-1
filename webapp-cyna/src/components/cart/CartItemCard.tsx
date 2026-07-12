@@ -243,7 +243,7 @@ export default function CartItemCard({ item }: CartItemCardProps) {
 
             <button
               aria-label={tc("remove", { name: item.name })}
-              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-red-600 transition hover:bg-red-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 disabled:opacity-50"
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-md text-slate-600 transition hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:opacity-50"
               disabled={isPending}
               onClick={handleRemove}
               type="button"

@@ -28,23 +28,17 @@ export default async function UserDashboardLayout({
 
   const items = [
     { title: t("account"), url: "/user-dashboard/infos", icon: "user" },
-    { title: t("orders"), url: "/user-dashboard/orders", icon: "package" },
-    {
-      title: t("subscriptions"),
-      url: "/user-dashboard/subscriptions",
-      icon: "refresh",
-    },
-    { title: t("billing"), url: "/user-dashboard/billing", icon: "credit-card" },
+    { title: t("purchases"), url: "/user-dashboard/purchases", icon: "package" },
     { title: t("addresses"), url: "/user-dashboard/addresses", icon: "map-pin" },
   ];
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="grid gap-8 lg:grid-cols-[240px_minmax(0,1fr)]">
-        <aside>
+    <div className="mx-auto w-full max-w-7xl overflow-x-clip px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[256px_minmax(0,1fr)] lg:gap-8">
+        <aside className="min-w-0 max-w-full">
           <UserDashboardNav items={items} title={tMenu("myAccount")} />
         </aside>
-        <div className="min-w-0">{children}</div>
+        <main className="min-w-0 max-w-full">{children}</main>
       </div>
     </div>
   );

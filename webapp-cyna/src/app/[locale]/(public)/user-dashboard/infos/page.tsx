@@ -55,21 +55,21 @@ export default async function Account({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-6 sm:space-y-8">
       {updated === "password" && <AccountToast message={t("passwordUpdated")} />}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-950">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
           {t("title")}
         </h1>
         <Link
           href="/user-dashboard/user-edition"
-          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:w-auto"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:w-auto"
         >
           {t("editProfile")}
         </Link>
       </div>
 
-      <div className="w-full max-w-3xl rounded-lg border border-slate-200 bg-white p-6 sm:p-8">
+      <div className="w-full min-w-0 max-w-3xl rounded-lg border border-slate-200 bg-white p-5 sm:p-8">
         <h2 className="text-lg font-semibold capitalize text-slate-900">
           {user.firstName} {user.lastName}
         </h2>
@@ -79,7 +79,7 @@ export default async function Account({
             <dt className="font-medium text-slate-500 sm:w-40 sm:shrink-0">
               {t("email")}
             </dt>
-            <dd className="text-slate-900">{user.email}</dd>
+            <dd className="break-all text-slate-900">{user.email}</dd>
           </div>
           <div className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0 sm:flex-row sm:gap-4">
             <dt className="font-medium text-slate-500 sm:w-40 sm:shrink-0">

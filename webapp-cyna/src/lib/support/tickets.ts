@@ -11,7 +11,7 @@ import type { TablesInsert } from "@/types/database.types";
 export const supportTicketSchema = z.object({
   sujet: z.string().trim().min(1).max(200),
   email_contact: z.string().trim().min(1).max(254).email(),
-  description: z.string().trim().max(5000).optional(),
+  description: z.string().trim().min(1).max(5000),
   orderId: z.number().int().positive().optional(),
 });
 

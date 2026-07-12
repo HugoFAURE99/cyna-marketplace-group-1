@@ -13,7 +13,7 @@ const footerLinks = [
 export default async function PublicFooter() {
   const t = await getTranslations("footer");
   return (
-    <footer className="relative z-20 bg-[#2b0958] text-white">
+    <footer className="relative z-20 hidden bg-[#2b0958] text-white md:block">
       <div className="mx-auto flex w-full max-w-6xl flex-col items-center gap-4 px-4 py-5 sm:flex-row sm:justify-between sm:px-6 lg:px-8">
         <Image alt="CYNA" className="h-7 w-auto" height={28} src="/brand/cyna-logo-full-white.svg" width={103} />
         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">

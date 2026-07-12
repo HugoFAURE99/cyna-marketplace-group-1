@@ -45,7 +45,7 @@ export default async function Addresses({
         </h1>
         <Link
           href="/user-dashboard/addresses/new"
-          className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:w-auto"
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:w-auto"
         >
           <Plus className="size-4" />
           {t("addNew")}

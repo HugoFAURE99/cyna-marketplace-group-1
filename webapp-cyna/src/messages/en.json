@@ -31,6 +31,7 @@
     "signUp": "Create account",
     "logOut": "Log out",
     "myAccount": "My account",
+    "language": "Language",
     "connectedAs": "Connected as",
     "termsOfUse": "Terms of Use",
     "legalNotices": "Legal Notices",
@@ -704,6 +705,8 @@
     "orderLabel": "Related order (optional)",
     "orderNone": "None",
     "orderRefPrefix": "Related order:",
+    "otherProducts": "+ {count, plural, one {# other product} other {# other products}}",
+    "orderContentsUnavailable": "contents unavailable",
     "accountNote": "This ticket is opened under your account, and our reply goes to your email.",
     "loginRequiredTitle": "Sign in to open a ticket",
     "loginRequiredBody": "Log in or create an account so your ticket is saved to your profile and we can follow up with you.",
@@ -719,10 +722,10 @@
   "legal": {
     "legal_title": "Legal Notices",
     "legal_paragraph": "CYNA is an educational prototype. This page identifies the student project, its contact channel and the third-party services used for the demonstration.",
-    "projectOwner": "CYNA student team — four students",
+    "projectOwner": "G1 Dev",
     "projectStatus": "Educational project, not a commercial company",
     "notApplicable": "Not applicable",
-    "studentTeam": "CYNA project team",
+    "studentTeam": "G1 Dev",
     "webedit_title": "Website Editing",
     "webedit_ul1": "Website Owner",
     "webedit_ul2": "Legal Form",
@@ -757,24 +760,33 @@
     "paragraph7": "These notices may change as the school project evolves. Questions can be sent to support.cyna@gmail.com."
   },
   "user_dashboard": {
-    "account": "Account Informations",
+    "account": "Account information",
+    "purchases": "Purchases",
     "orders": "Orders",
     "subscriptions": "Subscriptions",
     "billing": "Billing",
     "addresses": "Address Book"
   },
+  "purchases": {
+    "title": "Your purchases",
+    "subtitle": "Find your orders, subscriptions and invoices in one place.",
+    "orders": "Orders",
+    "subscriptions": "Subscriptions",
+    "invoices": "Invoices"
+  },
   "account": {
-    "title": "Account Informations",
-    "editProfile": "Edit User Profile",
+    "title": "Account information",
+    "editProfile": "Edit profile",
     "email": "Email",
     "creationDate": "Member since",
-    "passwordUpdated": "Your password has been updated successfully."
+    "passwordUpdated": "Your password has been updated successfully.",
+    "close": "Close"
   },
   "orders": {
     "title": "Orders",
     "invoiceWarning": "If you cannot download an invoice, please contact support.",
     "last_orders": "Last Orders",
-    "searchPlaceholder": "Search for an order (ID, status, amount)...",
+    "searchPlaceholder": "Search…",
     "noSearchResults": "No order found for \"{search}\".",
     "noOrders": "You do not have any orders at the moment.",
     "subscriptionType": {
@@ -787,6 +799,7 @@
     "allStatuses": "All statuses",
     "columns": {
       "id": "Order ID",
+      "products": "Products",
       "date": "Date",
       "amount": "Amount",
       "subscription": "Subscription",
@@ -799,7 +812,31 @@
       "cancelled": "Cancelled",
       "failed": "Failed"
     },
-    "viewInvoice": "View invoice"
+    "viewInvoice": "View invoice",
+    "filters": {
+      "search": "Search",
+      "year": "Year",
+      "service": "Service",
+      "billing": "Billing period",
+      "status": "Status"
+    },
+    "billing": {
+      "monthly": "Monthly",
+      "annual": "Annual",
+      "one_time": "One-time"
+    },
+    "browseProducts": "Browse products",
+    "contactSupport": "Contact support",
+    "details": "View details",
+    "hideDetails": "Hide details",
+    "detailProducts": "Ordered products",
+    "detailBilling": "Billing",
+    "detailInvoices": "Invoices",
+    "quantity": "{count, plural, one {# licence} other {# licences}}",
+    "card": "Card",
+    "notAvailable": "Not available",
+    "invoicePending": "Invoice pending",
+    "noInvoices": "No associated invoice"
   },
   "user_edition": {
     "title": "Edit Profile",
@@ -859,8 +896,8 @@
     "viewList": "List view",
     "viewGrid": "Grid view",
     "status": "Status",
-    "startDate": "Start Date",
-    "endDate": "End Date",
+    "startDate": "Start",
+    "endDate": "End",
     "deactivate": "Deactivate",
     "deactivating": "Deactivating...",
     "unknown": "Unknown Subscription",
@@ -871,7 +908,25 @@
     "confirmDeactivateTitle": "Confirm deactivation",
     "confirmDeactivateMessage": "Are you sure you want to deactivate this subscription?",
     "confirm": "Confirm",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "manageTitle": "Manage Stripe billing",
+    "manageDescription": "Update your payment method or cancel a subscription at the end of its current period.",
+    "manage": "Manage in Stripe",
+    "portalUnavailable": "The Stripe portal will be available after your first purchase with this account.",
+    "subscriptionNumber": "Subscription #{id}",
+    "ongoing": "Ongoing",
+    "statuses": {
+      "active": "Active",
+      "trialing": "Trial",
+      "actif": "Active",
+      "canceled": "Cancelled",
+      "incomplete": "Incomplete",
+      "incomplete_expired": "Expired",
+      "past_due": "Past due",
+      "unpaid": "Unpaid",
+      "paused": "Paused",
+      "désactivé": "Deactivated"
+    }
   },
   "orderConfirmed": {
     "title": "Order confirmed",
@@ -895,6 +950,7 @@
     "invoiceWarning": "An invoice may take a few moments to become available. Contact support if it remains unavailable.",
     "supportLink": "Open support",
     "id": "Invoice ID",
+    "order": "Order",
     "date": "Date",
     "amount": "Amount",
     "status": "Status",
@@ -904,6 +960,14 @@
     "downloadError": "The invoice could not be opened. Please try again shortly.",
     "noInvoices": "You do not have any invoices at the moment.",
     "searchPlaceholder": "Search for an invoice (ID, status, amount)...",
-    "noSearchResults": "No invoice found for \"{search}\"."
+    "noSearchResults": "No invoice found for \"{search}\".",
+    "statuses": {
+      "paid": "Paid",
+      "open": "Open",
+      "draft": "Draft",
+      "void": "Void",
+      "uncollectible": "Uncollectible",
+      "unknown": "Unknown"
+    }
   }
 }
