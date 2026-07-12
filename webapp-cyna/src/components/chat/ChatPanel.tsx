@@ -49,7 +49,7 @@ export default function ChatPanel({
     <div
       role="dialog"
       aria-label={t("title")}
-      className="fixed bottom-24 left-4 z-40 flex h-[min(70vh,560px)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-900/5 animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 sm:left-6 sm:w-[384px]"
+      className="fixed bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4rem)] left-3 z-40 flex h-[min(70vh,560px)] w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl ring-1 ring-slate-900/5 animate-in fade-in slide-in-from-bottom-4 zoom-in-95 duration-300 sm:bottom-24 sm:left-6 sm:w-[384px]"
     >
       <div className="flex items-center justify-between gap-2 border-b border-slate-200 px-4 py-3">
         <div className="flex items-center gap-1.5">
@@ -68,7 +68,7 @@ export default function ChatPanel({
           type="button"
           onClick={onClose}
           aria-label={t("close")}
-          className="inline-flex size-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+          className="inline-flex size-11 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
         >
           <X aria-hidden="true" className="size-5" />
         </button>

@@ -21,11 +21,5 @@ export async function submitChatSupportTicket(input: SupportTicketInput) {
     userId = null;
   }
 
-  // Chatbot tickets are also account-only; the chat shows a sign-in card to
-  // logged-out users instead of the form.
-  if (!userId) {
-    return { ok: false };
-  }
-
   return createSupportTicket(input, { userId, origineChatbot: true });
 }

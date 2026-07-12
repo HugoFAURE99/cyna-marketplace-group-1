@@ -31,7 +31,7 @@ export default async function NewAddress({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
               <label htmlFor="prenom" className="font-medium text-slate-700">
-                {t("firstName")} <span className="text-red-500">*</span>
+                {t("firstName")} <span className="text-purple-700">*</span>
               </label>
               <input
                 type="text"
@@ -43,7 +43,7 @@ export default async function NewAddress({
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="nom" className="font-medium text-slate-700">
-                {t("lastName")} <span className="text-red-500">*</span>
+                {t("lastName")} <span className="text-purple-700">*</span>
               </label>
               <input
                 type="text"
@@ -57,7 +57,7 @@ export default async function NewAddress({
 
           <div className="flex flex-col gap-2">
             <label htmlFor="adresse" className="font-medium text-slate-700">
-              {t("address1")} <span className="text-red-500">*</span>
+              {t("address1")} <span className="text-purple-700">*</span>
             </label>
             <input
               type="text"
@@ -83,7 +83,7 @@ export default async function NewAddress({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
               <label htmlFor="code_postal" className="font-medium text-slate-700">
-                {t("postalCode")} <span className="text-red-500">*</span>
+                {t("postalCode")} <span className="text-purple-700">*</span>
               </label>
               <input
                 type="text"
@@ -95,7 +95,7 @@ export default async function NewAddress({
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="ville" className="font-medium text-slate-700">
-                {t("city")} <span className="text-red-500">*</span>
+                {t("city")} <span className="text-purple-700">*</span>
               </label>
               <input
                 type="text"
@@ -121,7 +121,7 @@ export default async function NewAddress({
             </div>
             <div className="flex flex-col gap-2">
               <label htmlFor="pays" className="font-medium text-slate-700">
-                {t("country")} <span className="text-red-500">*</span>
+                {t("country")} <span className="text-purple-700">*</span>
               </label>
               <input
                 type="text"
@@ -151,16 +151,16 @@ export default async function NewAddress({
             {t("makeDefault")}
           </label>
 
-          <div className="flex items-center gap-4 mt-6 pt-6 border-t border-slate-100">
+          <div className="flex flex-col gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center">
             <button
               type="submit"
-              className="inline-flex h-11 items-center justify-center rounded-md bg-purple-700 px-6 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
+              className="inline-flex h-11 w-full items-center justify-center rounded-md bg-purple-700 px-6 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:w-auto"
             >
               {t("submitNew")}
             </button>
             <Link
               href="/user-dashboard/addresses"
-              className="inline-flex h-11 items-center justify-center rounded-md border border-slate-300 px-6 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+              className="inline-flex h-11 w-full items-center justify-center rounded-md border border-slate-300 px-6 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 sm:w-auto"
             >
               {t("cancel")}
             </Link>

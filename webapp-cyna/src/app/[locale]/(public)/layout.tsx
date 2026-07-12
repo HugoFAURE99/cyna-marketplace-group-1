@@ -14,7 +14,7 @@ export default function PublicLayout({
       <div aria-hidden="true" className="h-[72px] shrink-0" />
       {/* Content fills at least the viewport (minus the header) so the footer
           stays below the fold on short pages. */}
-      <div className="flex flex-1 flex-col min-h-[calc(100vh-72px)]">
+      <div className="flex min-h-[calc(100vh-72px)] flex-1 flex-col pb-20 md:pb-0">
         {children}
       </div>
       <PublicFooter />

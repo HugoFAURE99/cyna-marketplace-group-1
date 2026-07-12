@@ -88,7 +88,7 @@ export default function ChatTicketForm({ email, orders }: ChatTicketFormProps) {
           {...register("sujet")}
         />
         {errors.sujet && (
-          <p className="text-xs text-red-600">{errors.sujet.message}</p>
+          <p className="text-xs font-medium text-purple-700">{errors.sujet.message}</p>
         )}
       </div>
 
@@ -101,7 +101,7 @@ export default function ChatTicketForm({ email, orders }: ChatTicketFormProps) {
           {...register("email_contact")}
         />
         {errors.email_contact && (
-          <p className="text-xs text-red-600">{errors.email_contact.message}</p>
+          <p className="text-xs font-medium text-purple-700">{errors.email_contact.message}</p>
         )}
       </div>
 
@@ -114,7 +114,7 @@ export default function ChatTicketForm({ email, orders }: ChatTicketFormProps) {
           {...register("description")}
         />
         {errors.description && (
-          <p className="text-xs text-red-600">{errors.description.message}</p>
+          <p className="text-xs font-medium text-purple-700">{errors.description.message}</p>
         )}
       </div>
 
@@ -141,7 +141,7 @@ export default function ChatTicketForm({ email, orders }: ChatTicketFormProps) {
         </div>
       )}
 
-      {serverError && <p className="text-xs text-red-600">{t("error")}</p>}
+      {serverError && <p className="text-xs font-medium text-purple-800" role="alert">{t("error")}</p>}
 
       <button
         type="submit"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -34,8 +34,12 @@ export function RegisterForm({
   ...props
 }: React.ComponentProps<"div">) {
   const t = useTranslations("auth.register");
+  const locale = useLocale();
 
-  const [state, formAction, isPending] = useActionState(register, initialState);
+  const [state, formAction, isPending] = useActionState(
+    register.bind(null, locale),
+    initialState,
+  );
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

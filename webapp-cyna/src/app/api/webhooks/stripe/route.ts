@@ -36,6 +36,11 @@ export async function POST(req: Request) {
     if (event.type === "checkout.session.completed") {
       await handleCompletedCheckout(event.data.object);
     } else if (
+      event.type === "customer.subscription.updated" ||
+      event.type === "customer.subscription.deleted"
+    ) {
+      await syncSubscriptionState(event.data.object);
+    } else if (
       event.type === "invoice.finalized" ||
       event.type === "invoice.paid" ||
       event.type === "invoice.payment_failed" ||
@@ -62,12 +67,27 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
   const customerEmail =
     session.customer_details?.email ?? session.customer_email ?? null;
   const customerId = stripeId(session.customer);
+  const paymentMethod = await getPaymentMethodSummary(session);
+  const address = session.customer_details?.address;
 
   const { error: orderError } = await supabase
     .from("commande")
     .update({
       id_compte: accountId,
       mail_utilisateur_invite: customerEmail,
+      billing_address_snapshot: address
+        ? {
+            city: address.city,
+            country: address.country,
+            line1: address.line1,
+            line2: address.line2,
+            name: session.customer_details?.name ?? null,
+            postal_code: address.postal_code,
+            state: address.state,
+          }
+        : null,
+      payment_method_brand: paymentMethod?.brand ?? null,
+      payment_method_last4: paymentMethod?.last4 ?? null,
       stripe_checkout_session_id: session.id,
     })
     .eq("id_commande", orderId);
@@ -121,8 +141,7 @@ async function upsertSubscriptions(
     id_commande: orderId,
     id_compte: accountId,
     id_prix: line.id_prix,
-    statut_abonnement:
-      subscription.status === "active" ? "Actif" : subscription.status,
+    statut_abonnement: subscription.status,
     stripe_subscription_id: subscription.id,
   }));
   if (rows.length === 0) return;
@@ -131,6 +150,43 @@ async function upsertSubscriptions(
     .from("abonnement")
     .upsert(rows, { onConflict: "stripe_subscription_id,id_prix" });
   if (error) throw error;
+}
+
+async function syncSubscriptionState(subscription: Stripe.Subscription) {
+  const firstItem = subscription.items.data[0];
+  const endDate = firstItem?.current_period_end
+    ? new Date(firstItem.current_period_end * 1000).toISOString()
+    : subscription.ended_at
+      ? new Date(subscription.ended_at * 1000).toISOString()
+      : null;
+  const { error } = await supabase
+    .from("abonnement")
+    .update({
+      date_fin: endDate,
+      statut_abonnement: subscription.status,
+    })
+    .eq("stripe_subscription_id", subscription.id);
+  if (error) throw error;
+}
+
+async function getPaymentMethodSummary(session: Stripe.Checkout.Session) {
+  let paymentMethodId: string | null = null;
+  const paymentIntentId = stripeId(session.payment_intent);
+  if (paymentIntentId) {
+    const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
+    paymentMethodId = stripeId(intent.payment_method);
+  } else {
+    const subscriptionId = stripeId(session.subscription);
+    if (subscriptionId) {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      paymentMethodId = stripeId(subscription.default_payment_method);
+    }
+  }
+  if (!paymentMethodId) return null;
+  const method = await stripe.paymentMethods.retrieve(paymentMethodId);
+  return method.card
+    ? { brand: method.card.brand, last4: method.card.last4 }
+    : null;
 }
 
 async function syncBillingAddress(

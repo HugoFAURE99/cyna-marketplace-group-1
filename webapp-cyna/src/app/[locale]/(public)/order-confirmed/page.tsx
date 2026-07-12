@@ -167,10 +167,10 @@ export default async function OrderConfirmedPage({
             <div className="flex flex-col gap-3 sm:flex-row">
               {user ? (
                 <>
-                  <Link className="inline-flex h-11 flex-1 items-center justify-center rounded-md bg-purple-700 px-5 text-sm font-semibold text-white hover:bg-purple-800" href="/user-dashboard/orders">
+                  <Link className="inline-flex h-11 flex-1 items-center justify-center rounded-md bg-purple-700 px-5 text-sm font-semibold text-white hover:bg-purple-800" href="/user-dashboard/purchases/orders">
                     {t("viewOrders")}
                   </Link>
-                  <Link className="inline-flex h-11 flex-1 items-center justify-center rounded-md border border-purple-700 px-5 text-sm font-semibold text-purple-700 hover:bg-purple-50" href="/user-dashboard/subscriptions">
+                  <Link className="inline-flex h-11 flex-1 items-center justify-center rounded-md border border-purple-700 px-5 text-sm font-semibold text-purple-700 hover:bg-purple-50" href="/user-dashboard/purchases/subscriptions">
                     {t("viewSubscriptions")}
                   </Link>
                 </>

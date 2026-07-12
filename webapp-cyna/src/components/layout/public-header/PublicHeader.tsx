@@ -45,7 +45,7 @@ export default async function PublicHeader() {
       {/* logo | search | actions. Search is centered in the flex-1 track between
           logo and actions, so its gap to each side stays even despite their
           different widths. */}
-      <div className="mx-auto flex h-[72px] w-full max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-[72px] w-full max-w-7xl items-center justify-between gap-1 px-3 sm:gap-3 sm:px-6 lg:px-8">
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <Link
             aria-label={t("homeAriaLabel")}
@@ -54,7 +54,7 @@ export default async function PublicHeader() {
           >
             <Image
               alt="CYNA"
-              className="h-auto w-[118px]"
+              className="h-auto w-[104px] sm:w-[118px]"
               height={32}
               priority
               src="/brand/cyna-logo-v2-header.svg"
@@ -66,7 +66,7 @@ export default async function PublicHeader() {
             aria-hidden="true"
             className="hidden h-6 w-px bg-slate-200 sm:block"
           />
-          <CategoryMenu categories={categories} />
+          <div className="hidden md:block"><CategoryMenu categories={categories} /></div>
         </div>
 
         <div className="hidden min-w-0 flex-1 md:block">
@@ -79,7 +79,7 @@ export default async function PublicHeader() {
           {/* État de connexion (visible sur écrans ≥ sm) */}
           {user ? (
             <Link
-              className="hidden h-9 max-w-[200px] items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 shadow-xs transition hover:border-purple-200 hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:inline-flex"
+              className="hidden h-11 max-w-[200px] items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 shadow-xs transition hover:border-purple-200 hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 lg:inline-flex"
               href="/user-dashboard/infos"
             >
               <CircleUserRound
@@ -90,7 +90,7 @@ export default async function PublicHeader() {
             </Link>
           ) : (
             <Link
-              className="hidden h-9 items-center gap-1.5 rounded-md bg-purple-700 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 sm:inline-flex"
+              className="hidden h-11 items-center gap-1.5 rounded-md bg-purple-700 px-4 text-sm font-semibold text-white shadow-xs transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 lg:inline-flex"
               href="/login"
             >
               <LogIn aria-hidden="true" className="size-4" />
@@ -99,10 +99,10 @@ export default async function PublicHeader() {
           )}
 
           <MobileSearch />
-          <LanguageSwitcher />
+          <div className="hidden md:block"><LanguageSwitcher /></div>
           <CartButton count={cartCount} />
 
-          <PublicMenuSheet isLoggedIn={!!user} userName={displayName} />
+          <PublicMenuSheet categories={categories} isLoggedIn={!!user} />
         </div>
       </div>
     </header>

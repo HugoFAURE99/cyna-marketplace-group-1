@@ -9,16 +9,16 @@ export default function ChatTicketCard({ email }: { email: string }) {
   const t = useTranslations("chat");
 
   return (
-    <div className="flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 px-3 py-2.5">
+    <div className="flex items-start gap-3 rounded-lg border border-purple-200 bg-purple-50 px-3 py-2.5">
       <CheckCircle2
         aria-hidden="true"
-        className="mt-0.5 size-5 shrink-0 text-green-600"
+        className="mt-0.5 size-5 shrink-0 text-purple-700"
       />
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-green-800">
+        <p className="text-sm font-semibold text-purple-900">
           {t("ticketCreatedTitle")}
         </p>
-        <p className="text-xs text-green-700">
+        <p className="text-xs text-purple-700">
           {t("ticketCreatedSubtitle", { email })}
         </p>
       </div>

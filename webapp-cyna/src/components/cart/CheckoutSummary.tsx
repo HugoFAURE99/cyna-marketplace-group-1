@@ -50,8 +50,8 @@ export default function CheckoutSummary({
       </div>
 
       {hasMixedIntervals && (
-        <div className="mt-4 flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-          <AlertCircle className="mt-0.5 size-4 shrink-0 text-red-600" />
+        <div className="mt-4 flex items-start gap-3 rounded-md border border-purple-200 bg-purple-50 p-3 text-sm text-purple-900">
+          <AlertCircle className="mt-0.5 size-4 shrink-0 text-purple-700" />
           <p>
             {/* On utilise purement et simplement next-intl */}
             {t("mixedIntervalsError")}

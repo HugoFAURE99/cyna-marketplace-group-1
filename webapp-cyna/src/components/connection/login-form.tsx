@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -36,6 +36,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const t = useTranslations("auth.login");
+  const locale = useLocale();
 
   // 1. On récupère la valeur depuis l'URL
   const searchParams = useSearchParams();
@@ -43,7 +44,7 @@ export function LoginForm({
 
   // 2. On "graft" (bind) l'argument 'next' à l'action originale.
   // Le premier paramètre est 'null' pour le contexte (this), le deuxième est notre variable.
-  const loginWithNext = login.bind(null, next);
+  const loginWithNext = login.bind(null, locale, next);
 
   // 3. On donne cette action modifiée à useActionState
   const [state, formAction, isPending] = useActionState(

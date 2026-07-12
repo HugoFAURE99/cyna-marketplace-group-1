@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useActionState } from "react";
 
 import { cn } from "@/lib/utils";
@@ -32,9 +32,10 @@ export function ResetPasswordForm({
 }: React.ComponentProps<"div">) {
   // J'utilise "auth.resetPassword" pour les traductions
   const t = useTranslations("auth.resetPassword");
+  const locale = useLocale();
 
   const [state, formAction, isPending] = useActionState<ResetState, FormData>(
-    resetPassword,
+    resetPassword.bind(null, locale),
     initialState
   );
 

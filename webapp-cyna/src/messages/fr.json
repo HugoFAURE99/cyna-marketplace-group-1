@@ -31,6 +31,7 @@
     "signUp": "Créer un compte",
     "logOut": "Se déconnecter",
     "myAccount": "Mon compte",
+    "language": "Langue",
     "connectedAs": "Connecté en tant que",
     "termsOfUse": "Conditions d'utilisation",
     "legalNotices": "Mentions légales",
@@ -705,6 +706,8 @@
     "orderLabel": "Commande concernée (optionnel)",
     "orderNone": "Aucune",
     "orderRefPrefix": "Commande liée :",
+    "otherProducts": "+ {count, plural, one {# autre produit} other {# autres produits}}",
+    "orderContentsUnavailable": "contenu indisponible",
     "accountNote": "Ce ticket est ouvert depuis votre compte, et notre réponse sera envoyée à votre e-mail.",
     "loginRequiredTitle": "Connectez-vous pour ouvrir un ticket",
     "loginRequiredBody": "Connectez-vous ou créez un compte pour que votre ticket soit enregistré dans votre profil et que nous puissions vous recontacter.",
@@ -720,10 +723,10 @@
   "legal": {
     "legal_title": "Mentions Légales",
     "legal_paragraph": "CYNA est un prototype pédagogique. Cette page présente l'équipe projet, son contact et les services tiers utilisés pour la démonstration.",
-    "projectOwner": "Équipe étudiante CYNA — quatre étudiants",
+    "projectOwner": "G1 Dev",
     "projectStatus": "Projet pédagogique, sans société commerciale",
     "notApplicable": "Non applicable",
-    "studentTeam": "Équipe projet CYNA",
+    "studentTeam": "G1 Dev",
     "webedit_title": "Édition du site",
     "webedit_ul1": "Propriétaire du site",
     "webedit_ul2": "Forme juridique",
@@ -759,23 +762,32 @@
   },
   "user_dashboard": {
     "account": "Informations de compte",
+    "purchases": "Achats",
     "orders": "Commandes",
     "subscriptions": "Abonnements",
     "billing": "Facturation",
     "addresses": "Carnet d'adresses"
+  },
+  "purchases": {
+    "title": "Vos achats",
+    "subtitle": "Retrouvez vos commandes, abonnements et factures au même endroit.",
+    "orders": "Commandes",
+    "subscriptions": "Abonnements",
+    "invoices": "Factures"
   },
   "account": {
     "title": "Informations de compte",
     "editProfile": "Modifier le profil",
     "email": "E-mail",
     "creationDate": "Membre depuis",
-    "passwordUpdated": "Votre mot de passe a bien été mis à jour."
+    "passwordUpdated": "Votre mot de passe a bien été mis à jour.",
+    "close": "Fermer"
   },
   "orders": {
-    "title": "Vos Commandes",
+    "title": "Vos commandes",
     "invoiceWarning": "Si vous ne parvenez pas à télécharger une facture, veuillez contacter le support.",
     "last_orders": "Dernières Commandes",
-    "searchPlaceholder": "Rechercher une commande (ID, statut, montant)...",
+    "searchPlaceholder": "Rechercher...",
     "noSearchResults": "Aucune commande trouvée pour \"{search}\".",
     "noOrders": "Vous n'avez aucune commande pour le moment.",
     "subscriptionType": {
@@ -788,6 +800,7 @@
     "allStatuses": "Tous les statuts",
     "columns": {
       "id": "ID Commande",
+      "products": "Produits",
       "date": "Date",
       "amount": "Montant",
       "subscription": "Abonnement",
@@ -800,7 +813,31 @@
       "cancelled": "Annulée",
       "failed": "Échouée"
     },
-    "viewInvoice": "Voir la facture"
+    "viewInvoice": "Voir la facture",
+    "filters": {
+      "search": "Recherche",
+      "year": "Année",
+      "service": "Service",
+      "billing": "Fréquence",
+      "status": "Statut"
+    },
+    "billing": {
+      "monthly": "Mensuel",
+      "annual": "Annuel",
+      "one_time": "Paiement unique"
+    },
+    "browseProducts": "Parcourir les produits",
+    "contactSupport": "Contacter le support",
+    "details": "Voir les détails",
+    "hideDetails": "Masquer les détails",
+    "detailProducts": "Produits commandés",
+    "detailBilling": "Facturation",
+    "detailInvoices": "Factures",
+    "quantity": "{count, plural, one {# licence} other {# licences}}",
+    "card": "Carte",
+    "notAvailable": "Non disponible",
+    "invoicePending": "Facture en préparation",
+    "noInvoices": "Aucune facture associée"
   },
   "user_edition": {
     "title": "Édition du profil",
@@ -860,8 +897,8 @@
     "viewList": "Vue liste",
     "viewGrid": "Vue grille",
     "status": "Statut",
-    "startDate": "Date de début",
-    "endDate": "Date de fin",
+    "startDate": "Début",
+    "endDate": "Fin",
     "deactivate": "Désactiver",
     "deactivating": "Désactivation...",
     "unknown": "Abonnement inconnu",
@@ -872,7 +909,25 @@
     "confirmDeactivateTitle": "Confirmer la désactivation",
     "confirmDeactivateMessage": "Êtes-vous sûr de vouloir désactiver cet abonnement\u00A0?",
     "confirm": "Confirmer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "manageTitle": "Gérer votre facturation Stripe",
+    "manageDescription": "Modifiez votre moyen de paiement ou résiliez un abonnement à la fin de la période en cours.",
+    "manage": "Gérer dans Stripe",
+    "portalUnavailable": "Le portail Stripe sera disponible après votre premier achat avec ce compte.",
+    "subscriptionNumber": "Abonnement n°{id}",
+    "ongoing": "En cours",
+    "statuses": {
+      "active": "Actif",
+      "trialing": "Période d'essai",
+      "actif": "Actif",
+      "canceled": "Résilié",
+      "incomplete": "Incomplet",
+      "incomplete_expired": "Expiré",
+      "past_due": "Paiement en retard",
+      "unpaid": "Impayé",
+      "paused": "Suspendu",
+      "désactivé": "Désactivé"
+    }
   },
   "orderConfirmed": {
     "title": "Commande confirmée",
@@ -896,6 +951,7 @@
     "invoiceWarning": "Une facture peut mettre quelques instants à apparaître. Contactez le support si elle reste indisponible.",
     "supportLink": "Ouvrir le support",
     "id": "N° Facture",
+    "order": "Commande",
     "date": "Date",
     "amount": "Montant",
     "status": "Statut",
@@ -905,6 +961,14 @@
     "downloadError": "La facture n'a pas pu être ouverte. Veuillez réessayer dans quelques instants.",
     "noInvoices": "Vous n'avez aucune facture pour le moment.",
     "searchPlaceholder": "Rechercher une facture (N°, statut, montant)...",
-    "noSearchResults": "Aucune facture trouvée pour \"{search}\"."
+    "noSearchResults": "Aucune facture trouvée pour \"{search}\".",
+    "statuses": {
+      "paid": "Payée",
+      "open": "À payer",
+      "draft": "Brouillon",
+      "void": "Annulée",
+      "uncollectible": "Irrécouvrable",
+      "unknown": "Inconnue"
+    }
   }
 }

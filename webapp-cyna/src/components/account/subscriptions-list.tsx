@@ -26,31 +26,35 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: AccountSub
 
   return (
     <div className="w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div className="relative flex-1 w-full max-w-md">
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="relative w-full max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
           <Input
             type="text"
             placeholder={t("searchPlaceholder")}
-            className="pl-10 w-full bg-white"
+            className="min-h-11 w-full bg-white pl-10"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+        <div className="flex min-h-11 items-center gap-1 rounded-lg bg-slate-100 p-1">
           <Button 
+            aria-label={t("viewList")}
+            aria-pressed={viewMode === "list"}
             variant="ghost" 
             size="sm" 
-            className={`px-3 py-1.5 h-auto ${viewMode === 'list' ? 'bg-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`min-h-9 px-3 py-1.5 ${viewMode === 'list' ? 'bg-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             onClick={() => setViewMode('list')}
             title={t("viewList")}
           >
             <List className="w-4 h-4" />
           </Button>
           <Button 
+            aria-label={t("viewGrid")}
+            aria-pressed={viewMode === "grid"}
             variant="ghost" 
             size="sm" 
-            className={`px-3 py-1.5 h-auto ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            className={`min-h-9 px-3 py-1.5 ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             onClick={() => setViewMode('grid')}
             title={t("viewGrid")}
           >
@@ -61,15 +65,15 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: AccountSub
 
       <div className="w-full">
         {filteredSubscriptions.length > 0 ? (
-          <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" : "flex flex-col gap-4"}>
+          <div className={viewMode === 'grid' ? "grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
             {filteredSubscriptions.map((subscription) => (
               <SubscriptionCard key={subscription.id_abonnement} subscription={subscription} layout={viewMode} />
             ))}
           </div>
         ) : search ? (
-          <p className="px-4 py-8 text-slate-500">{t("noSearchResults", { search })}</p>
+          <p className="rounded-lg border border-dashed border-slate-300 px-4 py-10 text-center text-slate-500">{t("noSearchResults", { search })}</p>
         ) : (
-          <p className="px-4 py-8 text-slate-500">{t("noSubscriptions")}</p>
+          <p className="rounded-lg border border-dashed border-slate-300 px-4 py-10 text-center text-slate-500">{t("noSubscriptions")}</p>
         )}
       </div>
     </div>

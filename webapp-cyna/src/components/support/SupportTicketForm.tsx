@@ -13,13 +13,15 @@ import { submitSupportTicket } from "@/app/[locale]/(public)/faq/_actions/suppor
 import type { ChatOrderOption } from "@/lib/gemini/types";
 
 const fieldClass =
-  "w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-200";
+  "min-h-11 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-200";
 
 export default function SupportTicketForm({
   defaultEmail = "",
+  isAuthenticated = false,
   orders = [],
 }: {
   defaultEmail?: string;
+  isAuthenticated?: boolean;
   orders?: ChatOrderOption[];
 }) {
   const t = useTranslations("support");
@@ -66,10 +68,10 @@ export default function SupportTicketForm({
 
   if (submitted) {
     return (
-      <div className="flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+      <div className="flex items-start gap-3 rounded-lg border border-purple-200 bg-purple-50 p-4 text-sm text-purple-900">
         <CheckCircle2
           aria-hidden="true"
-          className="mt-0.5 size-5 shrink-0 text-green-600"
+          className="mt-0.5 size-5 shrink-0 text-purple-700"
         />
         <p>{t("success")}</p>
       </div>
@@ -92,7 +94,7 @@ export default function SupportTicketForm({
           {...register("sujet")}
         />
         {errors.sujet && (
-          <p className="text-xs text-red-600">{errors.sujet.message}</p>
+          <p className="text-xs font-medium text-purple-700">{errors.sujet.message}</p>
         )}
       </div>
 
@@ -121,7 +123,7 @@ export default function SupportTicketForm({
           {...register("email_contact")}
         />
         {errors.email_contact && (
-          <p className="text-xs text-red-600">{errors.email_contact.message}</p>
+          <p className="text-xs font-medium text-purple-700">{errors.email_contact.message}</p>
         )}
       </div>
 
@@ -140,18 +142,18 @@ export default function SupportTicketForm({
           {...register("description")}
         />
         {errors.description && (
-          <p className="text-xs text-red-600">{errors.description.message}</p>
+          <p className="text-xs font-medium text-purple-700">{errors.description.message}</p>
         )}
       </div>
 
-      {serverError && <p className="text-sm text-red-600">{t("error")}</p>}
+      {serverError && <p className="text-sm font-medium text-purple-800" role="alert">{t("error")}</p>}
 
-      <p className="text-xs text-slate-500">{t("accountNote")}</p>
+      {isAuthenticated && <p className="text-xs text-slate-500">{t("accountNote")}</p>}
 
       <button
         type="submit"
         disabled={isSubmitting}
-        className="inline-flex h-10 items-center justify-center rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
       >
         {isSubmitting ? t("submitting") : t("submit")}
       </button>

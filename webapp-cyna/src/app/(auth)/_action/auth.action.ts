@@ -13,6 +13,7 @@ type AuthActionState = {
 } | null;
 
 export async function login(
+  locale: string,
   next: string,
   _prevState: AuthActionState,
   formData: FormData,
@@ -33,7 +34,7 @@ export async function login(
       }
       return { errorKey: "errorUnavailable" };
     }
-    redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/");
+    redirect(localizedPath(locale, next));
   } catch (error) {
     if (error && typeof error === "object" && "digest" in error) throw error;
     console.error("[auth] login failed", error);
@@ -42,6 +43,7 @@ export async function login(
 }
 
 export async function register(
+  locale: string,
   _prevState: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
@@ -70,7 +72,7 @@ export async function register(
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${normaliseLocale(locale)}`,
       },
     });
     if (error) {
@@ -92,7 +94,7 @@ export async function register(
         return { errorKey: "errorUnavailable" };
       }
     }
-    redirect("/login?message=checkEmail");
+    redirect(`/${normaliseLocale(locale)}/login?message=checkEmail`);
   } catch (error) {
     if (error && typeof error === "object" && "digest" in error) throw error;
     console.error("[auth] registration failed", error);
@@ -103,10 +105,12 @@ export async function register(
 export async function logout() {
   const supabase = await createServerClient();
   await supabase.auth.signOut();
-  redirect("/");
+  const { getLocale } = await import("next-intl/server");
+  redirect(`/${normaliseLocale(await getLocale())}`);
 }
 
 export async function resetPassword(
+  locale: string,
   _prevState: AuthActionState,
   formData: FormData,
 ): Promise<AuthActionState> {
@@ -115,7 +119,7 @@ export async function resetPassword(
   try {
     const supabase = await createServerClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?next=/user-dashboard/update-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${normaliseLocale(locale)}&next=/user-dashboard/update-password`,
     });
     return error ? { errorKey: "errorUnavailable" } : { successKey: "resetEmailSent" };
   } catch (error) {
@@ -142,5 +146,19 @@ export async function updatePassword(
       errorKey: error.code === "weak_password" ? "errorTooShort" : "errorUpdateFailed",
     };
   }
-  redirect("/login?message=updatePasswordSuccess");
+  const { getLocale } = await import("next-intl/server");
+  redirect(`/${normaliseLocale(await getLocale())}/login?message=updatePasswordSuccess`);
+}
+
+function normaliseLocale(locale: string) {
+  return locale === "en" ? "en" : "fr";
+}
+
+function localizedPath(locale: string, candidate: string) {
+  const safe = candidate.startsWith("/") && !candidate.startsWith("//")
+    ? candidate
+    : "/";
+  if (/^\/(fr|en)(\/|$)/.test(safe)) return safe;
+  const prefix = `/${normaliseLocale(locale)}`;
+  return safe === "/" ? prefix : `${prefix}${safe}`;
 }

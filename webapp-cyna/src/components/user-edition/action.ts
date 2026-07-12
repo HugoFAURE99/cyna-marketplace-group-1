@@ -72,7 +72,7 @@ export async function requestPasswordResetEmail(
   if (!user?.email) return { errorKey: "errorUpdateFailed" };
 
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?next=/user-dashboard/update-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${await getLocale()}&next=/user-dashboard/update-password`,
   });
   if (error) {
     console.error("[auth] reset e-mail failed", error);

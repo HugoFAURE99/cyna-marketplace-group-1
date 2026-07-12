@@ -72,7 +72,7 @@ export default function HomeCarousel({ slides, buttonHref }: HomeCarouselProps) 
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
-      <div className="relative min-h-[360px] w-full sm:min-h-[440px]">
+      <div className="relative min-h-[500px] w-full sm:min-h-[440px]">
         {slides.map((slide, index) => {
           const active = index === safeIndex;
           // Only the active slide carries the page <h1>; others stay neutral
@@ -102,7 +102,7 @@ export default function HomeCarousel({ slides, buttonHref }: HomeCarouselProps) 
 
               <div className="relative flex h-full w-full items-center justify-center px-4 py-16 text-center sm:px-6 lg:px-8">
                 <div className="max-w-3xl">
-                  <Heading className="text-4xl font-bold tracking-normal sm:text-5xl">
+                  <Heading className="text-3xl font-bold tracking-normal sm:text-5xl">
                     {slide.titre_image}
                   </Heading>
                   {slide.description_image && (

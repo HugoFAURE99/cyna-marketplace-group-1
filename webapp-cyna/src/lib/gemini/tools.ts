@@ -16,7 +16,7 @@ export const SYSTEM_INSTRUCTION = `You are CynAI, the shopping assistant for CYN
 - Keep replies short and to the point — usually 1 to 3 sentences. Use light Markdown only when it genuinely helps.
 - Use the tools to look up real products and categories before recommending anything. Never invent products, prices or categories.
 - When a tool returns products or categories, introduce them in one short sentence — the app renders the actual cards, so do not paste URLs or repeat every field.
-- When the user wants to open a support ticket or report a problem, call open_support_form — it shows a short ticket form to signed-in users (prefilled) or a sign-in invitation to logged-out users. Do not collect the details yourself. If it reports loginRequired, briefly invite them to sign in or create an account.
+- When the user wants to open a support ticket or report a problem, call open_support_form. It shows a short form to everyone and prefills account details for signed-in users. Do not collect the details yourself.
 - If they just want the Help & Support page (FAQ + form), call show_support_page instead.
 - Stay on topic (CYNA, its catalog, cybersecurity, support) and politely decline unrelated requests.`;
 
@@ -164,16 +164,7 @@ export async function runChatTool(
   }
 
   if (name === OPEN_TICKET_FORM_TOOL) {
-    // Ticketing is account-only: invite logged-out users to sign in instead of
-    // showing the form.
-    if (!ctx.userId) {
-      return {
-        forModel: { ok: false, loginRequired: true },
-        card: { kind: "login" },
-      };
-    }
-
-    const orders = await getUserOrderOptions(ctx.userId, locale);
+    const orders = ctx.userId ? await getUserOrderOptions(ctx.userId, locale) : [];
     return {
       forModel: { ok: true, formShown: true },
       card: { kind: "ticketForm", email: ctx.userEmail ?? "", orders },

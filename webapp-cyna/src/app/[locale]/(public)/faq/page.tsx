@@ -1,8 +1,7 @@
-import { ChevronDown, LogIn, Mail, MapPin, UserPlus } from "lucide-react";
+import { ChevronDown, Mail, MapPin } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import SupportTicketForm from "@/components/support/SupportTicketForm";
-import { Link } from "@/i18n/navigation";
 import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
 import { getUserOrderOptions } from "@/lib/support/orders";
@@ -74,36 +73,8 @@ export default async function FaqPage({
         <h2 className="text-xl font-semibold text-slate-900">
           {tSupport("title")}
         </h2>
-        {user ? (
-          <>
-            <p className="mt-1 mb-5 text-sm text-slate-600">
-              {tSupport("subtitle")}
-            </p>
-            <SupportTicketForm defaultEmail={user.email ?? ""} orders={orders} />
-          </>
-        ) : (
-          <>
-            <p className="mt-1 mb-5 text-sm text-slate-600">
-              {tSupport("loginRequiredBody")}
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
-                href="/login"
-              >
-                <LogIn aria-hidden="true" className="size-4" />
-                {tSupport("logIn")}
-              </Link>
-              <Link
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-purple-700 bg-white px-5 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
-                href="/register"
-              >
-                <UserPlus aria-hidden="true" className="size-4" />
-                {tSupport("createAccount")}
-              </Link>
-            </div>
-          </>
-        )}
+        <p className="mt-1 mb-5 text-sm text-slate-600">{tSupport("subtitle")}</p>
+        <SupportTicketForm defaultEmail={user?.email ?? ""} isAuthenticated={!!user} orders={orders} />
       </div>
     </div>
   );
