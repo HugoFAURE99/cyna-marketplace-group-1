@@ -7,11 +7,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslations } from "next-intl";
-import { CheckCircle2 } from "lucide-react";
 
 import { submitSupportTicket } from "@/app/[locale]/(public)/faq/_actions/support.actions";
 import type { ChatOrderOption } from "@/lib/gemini/types";
 import { SUPPORT_TICKET_CATEGORIES } from "@/lib/support/constants";
+import { useNotification } from "@/components/ui/notification-provider";
 
 const fieldClass =
   "min-h-11 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-200";
@@ -32,7 +32,7 @@ export default function SupportTicketForm({
   defaultOrderId?: string;
 }) {
   const t = useTranslations("support");
-  const [submitted, setSubmitted] = useState(false);
+  const { notify } = useNotification();
   const [serverError, setServerError] = useState(false);
 
   const schema = z.object({
@@ -55,7 +55,16 @@ export default function SupportTicketForm({
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { sujet: defaultSubject || "", email_contact: defaultEmail, description: "", categorie: (defaultCategory as any) || "other", orderId: defaultOrderId || "" },
+    defaultValues: {
+      sujet: defaultSubject || "",
+      email_contact: defaultEmail,
+      description: "",
+      categorie:
+        SUPPORT_TICKET_CATEGORIES.find(
+          (category) => category === defaultCategory,
+        ) ?? "other",
+      orderId: defaultOrderId || "",
+    },
   });
 
   const onSubmit = handleSubmit(async (values) => {
@@ -69,23 +78,11 @@ export default function SupportTicketForm({
     });
     if (result.ok) {
       reset();
-      setSubmitted(true);
+      notify(t("success"));
     } else {
       setServerError(true);
     }
   });
-
-  if (submitted) {
-    return (
-      <div className="flex items-start gap-3 rounded-lg border border-purple-200 bg-purple-50 p-4 text-sm text-purple-900">
-        <CheckCircle2
-          aria-hidden="true"
-          className="mt-0.5 size-5 shrink-0 text-purple-700"
-        />
-        <p>{t("success")}</p>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" noValidate>

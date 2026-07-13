@@ -140,7 +140,7 @@ export default function SearchAutocomplete({
   };
 
   const priceLabel = (product: SearchSuggestion) => {
-    if (product.quantite_produit <= 0) {
+    if (!product.est_disponible) {
       return tp("unavailable");
     }
     if (product.priceCents === null) {

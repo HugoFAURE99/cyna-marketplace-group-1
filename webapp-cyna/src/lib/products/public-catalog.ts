@@ -22,7 +22,7 @@ export type CatalogProduct = {
   mis_avant_ordre: number;
   ordre_priorite: number;
   date_ajout: string;
-  quantite_produit: number;
+  est_disponible: boolean;
   category: { cat_nom: string; lien_image_cat: string | null } | null;
   technicalCharacteristics: CatalogTechnicalCharacteristic[];
   images: PublicProductImage[];
@@ -69,7 +69,7 @@ export type CatalogProductQueryRow = Pick<
   | "mis_avant"
   | "mis_avant_ordre"
   | "ordre_priorite"
-  | "quantite_produit"
+  | "est_disponible"
 > & {
   produit_traduction:
     | Pick<Tables<"produit_traduction">, "langue" | "nom_pro" | "pro_description">[]
@@ -89,7 +89,7 @@ export type CatalogProductQueryRow = Pick<
 };
 
 // One select pulls each product with its category, images, and tariffs.
-// Adds display-ordering columns + stock and the embedded `pro_description`
+// Adds display-ordering columns + availability and the embedded `pro_description`
 // for fuzzy search on top of the card query shape.
 export const CATALOG_PRODUCT_SELECT = `
   date_ajout,
@@ -98,7 +98,7 @@ export const CATALOG_PRODUCT_SELECT = `
   mis_avant,
   mis_avant_ordre,
   ordre_priorite,
-  quantite_produit,
+  est_disponible,
   produit_traduction (
     langue,
     nom_pro,
@@ -148,17 +148,17 @@ const BILLING_ORDER: Record<string, number> = {
 
 type SearchOrderedProduct = Pick<
   CatalogProduct,
-  "date_ajout" | "id_produit" | "is_priorite" | "ordre_priorite" | "quantite_produit"
+  "date_ajout" | "est_disponible" | "id_produit" | "is_priorite" | "ordre_priorite"
 >;
 
 // Search/catalog ordering: available products first, priority products before
-// normal products, then out-of-stock products at the very end.
+// normal products, then unavailable products at the very end.
 export function compareBySearchOrder<T extends SearchOrderedProduct>(
   a: T,
   b: T,
 ) {
-  const aAvailable = a.quantite_produit > 0;
-  const bAvailable = b.quantite_produit > 0;
+  const aAvailable = a.est_disponible;
+  const bAvailable = b.est_disponible;
 
   if (aAvailable !== bAvailable) {
     return aAvailable ? -1 : 1;
@@ -226,7 +226,7 @@ export function normalizeCatalogProduct(
     mis_avant_ordre: row.mis_avant_ordre,
     ordre_priorite: row.ordre_priorite,
     date_ajout: row.date_ajout,
-    quantite_produit: row.quantite_produit,
+    est_disponible: row.est_disponible,
     category: row.categorie
       ? {
           cat_nom: categoryTranslation?.cat_nom ?? "",

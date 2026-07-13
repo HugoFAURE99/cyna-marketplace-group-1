@@ -1,6 +1,6 @@
 // Reusable product card for any listing (home, category, search). Renders the
 // image (with category-image / placeholder fallback), name, primary price, and
-// an "unavailable" badge when out of stock. Self-contained so it can be dropped
+// an "unavailable" badge when disabled. Self-contained so it can be dropped
 // into any grid.
 import { ImageOff } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -24,7 +24,7 @@ export default async function ProductCard({ product }: ProductCardProps) {
     product.category?.lien_image_cat ??
     null;
   const primaryTariff = product.tariffs[0];
-  const isUnavailable = product.quantite_produit <= 0;
+  const isUnavailable = !product.est_disponible;
 
   const periodSuffix = (type: string) => {
     if (type === "mensuel") return t("perMonth");

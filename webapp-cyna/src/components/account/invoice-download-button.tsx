@@ -6,7 +6,13 @@ import { useTranslations } from "next-intl";
 
 import { getInvoiceSignedUrl } from "@/lib/facture/facture.actions";
 
-export function InvoiceDownloadButton({ invoiceId }: { invoiceId: number }) {
+export function InvoiceDownloadButton({
+  compact = false,
+  invoiceId,
+}: {
+  compact?: boolean;
+  invoiceId: number;
+}) {
   const t = useTranslations("billing");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -27,7 +33,7 @@ export function InvoiceDownloadButton({ invoiceId }: { invoiceId: number }) {
   return (
     <span className="inline-flex flex-col items-start gap-1">
       <button
-        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md bg-purple-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-60"
+        className={`inline-flex cursor-pointer items-center gap-2 rounded-md bg-purple-700 font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-60 ${compact ? "min-h-9 px-3 py-1.5 text-xs" : "min-h-11 px-4 py-2 text-sm"}`}
         disabled={loading}
         onClick={download}
         type="button"

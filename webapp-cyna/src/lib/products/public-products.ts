@@ -18,7 +18,7 @@ type ProductNeutral = Pick<
   | "id_produit"
   | "is_priorite"
   | "ordre_priorite"
-  | "quantite_produit"
+  | "est_disponible"
   | "statut_produit"
 >;
 
@@ -53,7 +53,7 @@ export type PublicProductDetail = ProductNeutral & {
 
 export type SimilarProduct = Pick<
   ProductNeutral,
-  "date_ajout" | "id_produit" | "is_priorite" | "ordre_priorite" | "quantite_produit"
+  "date_ajout" | "est_disponible" | "id_produit" | "is_priorite" | "ordre_priorite"
 > & {
   nom_pro: string;
   category: PublicProductCategory | null;
@@ -118,7 +118,7 @@ type ProductQueryRow = ProductNeutral & {
 
 type SimilarProductQueryRow = Pick<
   ProductNeutral,
-  "date_ajout" | "id_produit" | "is_priorite" | "ordre_priorite" | "quantite_produit"
+  "date_ajout" | "est_disponible" | "id_produit" | "is_priorite" | "ordre_priorite"
 > & {
   produit_traduction: ProduitTraductionRow[] | null;
   categorie: CategoryQueryRow | null;
@@ -131,7 +131,7 @@ const PRODUCT_SELECT = `
   id_produit,
   is_priorite,
   ordre_priorite,
-  quantite_produit,
+  est_disponible,
   statut_produit,
   produit_traduction (
     langue,
@@ -179,7 +179,7 @@ const SIMILAR_PRODUCT_SELECT = `
   id_produit,
   is_priorite,
   ordre_priorite,
-  quantite_produit,
+  est_disponible,
   produit_traduction (
     langue,
     nom_pro,
@@ -323,7 +323,7 @@ function normalizeProduct(
     id_produit: row.id_produit,
     is_priorite: row.is_priorite,
     ordre_priorite: row.ordre_priorite,
-    quantite_produit: row.quantite_produit,
+    est_disponible: row.est_disponible,
     statut_produit: row.statut_produit,
     nom_pro: translation?.nom_pro ?? "",
     pro_description: translation?.pro_description ?? null,
@@ -347,7 +347,7 @@ function normalizeSimilarProduct(
     id_produit: row.id_produit,
     is_priorite: row.is_priorite,
     ordre_priorite: row.ordre_priorite,
-    quantite_produit: row.quantite_produit,
+    est_disponible: row.est_disponible,
     nom_pro: translation?.nom_pro ?? "",
     category: resolveCategory(row.categorie, locale),
     images: sortImages(row.image_produit ?? []),

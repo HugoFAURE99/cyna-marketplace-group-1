@@ -25,7 +25,7 @@ export default function ChatProductCard({
       : product.type_facturation === "annuel"
         ? t("perYear")
         : "";
-  const unavailable = product.quantite_produit <= 0;
+  const unavailable = !product.est_disponible;
 
   return (
     <Link

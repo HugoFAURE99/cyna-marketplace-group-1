@@ -38,6 +38,7 @@ type Category = {
 type Product = {
   id_produit: number;
   id_categorie: number;
+  est_disponible: boolean;
   statut_produit: boolean;
   prix_tarif: {
     id_prix: number;
@@ -185,6 +186,7 @@ export default function ProductForm({
             .array(z.enum(["mensuel", "annuel"]))
             .min(1, tv("billingRequired")),
           statut_produit: z.boolean(),
+          est_disponible: z.boolean(),
         })
         .refine(
           (d) => !d.billings.includes("mensuel") || (d.prix_mensuel ?? 0) > 0,
@@ -234,8 +236,9 @@ export default function ProductForm({
             BILLING_OPTIONS.includes(b as BillingOption),
           ),
           statut_produit: product.statut_produit,
+          est_disponible: product.est_disponible,
         }
-      : { billings: [], statut_produit: false },
+      : { billings: [], est_disponible: true, statut_produit: false },
   });
 
   const toggleBilling = (option: BillingOption) => {
@@ -599,6 +602,7 @@ export default function ProductForm({
       />
 
       {/* Product status toggle */}
+      <div className="grid gap-3 sm:grid-cols-2">
       <div className="flex items-center justify-between rounded-lg border p-4">
         <div>
           <Label>{t("status")}</Label>
@@ -621,6 +625,30 @@ export default function ProductForm({
             }`}
           />
         </button>
+      </div>
+      <div className="flex items-center justify-between rounded-lg border p-4">
+        <div>
+          <Label>{t("availability")}</Label>
+          <p className="text-sm text-muted-foreground">{t("availabilityHint")}</p>
+        </div>
+        <button
+          aria-label={t("availability")}
+          aria-pressed={watch("est_disponible")}
+          type="button"
+          onClick={readOnly ? undefined : () =>
+            setValue("est_disponible", !watch("est_disponible"))
+          }
+          className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors ${
+            readOnly ? "cursor-default" : "cursor-pointer"
+          } ${watch("est_disponible") ? "bg-primary" : "bg-muted"}`}
+        >
+          <span
+            className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
+              watch("est_disponible") ? "translate-x-5" : "translate-x-0"
+            }`}
+          />
+        </button>
+      </div>
       </div>
 
       <div className="flex justify-end gap-3 mt-6 pt-6 border-t">

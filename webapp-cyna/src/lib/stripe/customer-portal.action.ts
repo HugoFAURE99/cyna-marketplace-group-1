@@ -45,8 +45,9 @@ async function getPortalConfiguration() {
   const existing = configurations.data.find(
     (item) =>
       item.features.payment_method_update.enabled &&
-      item.features.subscription_cancel.enabled &&
-      item.features.subscription_cancel.mode === "at_period_end",
+      item.features.invoice_history.enabled &&
+      !item.features.subscription_cancel.enabled &&
+      !item.features.subscription_update.enabled,
   );
   if (existing) return existing.id;
 
@@ -60,11 +61,7 @@ async function getPortalConfiguration() {
       invoice_history: { enabled: true },
       payment_method_update: { enabled: true },
       subscription_cancel: {
-        cancellation_reason: {
-          enabled: true,
-          options: ["too_expensive", "missing_features", "switched_service", "other"],
-        },
-        enabled: true,
+        enabled: false,
         mode: "at_period_end",
       },
       subscription_update: { enabled: false },

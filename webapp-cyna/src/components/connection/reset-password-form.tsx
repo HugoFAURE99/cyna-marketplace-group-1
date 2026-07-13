@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { AuthMessage } from "@/components/connection/auth-message";
+import { useNotification } from "@/components/ui/notification-provider";
 
 import { resetPassword } from "@/app/(auth)/_action/auth.action";
 
@@ -33,11 +34,18 @@ export function ResetPasswordForm({
   // J'utilise "auth.resetPassword" pour les traductions
   const t = useTranslations("auth.resetPassword");
   const locale = useLocale();
+  const { notify } = useNotification();
 
   const [state, formAction, isPending] = useActionState<ResetState, FormData>(
     resetPassword.bind(null, locale),
     initialState
   );
+
+  useEffect(() => {
+    if (state?.successKey) {
+      notify(t(state.successKey as Parameters<typeof t>[0]));
+    }
+  }, [notify, state, t]);
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -46,12 +54,6 @@ export function ResetPasswordForm({
           <form action={formAction}>
             <FieldGroup>
               {/* Message de succès */}
-              {state?.successKey && (
-                <AuthMessage variant="info">
-                  {t(state.successKey as Parameters<typeof t>[0])}
-                </AuthMessage>
-              )}
-
               {/* Message d'erreur */}
               {(state?.errorKey || state?.error) && (
                 <AuthMessage variant="error">

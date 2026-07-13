@@ -1,5 +1,5 @@
 // Presentational "unavailable" badge. The caller decides when to render it
-// (i.e. when quantite_produit === 0) and passes the localised label.
+// (i.e. when est_disponible is false) and passes the localised label.
 import { cn } from "@/lib/utils";
 
 type AvailabilityBadgeProps = {

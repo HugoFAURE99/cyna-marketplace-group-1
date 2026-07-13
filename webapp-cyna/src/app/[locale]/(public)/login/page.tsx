@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { LoginForm } from "@/components/connection/login-form";
 import { AuthMessage } from "@/components/connection/auth-message";
+import { AccountToast } from "@/components/account/account-toast";
 import type { Locale } from "@/lib/i18n/translations";
 
 // Query-param keys the auth flow may redirect here with. We map them to
@@ -41,7 +42,7 @@ export default async function Login({
         </div>
 
         {/* Message de succès venant de l'inscription / reset (traduit) */}
-        {messageText && <AuthMessage variant="info">{messageText}</AuthMessage>}
+        {messageText && <AccountToast message={messageText} />}
 
         {/* Erreur venant du callback (ex: lien expiré) (traduit) */}
         {errorText && <AuthMessage variant="error">{errorText}</AuthMessage>}

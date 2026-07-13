@@ -90,7 +90,7 @@ export async function searchCatalog(
   }
 
   if (inStockOnly) {
-    products = products.filter((product) => product.quantite_produit > 0);
+    products = products.filter((product) => product.est_disponible);
   }
 
   const selectedCharacteristicIds = [
@@ -155,7 +155,7 @@ function sortCatalog(
       case "availability":
         // Available (in-stock) products first, then fall back to search order.
         return (
-          Number(b.quantite_produit > 0) - Number(a.quantite_produit > 0) ||
+          Number(b.est_disponible) - Number(a.est_disponible) ||
           compareBySearchOrder(a, b)
         );
       default:
@@ -173,7 +173,7 @@ export type SearchSuggestion = {
   imageUrl: string | null;
   priceCents: number | null;
   type_facturation: string | null;
-  quantite_produit: number;
+  est_disponible: boolean;
 };
 
 export function toSuggestion(product: CatalogProduct): SearchSuggestion {
@@ -187,6 +187,6 @@ export function toSuggestion(product: CatalogProduct): SearchSuggestion {
       null,
     priceCents: product.tariffs[0]?.prix ?? null,
     type_facturation: product.tariffs[0]?.type_facturation ?? null,
-    quantite_produit: product.quantite_produit,
+    est_disponible: product.est_disponible,
   };
 }

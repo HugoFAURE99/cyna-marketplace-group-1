@@ -2,30 +2,15 @@ import { CreditCard } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { SubscriptionsList } from "@/components/account/subscriptions-list";
-import type { AccountSubscription } from "@/components/account/subscription-card";
 import type { Locale } from "@/lib/i18n/translations";
 import { openCustomerPortal } from "@/lib/stripe/customer-portal.action";
-import { createServerClient } from "@/lib/supabase/server-client";
+import { getAccountSubscriptions } from "@/lib/subscriptions/account-subscriptions";
 
 export default async function PurchaseSubscriptions({ params, searchParams }: { params: Promise<{ locale: Locale }>; searchParams: Promise<{ portal?: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("subscriptions");
-  const supabase = await createServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  let subscriptions: AccountSubscription[] = [];
-  if (user) {
-    const { data, error } = await supabase.from("abonnement").select(`
-      *,
-      commande (date_commande, montant_total, statut_commande),
-      prix_tarif (
-        prix_tarif_traduction (nom_prix_tarif, langue),
-        produit (produit_traduction (nom_pro, langue))
-      )
-    `).order("date_debut", { ascending: false });
-    if (error) throw new Error(`SUBSCRIPTION_LIST_QUERY_FAILED: ${error.message}`);
-    subscriptions = (data ?? []) as unknown as AccountSubscription[];
-  }
+  const subscriptions = await getAccountSubscriptions();
   const { portal } = await searchParams;
   return <div className="space-y-6">
     <div className="flex flex-col gap-3 rounded-lg border border-purple-100 bg-purple-50 p-4 sm:flex-row sm:items-center sm:justify-between">

@@ -1,6 +1,15 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Search } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarClock,
+  ChevronDown,
+  ChevronUp,
+  CreditCard,
+  FileText,
+  Package,
+  Search,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -23,7 +32,23 @@ type OrderLine = {
   } | null;
 };
 
+type CurrentSubscription = {
+  annulation_programmee: boolean;
+  date_fin: string | null;
+  id_abonnement: number;
+  nombre_utilisateurs: number;
+  statut_abonnement: string;
+  prix_tarif: {
+    prix: number;
+    type_facturation: string;
+    produit: {
+      produit_traduction: { langue: string; nom_pro: string }[];
+    } | null;
+  } | null;
+};
+
 export type AccountOrder = {
+  abonnement: CurrentSubscription[];
   billing_address_snapshot: Json | null;
   date_commande: string;
   facture: Tables<"facture">[];
@@ -162,7 +187,7 @@ function SortableHead({ active, ascending, label, onClick }: { active: boolean; 
 }
 
 function ExpandButton({ open, onClick, t }: { open: boolean; onClick: () => void; t: ReturnType<typeof useTranslations<"orders">> }) {
-  return <button aria-expanded={open} className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md px-3 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100" onClick={onClick} type="button">{open ? t("hideDetails") : t("details")}{open ? <ChevronUp aria-hidden="true" className="size-4" /> : <ChevronDown aria-hidden="true" className="size-4" />}</button>;
+  return <button aria-expanded={open} className="inline-flex min-h-9 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-xs font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100" onClick={onClick} type="button">{open ? t("hideDetails") : t("details")}{open ? <ChevronUp aria-hidden="true" className="size-3.5" /> : <ChevronDown aria-hidden="true" className="size-3.5" />}</button>;
 }
 
 function OrderDetails({ locale, order, t }: { locale: string; order: AccountOrder; t: ReturnType<typeof useTranslations<"orders">> }) {
@@ -171,19 +196,109 @@ function OrderDetails({ locale, order, t }: { locale: string; order: AccountOrde
   const productNameFallback = order.ligne_commande[0] ? (productName(order.ligne_commande[0], locale) || `Commande #${order.id_commande}`) : `Commande #${order.id_commande}`;
   const contactSubject = t("billingIssue", { name: productNameFallback });
   const contactHref = `/faq?category=order&subject=${encodeURIComponent(contactSubject)}&orderId=${order.id_commande}`;
+  const subscriptions = order.abonnement ?? [];
+  const currentSubscriptions = subscriptions.filter((subscription) =>
+    ["active", "trialing", "past_due", "actif"].includes(
+      subscription.statut_abonnement.toLowerCase(),
+    ),
+  );
+  const renewableSubscriptions = currentSubscriptions.filter(
+    (subscription) => !subscription.annulation_programmee,
+  );
+  const nextRenewalDate = renewableSubscriptions
+    .map((subscription) => subscription.date_fin)
+    .filter((value): value is string => Boolean(value))
+    .sort()[0] ?? null;
+  const nextRenewalSubscriptions = nextRenewalDate
+    ? renewableSubscriptions.filter(
+        (subscription) => subscription.date_fin === nextRenewalDate,
+      )
+    : renewableSubscriptions;
+  const nextRenewalTotal = nextRenewalSubscriptions.reduce(
+    (total, subscription) =>
+      total +
+      (subscription.prix_tarif?.prix ?? 0) *
+        subscription.nombre_utilisateurs,
+    0,
+  );
+  const hasSubscriptions = currentSubscriptions.length > 0;
 
-  const renderActionButton = () => {
-    return isFailed ? (
-      <Link href={contactHref as any} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100">{t("contactSupport")}</Link>
-    ) : (
-      <Link href={`/user-dashboard/purchases/orders/${order.id_commande}/subscriptions` as any} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100">{t("viewSubscriptions")}</Link>
-    );
-  };
+  const actionButton = isFailed ? (
+    <Link href={contactHref as never} className="inline-flex min-h-9 items-center justify-center rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700">
+      {t("contactSupport")}
+    </Link>
+  ) : subscriptions.length > 0 ? (
+    <Link href={`/user-dashboard/purchases/orders/${order.id_commande}/subscriptions` as never} className="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-purple-200 bg-white px-3 py-1.5 text-xs font-semibold text-purple-800 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700">
+      {t("viewSubscriptions")}<ArrowRight aria-hidden="true" className="size-3.5" />
+    </Link>
+  ) : null;
 
-  return <div className="grid gap-6 lg:grid-cols-3">
-    <section><h3 className="font-semibold text-slate-950">{t("detailProducts")}</h3><ul className="mt-2 space-y-2 text-sm text-slate-700">{order.ligne_commande.map((line, index) => <li key={index}>{productName(line, locale) || t("notAvailable")} · {t("quantity", { count: line.quantite })} · {t(`billing.${billingValue(line.prix_tarif?.type_facturation)}` as Parameters<typeof t>[0])}</li>)}</ul></section>
-    <section><h3 className="font-semibold text-slate-950">{t("detailBilling")}</h3><div className="mt-2 space-y-1 text-sm text-slate-700"><p>{order.payment_method_last4 ? `${order.payment_method_brand?.toUpperCase() ?? t("card")} •••• ${order.payment_method_last4}` : t("notAvailable")}</p><p>{address ? [address.name, address.line1, address.line2, address.postal_code, address.city, address.country].filter(Boolean).join(", ") : t("notAvailable")}</p></div></section>
-    <section><h3 className="font-semibold text-slate-950">{t("detailInvoices")}</h3><div className="mt-2 space-y-3">{order.facture.length ? order.facture.map((invoice) => <div className="flex flex-col items-start gap-2" key={invoice.id_facture}><p className="text-sm text-slate-700">{formatDate(invoice.date_facture, locale)} · {formatCurrency(invoice.montant_total, locale)}</p><div className="flex items-center gap-2">{invoice.storage_path || invoice.hosted_invoice_url ? <InvoiceDownloadButton invoiceId={invoice.id_facture} /> : <span className="text-sm text-slate-500">{t("invoicePending")}</span>}{renderActionButton()}</div></div>) : <div className="flex flex-col items-start gap-2"><p className="text-sm text-slate-600">{t("noInvoices")}</p>{renderActionButton()}</div>}</div></section>
+  return <div className="space-y-4">
+    {hasSubscriptions && (
+      <section className="rounded-lg border border-purple-100 bg-purple-50/60 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 className="flex items-center gap-2 text-sm font-bold text-purple-950"><CalendarClock aria-hidden="true" className="size-4 text-purple-700" />{t("currentSubscriptions")}</h3>
+            <p className="mt-1 text-xs text-purple-900/70">{t("renewalEstimateHint")}</p>
+          </div>
+          {nextRenewalSubscriptions.length > 0 && (
+            <div className="text-left sm:text-right">
+              <p className="text-xs text-purple-800">{t("nextRenewal")}</p>
+              <p className="mt-0.5 font-bold text-purple-950">{nextRenewalDate ? formatDate(nextRenewalDate, locale) : t("notAvailable")}<span className="mx-1.5 text-purple-300">·</span>{formatCurrency(nextRenewalTotal / 100, locale)}</p>
+            </div>
+          )}
+        </div>
+        <ul className="mt-4 divide-y divide-purple-100 rounded-md border border-purple-100 bg-white">
+          {currentSubscriptions.map((subscription) => (
+            <li className="flex flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between" key={subscription.id_abonnement}>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-slate-900">{currentSubscriptionName(subscription, locale) || t("notAvailable")}</p>
+                <p className="mt-0.5 text-xs text-slate-500">{t("currentUsers", { count: subscription.nombre_utilisateurs })}{subscription.annulation_programmee && subscription.date_fin ? ` · ${t("endsOn", { date: formatDate(subscription.date_fin, locale) })}` : ""}</p>
+              </div>
+              <p className="shrink-0 text-sm font-bold text-purple-800">{formatCurrency(((subscription.prix_tarif?.prix ?? 0) * subscription.nombre_utilisateurs) / 100, locale)}<span className="ml-1 text-xs font-normal text-slate-500">{billingSuffix(subscription.prix_tarif?.type_facturation, t)}</span></p>
+            </li>
+          ))}
+        </ul>
+        {nextRenewalSubscriptions.length === 0 && <p className="mt-3 text-sm font-medium text-purple-900">{t("noUpcomingRenewal")}</p>}
+      </section>
+    )}
+
+    <div className="grid gap-4 lg:grid-cols-2">
+      <section className="rounded-lg border border-slate-200 bg-white p-4">
+        <h3 className="flex items-center gap-2 text-sm font-bold text-slate-950"><Package aria-hidden="true" className="size-4 text-purple-700" />{t("detailProducts")}</h3>
+        <ul className="mt-3 divide-y divide-slate-100">
+          {order.ligne_commande.map((line, index) => (
+            <li className="flex items-start justify-between gap-4 py-2.5 first:pt-0 last:pb-0" key={index}>
+              <div><p className="text-sm font-semibold text-slate-900">{productName(line, locale) || t("notAvailable")}</p><p className="mt-0.5 text-xs text-slate-500">{t("quantity", { count: line.quantite })} · {t(`billing.${billingValue(line.prix_tarif?.type_facturation)}` as Parameters<typeof t>[0])}</p></div>
+              <p className="shrink-0 text-sm font-semibold text-slate-800">{formatCurrency(line.sous_total, locale)}</p>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3 text-sm"><span className="font-medium text-slate-500">{t("originalTotal")}</span><span className="font-bold text-slate-950">{formatCurrency(order.montant_total, locale)}</span></div>
+      </section>
+
+      <section className="rounded-lg border border-slate-200 bg-white p-4">
+        <h3 className="flex items-center gap-2 text-sm font-bold text-slate-950"><CreditCard aria-hidden="true" className="size-4 text-purple-700" />{t("detailBilling")}</h3>
+        <dl className="mt-3 space-y-3 text-sm">
+          <div><dt className="text-xs text-slate-500">{t("paymentMethod")}</dt><dd className="mt-0.5 font-medium text-slate-800">{order.payment_method_last4 ? `${order.payment_method_brand?.toUpperCase() ?? t("card")} •••• ${order.payment_method_last4}` : t("notAvailable")}</dd></div>
+          <div><dt className="text-xs text-slate-500">{t("billingAddress")}</dt><dd className="mt-0.5 leading-5 text-slate-700">{address ? [address.name, address.line1, address.line2, address.postal_code, address.city, address.country].filter(Boolean).join(", ") : t("notAvailable")}</dd></div>
+        </dl>
+      </section>
+    </div>
+
+    <section className="rounded-lg border border-slate-200 bg-white p-4">
+      <div className="flex items-center justify-between gap-3"><h3 className="flex items-center gap-2 text-sm font-bold text-slate-950"><FileText aria-hidden="true" className="size-4 text-purple-700" />{t("detailInvoices")}</h3>{actionButton}</div>
+      {order.facture.length ? (
+        <ul className="mt-3 divide-y divide-slate-100">
+          {order.facture.map((invoice) => (
+            <li className="flex flex-col gap-2 py-2.5 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between" key={invoice.id_facture}>
+              <p className="text-sm text-slate-700">{formatDate(invoice.date_facture, locale)} · <span className="font-semibold text-slate-900">{formatCurrency(invoice.montant_total, locale)}</span></p>
+              {invoice.storage_path || invoice.hosted_invoice_url ? <InvoiceDownloadButton compact invoiceId={invoice.id_facture} /> : <span className="text-xs text-slate-500">{t("invoicePending")}</span>}
+            </li>
+          ))}
+        </ul>
+      ) : <p className="mt-3 text-sm text-slate-600">{t("noInvoices")}</p>}
+    </section>
   </div>;
 }
 
@@ -211,6 +326,8 @@ function billingValue(value?: string | null): Exclude<BillingFilter, "all"> {
   return "one_time";
 }
 function productName(line: OrderLine, locale: string) { const values = line.prix_tarif?.produit?.produit_traduction ?? []; return values.find((item) => item.langue === locale)?.nom_pro ?? values.find((item) => item.langue === "fr")?.nom_pro ?? values[0]?.nom_pro ?? ""; }
+function currentSubscriptionName(subscription: CurrentSubscription, locale: string) { const values = subscription.prix_tarif?.produit?.produit_traduction ?? []; return values.find((item) => item.langue === locale)?.nom_pro ?? values.find((item) => item.langue === "fr")?.nom_pro ?? values[0]?.nom_pro ?? ""; }
+function billingSuffix(value: string | undefined, t: ReturnType<typeof useTranslations<"orders">>) { const normalized = value?.toLowerCase(); if (normalized === "mensuel" || normalized === "monthly") return t("perMonth"); if (normalized === "annuel" || normalized === "annual") return t("perYear"); return ""; }
 function categoryName(line: OrderLine, locale: string) { const values = line.prix_tarif?.produit?.categorie?.categorie_traduction ?? []; return values.find((item) => item.langue === locale)?.cat_nom ?? values.find((item) => item.langue === "fr")?.cat_nom ?? values[0]?.cat_nom ?? ""; }
 function formatDate(value: string, locale: string) { return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(value)); }
 function formatCurrency(value: number, locale: string) { return new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" }).format(value); }

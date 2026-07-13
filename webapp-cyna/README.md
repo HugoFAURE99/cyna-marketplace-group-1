@@ -36,14 +36,28 @@ Ne jamais exposer les clés `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY` ou 
 
 ## Base de données
 
-`supabase/migrations/20260712235959_latest_schema.sql` est l'unique schéma de
-référence. Il décrit uniquement la structure finale (tables, contraintes,
-index, fonctions, triggers et RLS) et ne contient ni seed ni transformation de
-données.
+`supabase/migrations/20260712235959_latest_schema.sql` est le schéma de base pour
+une installation vide. Les migrations horodatées suivantes sont additives ;
+`20260713210000_subscription_management.sql` ajoute notamment le miroir des
+items Stripe, le nombre d'utilisateurs et la disponibilité commerciale SaaS.
 
 Ce fichier est destiné à une installation vide. **Ne pas l'exécuter sur le
 projet Supabase peuplé existant**, dont le schéma a déjà été appliqué
 manuellement et dont le registre de migrations est vide.
+
+Pour réparer ce registre sans rejouer le schéma de base, vérifier d'abord la
+cible liée puis marquer uniquement la base comme déjà appliquée :
+
+```bash
+supabase link --project-ref <project-ref>
+supabase migration list --linked
+supabase migration repair 20260712235959 --status applied --linked
+supabase db push --linked
+```
+
+La dernière commande applique alors uniquement les migrations additives non
+enregistrées. Ces commandes modifient le projet distant : elles sont à exécuter
+manuellement après sauvegarde et revue de `supabase migration list`.
 
 Créer séparément les buckets Storage suivants :
 
@@ -57,6 +71,18 @@ npm run invoices:backfill
 ```
 
 Cette commande écrit dans la base et le bucket configurés par `.env.local`. Elle n'est jamais lancée automatiquement.
+
+Les anciens abonnements se prévisualisent d'abord sans écriture, puis se
+synchronisent explicitement après revue du rapport :
+
+```bash
+npm run subscriptions:backfill
+npm run subscriptions:backfill -- --apply
+```
+
+Le rapport signale les prix Stripe non mappés, les lignes ambiguës et les
+abonnements sans contexte de commande. Ne jamais lancer `--apply` avant d'avoir
+résolu ces éléments.
 
 Les fichiers de `supabase/seeds/development` sont non idempotents, contiennent
 des identifiants de démonstration et ne doivent jamais être exécutés sur un
@@ -93,13 +119,20 @@ Reporter le secret `whsec_…` affiché dans `STRIPE_WEBHOOK_SECRET`. Le webhook
 - `invoice.finalized` et `invoice.paid` ;
 - `invoice.payment_failed` et `invoice.voided`.
 - `customer.subscription.updated` et `customer.subscription.deleted`.
+- `subscription_schedule.updated`, `released`, `completed`, `canceled` et `aborted`.
 
 En démonstration/déploiement, créer également un endpoint Stripe actif vers
 `https://<domaine>/api/webhooks/stripe` avec ces événements, puis définir son
 secret de signature dans `STRIPE_WEBHOOK_SECRET`. Sans endpoint, Stripe encaisse
-le paiement mais la commande reste `En attente`, le stock n'est pas finalisé et
+le paiement mais la commande reste `En attente`, l'abonnement n'est pas synchronisé et
 les lignes de `facture` ne sont pas créées. Stripe CLI ne couvre que les tests
 locaux pendant l'exécution de `stripe listen`.
+
+Le portail client Stripe configuré par CYNA gère uniquement le profil de
+facturation, les moyens de paiement et les factures. La résiliation Stripe et
+la mise à jour d'abonnement doivent rester désactivées dans toute configuration
+fournie via `STRIPE_CUSTOMER_PORTAL_CONFIGURATION_ID`, car CYNA gère les items
+des abonnements multi-services avec ses propres contrôles authentifiés.
 
 Carte de test Stripe : `4242 4242 4242 4242`, date future et CVC quelconque.
 
@@ -115,7 +148,7 @@ Le build de production est la vérification de référence. Le dépôt contient 
 ## Architecture
 
 - `src/app/[locale]/(public)` : pages publiques et espace client ;
-- `src/app/api/webhooks/stripe` : finalisation des commandes, stock, abonnements et factures ;
+- `src/app/api/webhooks/stripe` : finalisation des commandes, abonnements et factures ;
 - `src/lib` : accès Supabase/Stripe, panier, support et règles métier ;
 - `src/messages` : traductions françaises et anglaises ;
 - `supabase/migrations` : schéma, RLS et fonctions SQL.

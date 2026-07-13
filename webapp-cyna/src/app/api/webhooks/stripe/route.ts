@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 
+import { stripe } from "@/lib/stripe";
+import { syncStripeSubscription } from "@/lib/stripe/subscription-sync";
 import type { Database, TablesInsert } from "@/types/database.types";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string, {
-  apiVersion: "2026-06-24.dahlia",
-});
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 const supabase = createClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL as string,
@@ -39,7 +38,15 @@ export async function POST(req: Request) {
       event.type === "customer.subscription.updated" ||
       event.type === "customer.subscription.deleted"
     ) {
-      await syncSubscriptionState(event.data.object);
+      await syncStripeSubscription(event.data.object);
+    } else if (
+      event.type === "subscription_schedule.updated" ||
+      event.type === "subscription_schedule.released" ||
+      event.type === "subscription_schedule.completed" ||
+      event.type === "subscription_schedule.canceled" ||
+      event.type === "subscription_schedule.aborted"
+    ) {
+      await syncScheduleSubscription(event.data.object);
     } else if (
       event.type === "invoice.finalized" ||
       event.type === "invoice.paid" ||
@@ -110,63 +117,17 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
 
   const subscriptionId = stripeId(session.subscription);
   if (subscriptionId) {
-    await upsertSubscriptions(subscriptionId, orderId, accountId);
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    await syncStripeSubscription(subscription, { accountId, orderId });
   }
 }
 
-async function upsertSubscriptions(
-  subscriptionId: string,
-  orderId: number,
-  accountId: string | null,
-) {
-  const [subscription, linesResult] = await Promise.all([
-    stripe.subscriptions.retrieve(subscriptionId),
-    supabase
-      .from("ligne_commande")
-      .select("id_prix")
-      .eq("id_commande", orderId),
-  ]);
-  if (linesResult.error) throw linesResult.error;
-
-  const firstItem = subscription.items.data[0];
-  const startDate = new Date(
-    (firstItem?.current_period_start ?? subscription.created) * 1000,
-  ).toISOString();
-  const endDate = firstItem?.current_period_end
-    ? new Date(firstItem.current_period_end * 1000).toISOString()
-    : null;
-  const rows = (linesResult.data ?? []).map((line) => ({
-    date_debut: startDate,
-    date_fin: endDate,
-    id_commande: orderId,
-    id_compte: accountId,
-    id_prix: line.id_prix,
-    statut_abonnement: subscription.status,
-    stripe_subscription_id: subscription.id,
-  }));
-  if (rows.length === 0) return;
-
-  const { error } = await supabase
-    .from("abonnement")
-    .upsert(rows, { onConflict: "stripe_subscription_id,id_prix" });
-  if (error) throw error;
-}
-
-async function syncSubscriptionState(subscription: Stripe.Subscription) {
-  const firstItem = subscription.items.data[0];
-  const endDate = firstItem?.current_period_end
-    ? new Date(firstItem.current_period_end * 1000).toISOString()
-    : subscription.ended_at
-      ? new Date(subscription.ended_at * 1000).toISOString()
-      : null;
-  const { error } = await supabase
-    .from("abonnement")
-    .update({
-      date_fin: endDate,
-      statut_abonnement: subscription.status,
-    })
-    .eq("stripe_subscription_id", subscription.id);
-  if (error) throw error;
+async function syncScheduleSubscription(schedule: Stripe.SubscriptionSchedule) {
+  const subscriptionId =
+    stripeId(schedule.subscription) ?? schedule.released_subscription;
+  if (!subscriptionId) return;
+  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  await syncStripeSubscription(subscription);
 }
 
 async function getPaymentMethodSummary(session: Stripe.Checkout.Session) {

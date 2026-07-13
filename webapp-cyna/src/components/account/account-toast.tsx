@@ -1,31 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle2, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+import { useNotification } from "@/components/ui/notification-provider";
+
 export function AccountToast({ message }: { message: string }) {
-  const [visible, setVisible] = useState(true);
   const router = useRouter();
-  const t = useTranslations("account");
+  const { notify } = useNotification();
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setVisible(false);
-      router.replace(window.location.pathname, { scroll: false });
-    }, 5000);
-    return () => window.clearTimeout(timer);
-  }, [router]);
+    notify(message);
+    router.replace(window.location.pathname, { scroll: false });
+  }, [message, notify, router]);
 
-  if (!visible) return null;
-  return (
-    <div aria-live="polite" className="fixed right-4 top-24 z-50 flex max-w-sm items-start gap-3 rounded-lg border border-purple-200 bg-white p-4 text-sm text-slate-700 shadow-lg" role="status">
-      <CheckCircle2 aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-purple-700" />
-      <span>{message}</span>
-      <button aria-label={t("close")} className="ml-auto inline-flex size-11 cursor-pointer items-center justify-center rounded-md text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-200" onClick={() => setVisible(false)} type="button">
-        <X aria-hidden="true" className="size-4" />
-      </button>
-    </div>
-  );
+  return null;
 }
