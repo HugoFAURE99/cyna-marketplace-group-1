@@ -10,10 +10,13 @@ type FaqItem = { q: string; a: string };
 
 export default async function FaqPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
+  searchParams: Promise<{ category?: string; subject?: string; orderId?: string }>;
 }) {
   const { locale } = await params;
+  const { category, subject, orderId } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("faq");
   const tSupport = await getTranslations("support");
@@ -74,7 +77,14 @@ export default async function FaqPage({
           {tSupport("title")}
         </h2>
         <p className="mt-1 mb-5 text-sm text-slate-600">{tSupport("subtitle")}</p>
-        <SupportTicketForm defaultEmail={user?.email ?? ""} isAuthenticated={!!user} orders={orders} />
+        <SupportTicketForm 
+          defaultEmail={user?.email ?? ""} 
+          isAuthenticated={!!user} 
+          orders={orders} 
+          defaultCategory={category}
+          defaultSubject={subject}
+          defaultOrderId={orderId}
+        />
       </div>
     </div>
   );

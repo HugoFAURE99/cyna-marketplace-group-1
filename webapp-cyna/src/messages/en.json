@@ -861,7 +861,7 @@
       "completed": "Paid",
       "pending": "Pending",
       "cancelled": "Cancelled",
-      "failed": "Failed"
+      "failed": "Error"
     },
     "viewInvoice": "View invoice",
     "filters": {
@@ -880,6 +880,9 @@
     "contactSupport": "Contact support",
     "details": "View details",
     "hideDetails": "Hide details",
+    "back": "Back",
+    "viewSubscriptions": "View subscriptions",
+    "billingIssue": "Billing issue for {name}",
     "detailProducts": "Ordered products",
     "detailBilling": "Billing",
     "detailInvoices": "Invoices",
@@ -944,6 +947,9 @@
   },
   "subscriptions": {
     "title": "My Subscriptions",
+    "orderTitle": "Order #{id}",
+    "orderSubscriptions": "Subscriptions for order #{id}",
+    "cancelSubscription": "Cancel this subscription",
     "viewList": "List view",
     "viewGrid": "Grid view",
     "status": "Status",
@@ -964,7 +970,6 @@
     "manageDescription": "Update your payment method or cancel a subscription at the end of its current period.",
     "manage": "Manage in Stripe",
     "portalUnavailable": "The Stripe portal will be available after your first purchase with this account.",
-    "subscriptionNumber": "Subscription #{id}",
     "ongoing": "Ongoing",
     "statuses": {
       "active": "Active",

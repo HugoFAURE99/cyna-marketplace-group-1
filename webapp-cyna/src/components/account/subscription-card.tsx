@@ -5,12 +5,18 @@ import { useLocale, useTranslations } from "next-intl";
 
 export type AccountSubscription = {
   id_abonnement: number;
+  id_commande: number;
   statut_abonnement: string;
   date_debut: string;
   date_fin: string | null;
   prix_tarif: {
     prix_tarif_traduction?: { langue: string; nom_prix_tarif: string | null }[];
     produit?: { produit_traduction?: { langue: string; nom_pro: string }[] } | null;
+  } | null;
+  commande?: {
+    date_commande: string;
+    montant_total: number;
+    statut_commande: string;
   } | null;
 };
 
@@ -46,8 +52,7 @@ export function SubscriptionCard({
             <ShieldCheck aria-hidden="true" className="size-6" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-purple-700">{t("subscriptionNumber", { id: subscription.id_abonnement })}</p>
-            <h2 className="mt-1 break-words text-lg font-bold leading-snug text-slate-950">{name}</h2>
+            <h2 className="break-words text-lg font-bold leading-snug text-slate-950">{name}</h2>
             {productName && tariffName && tariffName !== productName && <p className="mt-1 text-sm text-slate-500">{tariffName}</p>}
           </div>
         </div>
@@ -65,6 +70,17 @@ export function SubscriptionCard({
         <DateItem label={t("startDate")} value={date.format(new Date(subscription.date_debut))} />
         {subscription.date_fin ? <DateItem label={t("endDate")} value={date.format(new Date(subscription.date_fin))} /> : <DateItem label={t("endDate")} value={t("ongoing")} />}
       </dl>
+      {active && (
+        <div className="border-t border-slate-100 bg-white p-5 sm:px-6 sm:pb-6 sm:pt-4">
+          <button
+            type="button"
+            onClick={() => console.log("Cancel subscription", subscription.id_abonnement)}
+            className="inline-flex w-full justify-center rounded-md border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 transition-colors"
+          >
+            {t("cancelSubscription")}
+          </button>
+        </div>
+      )}
     </article>
   );
 }

@@ -16,7 +16,9 @@ export default async function PurchaseSubscriptions({ params, searchParams }: { 
   let subscriptions: AccountSubscription[] = [];
   if (user) {
     const { data, error } = await supabase.from("abonnement").select(`
-      *, prix_tarif (
+      *,
+      commande (date_commande, montant_total, statut_commande),
+      prix_tarif (
         prix_tarif_traduction (nom_prix_tarif, langue),
         produit (produit_traduction (nom_pro, langue))
       )

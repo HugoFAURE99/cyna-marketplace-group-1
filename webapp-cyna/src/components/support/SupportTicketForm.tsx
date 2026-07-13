@@ -20,10 +20,16 @@ export default function SupportTicketForm({
   defaultEmail = "",
   isAuthenticated = false,
   orders = [],
+  defaultCategory,
+  defaultSubject,
+  defaultOrderId,
 }: {
   defaultEmail?: string;
   isAuthenticated?: boolean;
   orders?: ChatOrderOption[];
+  defaultCategory?: string;
+  defaultSubject?: string;
+  defaultOrderId?: string;
 }) {
   const t = useTranslations("support");
   const [submitted, setSubmitted] = useState(false);
@@ -49,7 +55,7 @@ export default function SupportTicketForm({
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { sujet: "", email_contact: defaultEmail, description: "", categorie: "other", orderId: "" },
+    defaultValues: { sujet: defaultSubject || "", email_contact: defaultEmail, description: "", categorie: (defaultCategory as any) || "other", orderId: defaultOrderId || "" },
   });
 
   const onSubmit = handleSubmit(async (values) => {
