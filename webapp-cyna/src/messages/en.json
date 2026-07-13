@@ -880,6 +880,8 @@
     "contactSupport": "Contact support",
     "details": "View details",
     "hideDetails": "Hide details",
+    "back": "Back",
+    "viewSubscriptions": "View subscriptions",
     "detailProducts": "Ordered products",
     "detailBilling": "Billing",
     "detailInvoices": "Invoices",
@@ -944,6 +946,9 @@
   },
   "subscriptions": {
     "title": "My Subscriptions",
+    "orderTitle": "Order #{id}",
+    "orderSubscriptions": "Subscriptions for order #{id}",
+    "cancelSubscription": "Cancel this subscription",
     "viewList": "List view",
     "viewGrid": "Grid view",
     "status": "Status",

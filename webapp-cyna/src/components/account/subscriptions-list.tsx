@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, LayoutGrid, List } from "lucide-react";
 import { SubscriptionCard, type AccountSubscription } from "@/components/account/subscription-card";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 export function SubscriptionsList({ subscriptions }: { subscriptions: AccountSubscription[] }) {
   const t = useTranslations("subscriptions");
+  const locale = useLocale();
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<"list" | "grid">("grid");
 
@@ -20,9 +21,16 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: AccountSub
     return (
       sub.statut_abonnement.toLowerCase().includes(term) ||
       planName.toLowerCase().includes(term) ||
-      (sub.id_abonnement && sub.id_abonnement.toString().includes(term))
+      (sub.id_abonnement && sub.id_abonnement.toString().includes(term)) ||
+      (sub.id_commande && sub.id_commande.toString().includes(term))
     );
   });
+
+  const groupedSubscriptions = filteredSubscriptions.reduce<Record<string, AccountSubscription[]>>((groups, sub) => {
+    const key = sub.id_commande ? String(sub.id_commande) : "unknown";
+    (groups[key] ??= []).push(sub);
+    return groups;
+  }, {});
 
   return (
     <div className="w-full">
@@ -65,9 +73,25 @@ export function SubscriptionsList({ subscriptions }: { subscriptions: AccountSub
 
       <div className="w-full">
         {filteredSubscriptions.length > 0 ? (
-          <div className={viewMode === 'grid' ? "grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
-            {filteredSubscriptions.map((subscription) => (
-              <SubscriptionCard key={subscription.id_abonnement} subscription={subscription} layout={viewMode} />
+          <div className="space-y-8">
+            {Object.entries(groupedSubscriptions).sort(([a], [b]) => Number(b) - Number(a)).map(([orderId, subs]) => (
+              <section key={orderId} className="space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                  <h3 className="text-lg font-bold text-slate-900">
+                    {t("orderTitle", { id: orderId !== "unknown" ? orderId : "?" })}
+                  </h3>
+                  {subs[0]?.commande?.date_commande && (
+                    <span className="text-sm font-medium text-slate-500">
+                      {new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(subs[0].commande.date_commande))}
+                    </span>
+                  )}
+                </div>
+                <div className={viewMode === 'grid' ? "grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" : "flex flex-col gap-4"}>
+                  {subs.map((subscription) => (
+                    <SubscriptionCard key={subscription.id_abonnement} subscription={subscription} layout={viewMode} />
+                  ))}
+                </div>
+              </section>
             ))}
           </div>
         ) : search ? (
