@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import createMiddleware from "next-intl/middleware";
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+
 
 import { routing } from "@/i18n/routing";
 
@@ -31,9 +32,56 @@ export async function proxy(request: NextRequest) {
     },
   );
 
+
   // Refresh an expired session when needed. Authentication redirects stay in
   // layouts so their destination always includes the active locale.
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser(); // On récupère l'utilisateur ici
+
+  // ==========================================
+  // VÉRIFICATION 2FA ET RÔLE POUR LES ADMINS
+  // ==========================================
+  const pathname = request.nextUrl.pathname;
+
+  // Cette regex détecte les routes comme /admin, /fr/admin, /en/admin
+  const isAdminRoute = pathname.match(/^\/(fr|en)?\/admin/);
+
+  if (isAdminRoute) {
+    const locale = pathname.startsWith('/en') ? 'en' : 'fr';
+
+    // 1. Bloquer les utilisateurs non connectés
+    if (!user) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = `/${locale}/login`;
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // 2. Vérifier si l'utilisateur possède bien le rôle "Admin"
+    const { data: profile } = await supabase
+      .from("utilisateur")
+      .select("role")
+      .eq("id_compte", user.id)
+      .single();
+
+    if (profile?.role !== "admin" && profile?.role !== "Admin") {
+      // S'il est enregistré comme "client", on le renvoie vers son tableau de bord
+      const homeUrl = request.nextUrl.clone();
+      homeUrl.pathname = `/${locale}/user-dashboard`;
+      return NextResponse.redirect(homeUrl);
+    }
+
+    // 3. Vérifier le niveau d'authentification (aal2 = mot de passe + 2FA)
+    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+    if (aalData?.currentLevel !== "aal2") {
+      // S'il n'a pas validé sa 2FA, on le redirige vers la page de vérification
+      const mfaUrl = request.nextUrl.clone();
+      mfaUrl.pathname = `/${locale}/mfa-verify`;
+      mfaUrl.searchParams.set("next", pathname); // Pour le ramener au bon endroit après
+      return NextResponse.redirect(mfaUrl);
+    }
+  }
+
+  // On retourne la réponse de base
   return response;
 }
 

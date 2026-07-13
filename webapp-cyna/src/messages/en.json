@@ -241,6 +241,19 @@
       "errorUpdateFailed": "Could not update your password. The link may have expired."
     }
   },
+  "mfa": {
+    "loading": "Chargement des paramètres de sécurité...",
+    "errorFetchParams": "Impossible de récupérer les paramètres de sécurité.",
+    "errorGenQr": "Erreur lors de la génération du QR Code.",
+    "errorChallenge": "Impossible de lancer la vérification.",
+    "errorCode": "Code incorrect. Veuillez réessayer.",
+    "titleVerify": "Vérification de sécurité",
+    "titleSetup": "Configuration 2FA",
+    "descVerify": "Entrez le code à 6 chiffres de votre application.",
+    "descSetup": "Scannez ce QR Code avec Google Authenticator ou Authy.",
+    "authCodeLabel": "Code d'authentification",
+    "submitButton": "Valider et continuer"
+  },
   "admin": {
     "nav": {
       "backoffice": "Back office",

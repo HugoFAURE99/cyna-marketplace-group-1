@@ -24,7 +24,9 @@ export async function login(
 
   try {
     const supabase = await createServerClient(formData.get("remember") === "on");
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    // On récupère authData pour avoir l'ID de l'utilisateur[cite: 2]
+    const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
+
     if (error) {
       if (error.message.includes("Email not confirmed")) {
         return { errorKey: "errorUnconfirmed" };
@@ -34,14 +36,33 @@ export async function login(
       }
       return { errorKey: "errorUnavailable" };
     }
+
+    // ==========================================
+    // INTERCEPTION 2FA POUR LES ADMINS
+    // ==========================================
+    if (authData.user) {
+      const { data: profile } = await supabase
+        .from("utilisateur")
+        .select("role")
+        .eq("id_compte", authData.user.id)
+        .single();
+
+      if (profile?.role === "admin" || profile?.role === "Admin") {
+        // Redirection forcée vers la page MFA avec la destination finale en paramètre
+        const mfaUrl = `/mfa-verify?next=${encodeURIComponent(next)}`;
+        redirect(localizedPath(locale, mfaUrl));
+      }
+    }
+    // ==========================================
+
     redirect(localizedPath(locale, next));
   } catch (error) {
-    if (error && typeof error === "object" && "digest" in error) throw error;
+    if (error && typeof error === "object" && "digest" in error) throw error; // Permet à Next.js de gérer le redirect()[cite: 2]
     console.error("[auth] login failed", error);
     return { errorKey: "errorUnavailable" };
   }
 }
-
+//==================================register=====================
 export async function register(
   locale: string,
   _prevState: AuthActionState,
@@ -108,7 +129,7 @@ export async function logout() {
   const { getLocale } = await import("next-intl/server");
   redirect(`/${normaliseLocale(await getLocale())}`);
 }
-
+//=============================
 export async function resetPassword(
   locale: string,
   _prevState: AuthActionState,
@@ -127,7 +148,7 @@ export async function resetPassword(
     return { errorKey: "errorUnavailable" };
   }
 }
-
+//=============================
 export async function updatePassword(
   _prevState: AuthActionState,
   formData: FormData,
