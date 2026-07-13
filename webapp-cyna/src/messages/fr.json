@@ -862,7 +862,7 @@
       "completed": "Payée",
       "pending": "En attente",
       "cancelled": "Annulée",
-      "failed": "Échouée"
+      "failed": "Erreur"
     },
     "viewInvoice": "Voir la facture",
     "filters": {
@@ -883,6 +883,7 @@
     "hideDetails": "Masquer",
     "back": "Retour",
     "viewSubscriptions": "Voir les abonnements",
+    "billingIssue": "Problème de facturation de {name}",
     "detailProducts": "Produits commandés",
     "detailBilling": "Facturation",
     "detailInvoices": "Factures",
@@ -970,7 +971,6 @@
     "manageDescription": "Modifiez votre moyen de paiement ou résiliez un abonnement à la fin de la période en cours.",
     "manage": "Gérer dans Stripe",
     "portalUnavailable": "Le portail Stripe sera disponible après votre premier achat avec ce compte.",
-    "subscriptionNumber": "Abonnement n°{id}",
     "ongoing": "En cours",
     "statuses": {
       "active": "Actif",

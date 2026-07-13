@@ -52,8 +52,7 @@ export function SubscriptionCard({
             <ShieldCheck aria-hidden="true" className="size-6" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-purple-700">{t("subscriptionNumber", { id: subscription.id_abonnement })}</p>
-            <h2 className="mt-1 break-words text-lg font-bold leading-snug text-slate-950">{name}</h2>
+            <h2 className="break-words text-lg font-bold leading-snug text-slate-950">{name}</h2>
             {productName && tariffName && tariffName !== productName && <p className="mt-1 text-sm text-slate-500">{tariffName}</p>}
           </div>
         </div>

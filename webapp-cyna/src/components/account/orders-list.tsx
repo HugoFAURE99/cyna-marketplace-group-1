@@ -167,16 +167,29 @@ function ExpandButton({ open, onClick, t }: { open: boolean; onClick: () => void
 
 function OrderDetails({ locale, order, t }: { locale: string; order: AccountOrder; t: ReturnType<typeof useTranslations<"orders">> }) {
   const address = isAddress(order.billing_address_snapshot) ? order.billing_address_snapshot : null;
+  const isFailed = normalizeStatus(order.statut_commande) === "failed";
+  const productNameFallback = order.ligne_commande[0] ? (productName(order.ligne_commande[0], locale) || `Commande #${order.id_commande}`) : `Commande #${order.id_commande}`;
+  const contactSubject = t("billingIssue", { name: productNameFallback });
+  const contactHref = `/faq?category=order&subject=${encodeURIComponent(contactSubject)}&orderId=${order.id_commande}`;
+
+  const renderActionButton = () => {
+    return isFailed ? (
+      <Link href={contactHref as any} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100">{t("contactSupport")}</Link>
+    ) : (
+      <Link href={`/user-dashboard/purchases/orders/${order.id_commande}/subscriptions` as any} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100">{t("viewSubscriptions")}</Link>
+    );
+  };
+
   return <div className="grid gap-6 lg:grid-cols-3">
     <section><h3 className="font-semibold text-slate-950">{t("detailProducts")}</h3><ul className="mt-2 space-y-2 text-sm text-slate-700">{order.ligne_commande.map((line, index) => <li key={index}>{productName(line, locale) || t("notAvailable")} · {t("quantity", { count: line.quantite })} · {t(`billing.${billingValue(line.prix_tarif?.type_facturation)}` as Parameters<typeof t>[0])}</li>)}</ul></section>
     <section><h3 className="font-semibold text-slate-950">{t("detailBilling")}</h3><div className="mt-2 space-y-1 text-sm text-slate-700"><p>{order.payment_method_last4 ? `${order.payment_method_brand?.toUpperCase() ?? t("card")} •••• ${order.payment_method_last4}` : t("notAvailable")}</p><p>{address ? [address.name, address.line1, address.line2, address.postal_code, address.city, address.country].filter(Boolean).join(", ") : t("notAvailable")}</p></div></section>
-    <section><h3 className="font-semibold text-slate-950">{t("detailInvoices")}</h3><div className="mt-2 space-y-3">{order.facture.length ? order.facture.map((invoice) => <div className="flex flex-col items-start gap-2" key={invoice.id_facture}><p className="text-sm text-slate-700">{formatDate(invoice.date_facture, locale)} · {formatCurrency(invoice.montant_total, locale)}</p><div className="flex items-center gap-2">{invoice.storage_path || invoice.hosted_invoice_url ? <InvoiceDownloadButton invoiceId={invoice.id_facture} /> : <span className="text-sm text-slate-500">{t("invoicePending")}</span>}<Link href={`/user-dashboard/purchases/orders/${order.id_commande}/subscriptions` as any} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100">{t("viewSubscriptions")}</Link></div></div>) : <div className="flex flex-col items-start gap-2"><p className="text-sm text-slate-600">{t("noInvoices")}</p><Link href={`/user-dashboard/purchases/orders/${order.id_commande}/subscriptions` as any} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-slate-100">{t("viewSubscriptions")}</Link></div>}</div></section>
+    <section><h3 className="font-semibold text-slate-950">{t("detailInvoices")}</h3><div className="mt-2 space-y-3">{order.facture.length ? order.facture.map((invoice) => <div className="flex flex-col items-start gap-2" key={invoice.id_facture}><p className="text-sm text-slate-700">{formatDate(invoice.date_facture, locale)} · {formatCurrency(invoice.montant_total, locale)}</p><div className="flex items-center gap-2">{invoice.storage_path || invoice.hosted_invoice_url ? <InvoiceDownloadButton invoiceId={invoice.id_facture} /> : <span className="text-sm text-slate-500">{t("invoicePending")}</span>}{renderActionButton()}</div></div>) : <div className="flex flex-col items-start gap-2"><p className="text-sm text-slate-600">{t("noInvoices")}</p>{renderActionButton()}</div>}</div></section>
   </div>;
 }
 
 function StatusBadge({ status, t }: { status: string; t: ReturnType<typeof useTranslations<"orders">> }) {
   const normalized = normalizeStatus(status);
-  const styles = { completed: "bg-purple-100 text-purple-800", pending: "bg-amber-100 text-amber-800", cancelled: "bg-slate-100 text-slate-700", failed: "bg-slate-200 text-slate-900" }[normalized];
+  const styles = { completed: "bg-purple-100 text-purple-800", pending: "bg-amber-100 text-amber-800", cancelled: "bg-slate-100 text-slate-700", failed: "bg-red-100 text-red-800" }[normalized];
   return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${styles}`}>{t(`status.${normalized}`)}</span>;
 }
 
