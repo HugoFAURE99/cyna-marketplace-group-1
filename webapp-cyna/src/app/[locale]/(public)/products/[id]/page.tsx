@@ -99,7 +99,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 {product.nom_pro}
               </h1>
               {product.est_disponible ? (
-                <p className="text-sm font-medium text-emerald-700">
+                <p className="w-fit bg-gradient-to-r from-purple-800 via-purple-600 to-fuchsia-500 bg-clip-text text-sm font-semibold text-transparent">
                   {t("availableNow")}
                 </p>
               ) : (

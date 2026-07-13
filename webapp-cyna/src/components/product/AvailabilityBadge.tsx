@@ -14,7 +14,7 @@ export default function AvailabilityBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full bg-slate-900/85 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm",
+        "inline-flex items-center rounded-full bg-black px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white",
         className,
       )}
     >

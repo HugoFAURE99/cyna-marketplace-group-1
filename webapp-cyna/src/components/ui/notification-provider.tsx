@@ -77,7 +77,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       <div
         aria-atomic="false"
         aria-live="polite"
-        className="pointer-events-none fixed left-1/2 top-[max(0.75rem,env(safe-area-inset-top))] z-[100] flex w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2 flex-col items-center gap-2"
+        className="pointer-events-none fixed left-1/2 top-[calc(72px+0.75rem)] z-[100] flex w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2 flex-col items-center gap-2"
       >
         {notifications.map((notification) => (
           <NotificationPill

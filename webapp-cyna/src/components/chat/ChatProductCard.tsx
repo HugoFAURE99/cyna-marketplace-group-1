@@ -60,7 +60,7 @@ export default function ChatProductCard({
             ? `${formatPriceCents(product.priceCents, locale)}${period}`
             : t("pricingUnavailable")}
           {unavailable && (
-            <span className="ml-1 font-normal text-slate-400">
+            <span className="ml-1 font-medium text-black">
               · {t("unavailable")}
             </span>
           )}

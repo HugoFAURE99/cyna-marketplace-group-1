@@ -173,3 +173,12 @@
   animation: cyna-notification-out 240ms ease-in both;
   will-change: opacity;
 }
+
+.cynai-launcher {
+  transition:
+    scale 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 320ms ease;
+  will-change: scale, translate;
+}

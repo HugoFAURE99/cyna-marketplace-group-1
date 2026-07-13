@@ -256,7 +256,14 @@ export default function SearchAutocomplete({
                             {product.cat_nom}
                           </span>
                         )}
-                        <span className="ml-auto shrink-0 font-semibold text-purple-700">
+                        <span
+                          className={cn(
+                            "ml-auto shrink-0 font-semibold",
+                            product.est_disponible
+                              ? "text-purple-700"
+                              : "text-black",
+                          )}
+                        >
                           {priceLabel(product)}
                         </span>
                       </span>
