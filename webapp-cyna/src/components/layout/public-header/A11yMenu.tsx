@@ -2,12 +2,16 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Accessibility } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function A11yMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [daltonisme, setDaltonisme] = useState(false);
   const [largeFont, setLargeFont] = useState(false);
+  const [dyslexicFont, setDyslexicFont] = useState(false);
+  const [highlightLinks, setHighlightLinks] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const t = useTranslations("a11y");
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -40,6 +44,26 @@ export default function A11yMenu() {
     }
   }, [largeFont]);
 
+  // Handle dyslexic font
+  useEffect(() => {
+    const html = document.documentElement;
+    if (dyslexicFont) {
+      html.classList.add("a11y-dyslexic-font");
+    } else {
+      html.classList.remove("a11y-dyslexic-font");
+    }
+  }, [dyslexicFont]);
+
+  // Handle highlight links
+  useEffect(() => {
+    const html = document.documentElement;
+    if (highlightLinks) {
+      html.classList.add("a11y-highlight-links");
+    } else {
+      html.classList.remove("a11y-highlight-links");
+    }
+  }, [highlightLinks]);
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -53,19 +77,34 @@ export default function A11yMenu() {
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-56 rounded-xl border border-slate-200 bg-white p-4 shadow-lg ring-1 ring-slate-900/5 z-50">
+        <div className="absolute left-0 top-full mt-2 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-lg ring-1 ring-slate-900/5 z-50">
+          <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-500">
+            {t("title")}
+          </h3>
           <div className="space-y-4">
             <div className="flex items-center justify-between gap-2">
               <label htmlFor="a11y-daltonisme" className="text-sm font-medium text-slate-700">
-                Daltonisme
+                {t("colorBlindness")}
               </label>
               <ToggleSwitch id="a11y-daltonisme" checked={daltonisme} onChange={setDaltonisme} />
             </div>
             <div className="flex items-center justify-between gap-2">
               <label htmlFor="a11y-large-font" className="text-sm font-medium text-slate-700">
-                Augmenter Police
+                {t("increaseFont")}
               </label>
               <ToggleSwitch id="a11y-large-font" checked={largeFont} onChange={setLargeFont} />
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="a11y-dyslexic-font" className="text-sm font-medium text-slate-700">
+                {t("dyslexicFont")}
+              </label>
+              <ToggleSwitch id="a11y-dyslexic-font" checked={dyslexicFont} onChange={setDyslexicFont} />
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <label htmlFor="a11y-highlight-links" className="text-sm font-medium text-slate-700">
+                {t("highlightLinks")}
+              </label>
+              <ToggleSwitch id="a11y-highlight-links" checked={highlightLinks} onChange={setHighlightLinks} />
             </div>
           </div>
         </div>

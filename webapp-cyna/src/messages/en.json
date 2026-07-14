@@ -1076,5 +1076,12 @@
       "uncollectible": "Uncollectible",
       "unknown": "Unknown"
     }
+  },
+  "a11y": {
+    "title": "Accessibility",
+    "colorBlindness": "Color blindness",
+    "increaseFont": "Increase font size",
+    "dyslexicFont": "Dyslexic font",
+    "highlightLinks": "Highlight links"
   }
 }

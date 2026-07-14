@@ -1,3 +1,4 @@
+@import url('https://fonts.cdnfonts.com/css/opendyslexic');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -151,6 +152,17 @@ html.a11y-daltonisme {
 
 html.a11y-large-font {
   font-size: 120%;
+}
+
+html.a11y-dyslexic-font * {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+
+html.a11y-highlight-links a,
+html.a11y-highlight-links button {
+  outline: 3px solid #8b5cf6 !important; /* purple-500 */
+  outline-offset: 2px !important;
+  text-decoration: underline !important;
 }
 
 @keyframes cyna-notification-in {
