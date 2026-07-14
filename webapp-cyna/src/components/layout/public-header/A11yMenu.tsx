@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Accessibility } from "lucide-react";
+import { EyeOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 export default function A11yMenu() {
@@ -73,11 +73,11 @@ export default function A11yMenu() {
         aria-label="Menu d'accessibilité"
         aria-expanded={isOpen}
       >
-        <Accessibility className="size-6" />
+        <EyeOff className="size-7" />
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-lg ring-1 ring-slate-900/5 z-50">
+        <div className="absolute right-0 bottom-full mb-2 w-64 rounded-xl border border-slate-200 bg-white p-4 shadow-lg ring-1 ring-slate-900/5 z-50">
           <h3 className="mb-4 text-sm font-bold uppercase tracking-wider text-slate-500">
             {t("title")}
           </h3>

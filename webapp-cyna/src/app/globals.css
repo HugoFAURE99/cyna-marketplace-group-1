@@ -159,10 +159,17 @@ html.a11y-dyslexic-font * {
 }
 
 html.a11y-highlight-links a,
-html.a11y-highlight-links button {
+html.a11y-highlight-links button,
+html.a11y-highlight-links summary {
   outline: 3px solid #8b5cf6 !important; /* purple-500 */
   outline-offset: 2px !important;
   text-decoration: underline !important;
+}
+
+html.a11y-highlight-links summary svg {
+  outline: 3px solid #8b5cf6 !important; /* purple-500 */
+  outline-offset: 2px !important;
+  border-radius: 4px;
 }
 
 @keyframes cyna-notification-in {

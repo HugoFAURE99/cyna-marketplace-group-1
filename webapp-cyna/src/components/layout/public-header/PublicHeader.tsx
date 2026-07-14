@@ -10,7 +10,6 @@ import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitc
 import MobileSearch from "@/components/layout/public-header/MobileSearch";
 import PublicMenuSheet from "@/components/layout/public-header/PublicMenuSheet";
 import SearchAutocomplete from "@/components/layout/public-header/SearchAutocomplete";
-import A11yMenu from "@/components/layout/public-header/A11yMenu";
 import { getCartCount } from "@/lib/cart/cart";
 import { getCatalogCategories } from "@/lib/products/public-catalog";
 import { getLocale } from "next-intl/server";
@@ -48,7 +47,6 @@ export default async function PublicHeader() {
           different widths. */}
       <div className="mx-auto flex h-[72px] w-full max-w-7xl items-center justify-between gap-1 px-3 sm:gap-3 sm:px-6 lg:px-8">
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <A11yMenu />
           <Link
             aria-label={t("homeAriaLabel")}
             className="inline-flex w-fit shrink-0 items-center rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
