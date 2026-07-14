@@ -6,8 +6,9 @@ import { ImageOff } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import AvailabilityBadge from "@/components/product/AvailabilityBadge";
+import PromotionalPrice from "@/components/product/PromotionalPrice";
 import { Link } from "@/i18n/navigation";
-import { formatPriceCents } from "@/lib/i18n/format";
+import type { Locale } from "@/lib/i18n/translations";
 import type { CatalogProduct } from "@/lib/products/public-catalog";
 
 type ProductCardProps = {
@@ -17,7 +18,7 @@ type ProductCardProps = {
 export default async function ProductCard({ product }: ProductCardProps) {
   const t = await getTranslations("product");
   const th = await getTranslations("home");
-  const locale = await getLocale();
+  const locale = (await getLocale()) as Locale;
 
   const imageUrl =
     product.images[0]?.lien_image_produit ??
@@ -65,13 +66,21 @@ export default async function ProductCard({ product }: ProductCardProps) {
         <h3 className="text-lg font-semibold text-slate-950">
           {product.nom_pro}
         </h3>
-        <p className="text-sm font-semibold text-purple-700">
-          {primaryTariff
-            ? `${formatPriceCents(primaryTariff.prix, locale)}${periodSuffix(
-                primaryTariff.type_facturation,
-              )}`
-            : t("pricingUnavailable")}
-        </p>
+        {primaryTariff ? (
+          <PromotionalPrice
+            automaticPromotion={primaryTariff.automaticPromotion}
+            badgeLabel={(discount) => t("promotionBadge", { discount })}
+            className="text-sm"
+            locale={locale}
+            originalPriceCents={primaryTariff.prix}
+            periodSuffix={periodSuffix(primaryTariff.type_facturation)}
+            promotionalPriceCents={primaryTariff.promotionalPriceCents}
+          />
+        ) : (
+          <p className="text-sm font-semibold text-purple-700">
+            {t("pricingUnavailable")}
+          </p>
+        )}
       </div>
     </Link>
   );

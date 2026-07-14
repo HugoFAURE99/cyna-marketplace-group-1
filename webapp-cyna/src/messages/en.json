@@ -26,6 +26,8 @@
     "searchClose": "Close search"
   },
   "menu": {
+    "backOffice": "Back office",
+    "enteringBackOffice": "Backoffice",
     "menu": "Menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
@@ -41,7 +43,6 @@
     "contact": "Contact",
     "faq": "Help",
     "aboutCyna": "About CYNA",
-    "faq": "Help",
     "orders": "Orders",
     "subscriptions": "Subscriptions"
   },
@@ -113,7 +114,11 @@
     },
     "perMonth": "/mo",
     "perYear": "/yr",
+    "promotionBadge": "Sale {discount}",
     "addToCart": "Add to cart",
+    "buyNow": "Buy now",
+    "buyNowError": "Checkout could not be started. Please verify your selection and try again.",
+    "redirecting": "Redirecting…",
     "addedToCart": "Added to cart",
     "addedToCartNotification": "{name} added to cart.",
     "currentlyUnavailable": "Currently unavailable",
@@ -125,6 +130,16 @@
   "category": {
     "notFound": "Category not found",
     "empty": "No products in this category yet."
+  },
+  "categoryPage": {
+    "notFound": "Category not found",
+    "eyebrow": "Product category",
+    "imageAlt": "{name} category image",
+    "productCount": "{count, plural, =0 {No products} one {# product} other {# products}}",
+    "products": "Products",
+    "advancedFilters": "Advanced filters",
+    "empty": "No products are available in this category yet.",
+    "emptyHint": "Please check again later or browse the full catalog."
   },
   "cart": {
     "title": "Shopping Cart",
@@ -146,6 +161,15 @@
     "redirecting": "Redirecting...",
     "securePayment": "Secure payment via Stripe.",
     "mixedIntervalsError": "You cannot mix monthly and annual subscriptions in the same order. Please select a single billing cycle for all items."
+  },
+  "guestCheckout": {
+    "title": "How would you like to continue?",
+    "description": "Pay as a guest, or sign in to keep orders, invoices, and subscriptions together. Stripe will ask for your email.",
+    "continueAsGuest": "Continue as guest",
+    "redirecting": "Redirecting…",
+    "signIn": "Sign in",
+    "createAccount": "Create an account",
+    "close": "Close"
   },
   "search": {
     "title": "Search",
@@ -192,7 +216,6 @@
       "loading": "Logging in...",
       "noAccount": "Don't have an account?",
       "createAccount": "Create an account",
-      "rememberMe": "Remember me",
       "registerSuccess": "Account created successfully! Please log in.",
       "errorInvalidCredentials": "Invalid email or password.",
       "checkEmail": "Registration successful! Please check your inbox to confirm your email.",
@@ -200,7 +223,8 @@
       "invalidLink": "This link is invalid or has expired. Please try again.",
       "errorMissingFields": "All fields are required.",
       "errorUnconfirmed": "Confirm your email address before signing in.",
-      "errorUnavailable": "Sign-in is temporarily unavailable. Please try again."
+      "errorUnavailable": "Sign-in is temporarily unavailable. Please try again.",
+      "errorInactive": "This account is inactive. Contact support if you think this is a mistake."
     },
     "register": {
       "title": "Create account",
@@ -247,20 +271,35 @@
     }
   },
   "mfa": {
-    "loading": "Chargement des paramètres de sécurité...",
-    "errorFetchParams": "Impossible de récupérer les paramètres de sécurité.",
-    "errorGenQr": "Erreur lors de la génération du QR Code.",
-    "errorChallenge": "Impossible de lancer la vérification.",
-    "errorCode": "Code incorrect. Veuillez réessayer.",
-    "titleVerify": "Vérification de sécurité",
-    "titleSetup": "Configuration 2FA",
-    "descVerify": "Entrez le code à 6 chiffres de votre application.",
-    "descSetup": "Scannez ce QR Code avec Google Authenticator ou Authy.",
-    "authCodeLabel": "Code d'authentification",
-    "submitButton": "Valider et continuer"
+    "loading": "Loading security settings...",
+    "errorFetchParams": "Unable to load security settings.",
+    "errorGenQr": "Unable to generate the QR code.",
+    "errorChallenge": "Unable to start verification.",
+    "errorCode": "Incorrect code. Please try again.",
+    "errorNoFactor": "No verified authenticator was found. Sign in again or request assistance.",
+    "titleVerify": "Security verification",
+    "titleSetup": "Set up two-factor authentication",
+    "descVerify": "Enter the 6-digit code from your authenticator app.",
+    "descSetup": "Scan this QR code with your authenticator app, then enter the displayed code.",
+    "authCodeLabel": "Authentication code",
+    "submitButton": "Verify and continue",
+    "exitAndSignOut": "Exit and sign out",
+    "retry": "Try again",
+    "qrAlt": "Two-factor authentication setup QR code",
+    "manualSecret": "Manual setup key",
+    "lostAuthenticator": "I lost access to my authenticator",
+    "recoveryCreated": "Recovery request #{id} was created. Support will verify your identity before resetting 2FA.",
+    "recoveryErrors": {
+      "authentication_required": "Sign in again before requesting recovery.",
+      "duplicate": "An MFA recovery request is already open for this account.",
+      "unavailable": "The recovery request could not be created. Try again."
+    }
   },
   "admin": {
     "nav": {
+      "viewCyna": "CYNA Marketplace",
+      "switchingToCyna": "Marketplace",
+      "logout": "Log out",
       "backoffice": "Back office",
       "homepage": "Homepage",
       "products": "Products",
@@ -271,6 +310,7 @@
       "promotions": "Promotions",
       "subscriptions": "Subscriptions",
       "support": "Support"
+      ,"chatbot": "Chatbot history"
     },
     "orders": {
       "title": "Orders",
@@ -311,6 +351,42 @@
       "invoice": "Invoice"
     },
     "sales": {
+      "analyticsViews": "Sales analytics views",
+      "tabs": {
+        "orders": "Orders",
+        "subscriptions": "Subscriptions"
+      },
+      "subtitle": "From {from} to {to}, using Europe/Paris time",
+      "last30days": "Last 30 days",
+      "last90days": "Last 90 days",
+      "yearToDate": "Year to date",
+      "custom": "Custom range",
+      "from": "From",
+      "to": "To",
+      "apply": "Apply",
+      "exportPdf": "Export PDF",
+      "rangeError": "This range is invalid or exceeds 366 days.",
+      "loading": "Refreshing statistics...",
+      "kpis": "Commerce indicators",
+      "grossRevenue": "Gross revenue",
+      "orderCount": "Completed orders",
+      "averageOrderValue": "Average order value",
+      "uniqueCustomers": "Unique customers",
+      "activeSubscriptions": "Active subscriptions",
+      "scheduledCancellations": "Scheduled cancellations",
+      "versusPrevious": "Compared with the previous period",
+      "trendTitle": "Revenue and order trend",
+      "revenue": "Revenue",
+      "orders": "Orders",
+      "categoryDistribution": "Category distribution",
+      "topProducts": "Top products",
+      "billingMix": "Billing mix",
+      "units": "{count, plural, one {# unit} other {# units}}",
+      "productRanking": "Product ranking",
+      "categoryRanking": "Category ranking",
+      "product": "Product",
+      "category": "Category",
+      "quantity": "Quantity",
       "title": "Sales Dashboard",
       "last7days": "Last 7 days",
       "last5weeks": "Last 5 weeks",
@@ -320,7 +396,44 @@
       "salesByCategory": "Sales distribution by category",
       "total": "Total (€)",
       "noData": "No sales data for this period.",
-      "period": "Period"
+      "period": "Period",
+      "subscriptions": {
+        "title": "Subscription health",
+        "window": "Due between {from} and {to}, using Europe/Paris time",
+        "horizon": "Forecast horizon",
+        "days": "{count, plural, one {# day} other {# days}}",
+        "active": "Active subscriptions",
+        "activeSeats": "Active seats",
+        "renewals": "Upcoming renewals",
+        "renewalValue": "Expected renewal value",
+        "endings": "Scheduled endings",
+        "endingValue": "Ending value",
+        "renewalTable": "Upcoming renewals",
+        "annualTitle": "Annual outlook",
+        "annualWindow": "Annual subscriptions ending from {from} through {to}",
+        "annualRenewals": "Annual renewals",
+        "annualRenewalValue": "Annual renewal value",
+        "annualEndings": "Scheduled annual endings",
+        "annualEndingValue": "Annual ending value",
+        "annualTable": "Next 12 calendar months",
+        "outlookType": "Type",
+        "outlookRenewal": "Renewal",
+        "outlookEnding": "Scheduled ending",
+        "products": "Product breakdown",
+        "billing": "Billing-plan mix",
+        "statuses": "Status distribution",
+        "customer": "Customer",
+        "product": "Product",
+        "plan": "Billing plan",
+        "seats": "Seats",
+        "value": "Amount",
+        "date": "Due date",
+        "remaining": "Remaining",
+        "daysRemaining": "{count, plural, =0 {Today} one {# day} other {# days}}",
+        "unknownCustomer": "Unknown customer",
+        "empty": "No subscriptions match this view.",
+        "subscriptionsCount": "{count, plural, one {# subscription} other {# subscriptions}}"
+      }
     },
     "promotions": {
       "title": "Promotions",
@@ -401,7 +514,8 @@
     "subscriptions": {
       "title": "Subscriptions",
       "tabAll": "All subscriptions",
-      "tabExpiring": "Expiring this month",
+      "tabExpiring": "Due within 30 days",
+      "tabAnnual": "Annual outlook",
       "search": "Search by client, product or ID...",
       "allStatuses": "All statuses",
       "allBillingTypes": "All plans",
@@ -425,7 +539,7 @@
       "cancelling": "Cancelling...",
       "bulkCancel": "Cancel selected",
       "bulkCancelTitle": "Bulk cancellation",
-      "bulkCancelMessage": "Are you sure you want to cancel {count} subscription(s)? This action is irreversible.",
+      "bulkCancelMessage": "{count, plural, one {Are you sure you want to cancel # subscription? This action is irreversible.} other {Are you sure you want to cancel # subscriptions? This action is irreversible.}}",
       "selected": "selected",
       "selectAll": "Select all",
       "back": "Back",
@@ -441,6 +555,45 @@
       "billingMensuel": "Monthly",
       "billingAnnuel": "Yearly",
       "reactivate": "Reactivate"
+      ,"seats": "Seats",
+      "scheduledEnding": "Scheduled ending",
+      "operationError": "Stripe could not complete this operation. No local status was changed.",
+      "statusTrialing": "Trialing",
+      "statusPastDue": "Past due",
+      "statusPaused": "Paused",
+      "statusIncomplete": "Incomplete",
+      "statusIncompleteExpired": "Incomplete (expired)",
+      "statusUnpaid": "Unpaid"
+    },
+    "chatbot": {
+      "title": "Chatbot history",
+      "subtitle": "Review retained customer and guest conversations. Conversations expire after 90 days.",
+      "search": "Search conversations",
+      "audience": "Audience",
+      "locale": "Language",
+      "all": "All",
+      "account": "Account",
+      "guest": "Guest",
+      "apply": "Apply filters",
+      "preview": "First message",
+      "messagesLabel": "Messages",
+      "lastActivity": "Last activity",
+      "actions": "Actions",
+      "view": "View",
+      "empty": "No retained conversations match these filters.",
+      "pagination": "Conversation pages",
+      "resultCount": "{count, plural, one {# conversation} other {# conversations}}",
+      "previous": "Previous",
+      "next": "Next",
+      "back": "Back to conversations",
+      "notFound": "This conversation does not exist or has expired.",
+      "transcriptTitle": "Conversation transcript",
+      "messages": "{count, plural, one {# message} other {# messages}}",
+      "user": "User",
+      "assistant": "Assistant",
+      "partialError": "The assistant response ended with an error.",
+      "delete": "Delete permanently",
+      "deleteConfirm": "Permanently delete this conversation and every message? This cannot be undone."
     },
     "support": {
       "title": "Support",
@@ -492,7 +645,10 @@
       "categorySubscription": "Subscription",
       "categoryAccount": "Account",
       "categoryTechnical": "Technical",
+      "categoryAdminAccess": "Admin access request",
+      "categoryMfaReset": "Two-factor authentication recovery",
       "categoryOther": "Other",
+      "reviewAccount": "Review account",
       "statusOpen": "New",
       "statusUrgent": "Urgent",
       "statusToProcess": "To process",
@@ -534,7 +690,15 @@
       "subEnd": "End",
       "subStatus": "Status",
       "loading": "Loading...",
-      "viewOrder": "View"
+      "viewOrder": "View",
+      "mfa": "Two-factor authentication",
+      "mfaEnabled": "Enabled",
+      "mfaDisabled": "Disabled",
+      "resetMfa": "Reset 2FA",
+      "resetMfaConfirm": "Confirm that the customer’s identity was checked offline before removing all authenticator factors.",
+      "resetMfaSuccess": "Two-factor authentication was reset and the user’s sessions were invalidated.",
+      "resetMfaError": "Two-factor authentication could not be reset.",
+      "resetMfaTicketRequired": "A matching open recovery ticket is required."
     },
     "actions": {
       "view": "View",
@@ -609,6 +773,27 @@
         "saving": "Saving...",
         "saved": "Saved!"
       },
+      "links": {
+        "placeholder": "Search a CYNA destination or enter a URL...",
+        "hint": "Choose a CYNA page or enter a safe relative path, anchor, or HTTP(S) URL.",
+        "noResults": "No suggested destination matches. You can keep the manually entered URL.",
+        "invalid": "Enter a CYNA path, anchor, or valid HTTP(S) URL.",
+        "groups": {
+          "page": "Pages",
+          "anchor": "Homepage sections",
+          "category": "Categories",
+          "product": "Products"
+        },
+        "home": "Homepage",
+        "catalog": "Product catalog",
+        "faq": "FAQ and support",
+        "about": "About CYNA",
+        "legal": "Legal notice",
+        "terms": "Terms and conditions",
+        "topProducts": "Featured products section",
+        "categoryFallback": "Category #{id}",
+        "productFallback": "Product #{id}"
+      },
       "shortcuts": {
         "title": "Shortcuts",
         "productsTitle": "Products",
@@ -652,6 +837,8 @@
       }
     },
     "productForm": {
+      "englishTranslation": "English translation",
+      "removeTranslation": "Remove translation",
       "nameGroup": "Name",
       "descriptionGroup": "Description",
       "specsGroup": "Technical characteristics",
@@ -680,9 +867,41 @@
       "imagesHint": "JPG, PNG or WebP (max 2MB per image, max 10 images)",
       "imagesCount": "{current}/{max} images",
       "imagesMax": "Maximum number of images reached",
-      "noImages": "No images"
+      "noImages": "No images",
+      "characteristics": {
+        "title": "Technical characteristics",
+        "description": "Select reusable translated characteristics and arrange their storefront order.",
+        "empty": "No technical characteristics selected.",
+        "search": "Search characteristics",
+        "create": "Create a characteristic",
+        "createTitle": "Create technical characteristic",
+        "editTitle": "Edit technical characteristic",
+        "globalWarning": "This change affects every product using this characteristic.",
+        "labelFr": "French label",
+        "labelEn": "English label",
+        "missingFr": "Missing French translation",
+        "missingEn": "Missing English translation",
+        "incomplete": "Translation incomplete",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "edit": "Edit",
+        "remove": "Remove from product",
+        "close": "Close",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "errors": {
+          "duplicate": "This label already exists in one of the languages.",
+          "invalid": "Both translated labels are required.",
+          "not_found": "This characteristic no longer exists.",
+          "migration_required": "The technical-characteristics database update is not installed yet. Apply the latest Supabase migrations, then retry.",
+          "database": "The characteristic could not be saved."
+        }
+      }
     },
     "categoryForm": {
+      "englishTranslation": "English translation",
+      "removeTranslation": "Remove translation",
       "editTitle": "Edit category",
       "createTitle": "Create a new category",
       "nameGroup": "Name",
@@ -710,7 +929,10 @@
       "confirmCategories": "Delete {count} category(ies)? This action is permanent.",
       "priorityOn": "Priority",
       "priorityOff": "Not priority",
-      "error": "Some items could not be deleted."
+      "error": "Some categories could not be deleted because of an unexpected error.",
+      "categoriesDeleted": "{count, plural, one {# category was deleted.} other {# categories were deleted.}}",
+      "categoriesInUse": "{count, plural, one {One category is still used by products and was not deleted.} other {# categories are still used by products and were not deleted.}}",
+      "categoryInUse": "{name}: {count, plural, one {# product uses this category.} other {# products use this category.}}"
     },
     "priority": {
       "title": "Priority products",
@@ -733,6 +955,7 @@
       "featuredEmpty": "Featured order management will be available soon.",
       "allCategories": "All categories",
       "filterByCategory": "Filter by category"
+      ,"searchPlaceholder": "Search by ID, product, or category"
     },
     "pagination": {
       "info": "{from}–{to} of {total}",
@@ -758,7 +981,11 @@
       "confirmRemoveMessage": "Remove \"{name}\" from featured products?",
       "confirmRemove": "Remove",
       "cancelRemove": "Cancel",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "close": "Close",
+      "dragProduct": "Drag to reorder this product",
+      "perMonth": "/month",
+      "perYear": "/year"
     },
     "delete": {
       "title": "Confirm deletion",
@@ -768,10 +995,12 @@
       "confirm": "Confirm",
       "deleting": "Deleting...",
       "productError": "Deletion failed. Please try again.",
-      "categoryError": "Could not delete this category. It may be used by products."
+      "categoryError": "The category could not be deleted because of an unexpected error.",
+      "categoryInUse": "{count, plural, one {This category cannot be deleted because # product uses it.} other {This category cannot be deleted because # products use it.}}"
     }
   },
   "validation": {
+    "nameEnRequired": "The English name is required when the EN translation is enabled",
     "nameFrRequired": "The French name is required",
     "descriptionFrRequired": "The French description is required",
     "pricePositive": "Price must be greater than 0",
@@ -831,6 +1060,8 @@
     "emailPlaceholder": "you@company.com",
     "category": "Category",
     "categories": {
+      "admin_access": "Administrator access",
+      "mfa_reset": "Authenticator recovery",
       "billing": "Billing",
       "order": "Order",
       "subscription": "Subscription",
@@ -936,6 +1167,8 @@
     "notFoundTitle": "Ticket not found",
     "notFoundBody": "This ticket does not exist or does not belong to your account.",
     "categories": {
+      "admin_access": "Administrator access",
+      "mfa_reset": "Authenticator recovery",
       "billing": "Billing",
       "order": "Order",
       "subscription": "Subscription",
@@ -959,12 +1192,48 @@
     "invoices": "Invoices"
   },
   "account": {
+    "adminAccessTitle": "Request administrator access",
+    "adminAccessDescription": "Open a dedicated request. The team will manually review your need and account before changing any role.",
+    "adminAccessExisting": "An administrator-access request is already being reviewed.",
+    "adminAccessSubject": "Administrator access request",
+    "adminAccessRequest": "Submit a request",
+    "adminAccessView": "View ticket",
     "title": "Account information",
     "editProfile": "Edit profile",
     "email": "Email",
     "creationDate": "Member since",
     "passwordUpdated": "Your password has been updated successfully.",
-    "close": "Close"
+    "close": "Close",
+    "mfa": {
+      "title": "Two-factor authentication",
+      "requiredDescription": "Two-factor authentication is required for BackOffice access.",
+      "enabledDescription": "Your account requests an authenticator code after every new login.",
+      "disabledDescription": "Add an authenticator app as an optional second sign-in step.",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "enable": "Enable 2FA",
+      "disable": "Disable 2FA",
+      "disableConfirm": "Disable two-factor authentication for this account?",
+      "loading": "Please wait...",
+      "setupInstructions": "Scan the QR code with your authenticator app, then enter its six-digit code.",
+      "manualSecret": "Manual setup key",
+      "code": "Six-digit authentication code",
+      "verify": "Verify and enable",
+      "qrAlt": "Two-factor authentication setup QR code",
+      "errors": {
+        "load": "Security settings could not be loaded.",
+        "enroll": "Two-factor authentication setup could not start.",
+        "verify": "Verification could not start.",
+        "code": "That code is incorrect. Try again.",
+        "disable": "Two-factor authentication could not be disabled. Verify your code by signing in again first."
+      }
+    }
+  },
+  "orderStatus": {
+    "pending": "Pending",
+    "paid": "Paid",
+    "failed": "Failed",
+    "canceled": "Canceled"
   },
   "orders": {
     "title": "Orders",
@@ -1039,6 +1308,12 @@
   "user_edition": {
     "title": "Edit Profile",
     "editEmailTitle": "Edit Email Address",
+    "editNameTitle": "Edit full name",
+    "fullNameLabel": "Full name",
+    "fullNameHint": "2–100 characters. Your casing and multipart name are preserved.",
+    "updateNameButton": "Update name",
+    "successNameUpdate": "Your name was updated.",
+    "errorInvalidName": "Enter a full name between 2 and 100 characters.",
     "newEmailLabel": "New Email Address",
     "emailPlaceholder": "your@email.com",
     "updateEmailButton": "Update Email",

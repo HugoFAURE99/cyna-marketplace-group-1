@@ -29,6 +29,17 @@ export type OrderDetail = Omit<OrderRow, "type_facturation" | "invoice_url"> & {
   invoice_url: string | null;
 };
 
+type BillingLine = { id_commande: number; prix_tarif: { type_facturation: string } | null };
+type OrderLineQuery = {
+  prix_tarif: {
+    produit: { produit_traduction: { langue: string; nom_pro: string }[] | null } | null;
+    type_facturation: string;
+  } | null;
+  prix_unitaire: number;
+  quantite: number;
+  sous_total: number;
+};
+
 export async function getOrders(): Promise<OrderRow[]> {
   const supabase = await createAdminClient();
 
@@ -76,7 +87,7 @@ export async function getOrders(): Promise<OrderRow[]> {
     .in("id_commande", orderIds);
 
   const billingMap = new Map<number, string>();
-  for (const l of (lignes ?? []) as any[]) {
+  for (const l of (lignes ?? []) as unknown as BillingLine[]) {
     if (!billingMap.has(l.id_commande) && l.prix_tarif?.type_facturation) {
       billingMap.set(l.id_commande, l.prix_tarif.type_facturation);
     }
@@ -153,10 +164,10 @@ export async function getOrderDetail(id: number): Promise<OrderDetail | null> {
     `)
     .eq("id_commande", id);
 
-  const lignesFormatted = (lignes ?? []).map((l: any) => {
+  const lignesFormatted = ((lignes ?? []) as unknown as OrderLineQuery[]).map((l) => {
     const pt = l.prix_tarif;
-    const traductions = pt?.produit?.produit_traduction as any[] | undefined;
-    const frName = traductions?.find((t: any) => t.langue === "fr")?.nom_pro || "—";
+    const traductions = pt?.produit?.produit_traduction;
+    const frName = traductions?.find((translation) => translation.langue === "fr")?.nom_pro || "—";
     return {
       produit_nom: frName,
       quantite: l.quantite,

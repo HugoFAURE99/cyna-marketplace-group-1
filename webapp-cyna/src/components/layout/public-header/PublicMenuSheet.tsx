@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 
 import { logout } from "@/app/(auth)/_action/auth.action";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
+import SiteModeSwitch from "@/components/layout/SiteModeSwitch";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "@/i18n/navigation";
 import A11yMenu from "@/components/layout/public-header/A11yMenu";
@@ -18,7 +19,7 @@ const informationLinks = [
   { href: "/about", icon: Info, labelKey: "aboutCyna" },
 ] as const;
 
-export default function PublicMenuSheet({ categories, isLoggedIn = false }: { categories: { id_categorie: number; cat_nom: string }[]; isLoggedIn?: boolean }) {
+export default function PublicMenuSheet({ categories, isAdmin = false, isLoggedIn = false }: { categories: { id_categorie: number; cat_nom: string }[]; isAdmin?: boolean; isLoggedIn?: boolean }) {
   const t = useTranslations("menu");
   const tHeader = useTranslations("header");
   const [open, setOpen] = useState(false);
@@ -42,9 +43,23 @@ export default function PublicMenuSheet({ categories, isLoggedIn = false }: { ca
           <SheetClose aria-label={t("closeMenu")} className="inline-flex size-11 cursor-pointer items-center justify-center rounded-md border border-slate-200 text-slate-700 transition hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100"><X aria-hidden="true" className="size-6" /></SheetClose>
         </div>
 
+        {isAdmin && (
+          <div className="mt-2 grid grid-cols-[minmax(0,1fr)_44px] gap-2">
+            <SiteModeSwitch
+              className="bg-gradient-to-r from-purple-700 via-purple-700 to-fuchsia-600 shadow-sm hover:from-purple-800 hover:via-purple-700 hover:to-fuchsia-700"
+              direction="enter"
+              href="/mfa-verify?next=%2Fadmin"
+              label={t("backOffice")}
+              onNavigate={close}
+              pendingLabel={t("enteringBackOffice")}
+              tone="brand"
+            />
+          </div>
+        )}
+
         <nav aria-label={tHeader("categories")} className="mt-7 md:hidden">
           <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-400"><LayoutGrid aria-hidden="true" className="size-4" />{tHeader("categories")}</p>
-          <ul className="space-y-1"><li><Link className="block min-h-11 rounded-md px-3 py-3 text-sm font-medium hover:bg-purple-50 hover:text-purple-700" href="/search" onClick={close}>{tHeader("allProducts")}</Link></li>{categories.map((category) => <li key={category.id_categorie}><Link className="block min-h-11 rounded-md px-3 py-3 text-sm hover:bg-purple-50 hover:text-purple-700" href={`/search?category=${category.id_categorie}`} onClick={close}>{category.cat_nom}</Link></li>)}</ul>
+          <ul className="space-y-1"><li><Link className="block min-h-11 rounded-md px-3 py-3 text-sm font-medium hover:bg-purple-50 hover:text-purple-700" href="/search" onClick={close}>{tHeader("allProducts")}</Link></li>{categories.map((category) => <li key={category.id_categorie}><Link className="block min-h-11 rounded-md px-3 py-3 text-sm hover:bg-purple-50 hover:text-purple-700" href={`/categories/${category.id_categorie}`} onClick={close}>{category.cat_nom}</Link></li>)}</ul>
         </nav>
 
         <nav aria-label={t("information")} className="mt-7"><p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">{t("information")}</p><ul className="space-y-1">{informationLinks.map((item) => <li key={item.href}><Link className="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-purple-50 hover:text-purple-700" href={item.href} onClick={close}><item.icon aria-hidden="true" className="size-4" />{t(item.labelKey)}</Link></li>)}</ul></nav>

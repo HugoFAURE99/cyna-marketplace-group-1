@@ -10,15 +10,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { HomeCarouselSlide } from "@/lib/home/public-home";
+import { ManagedCta } from "@/components/navigation/ManagedCta";
 
 type HomeCarouselProps = {
   slides: HomeCarouselSlide[];
-  buttonHref: string;
 };
 
 const AUTOPLAY_MS = 6000;
 
-export default function HomeCarousel({ slides, buttonHref }: HomeCarouselProps) {
+export default function HomeCarousel({ slides }: HomeCarouselProps) {
   const t = useTranslations("home");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -110,13 +110,14 @@ export default function HomeCarousel({ slides, buttonHref }: HomeCarouselProps) 
                       {slide.description_image}
                     </p>
                   )}
-                  <a
+                  <ManagedCta
                     className="mt-8 inline-flex h-11 items-center justify-center rounded-md bg-purple-700 px-6 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                    href={buttonHref}
+                    fallbackHref="#top-products"
+                    href={slide.buttonHref}
                     tabIndex={active ? undefined : -1}
                   >
-                    {t("exploreServices")}
-                  </a>
+                    {slide.buttonLabel || t("exploreServices")}
+                  </ManagedCta>
                 </div>
               </div>
             </div>

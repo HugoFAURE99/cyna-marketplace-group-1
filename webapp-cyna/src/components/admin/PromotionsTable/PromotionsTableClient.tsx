@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
-import { useRouter, usePathname } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Eye, Trash2 } from "lucide-react";
 import {
@@ -75,7 +75,6 @@ export default function PromotionsTableClient({
   const [cannotDelete, setCannotDelete] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const pathname = usePathname();
   const tPagination = useTranslations("admin.pagination");
 
   const filtered = useMemo(() => {
@@ -171,7 +170,7 @@ export default function PromotionsTableClient({
             setSearch(e.target.value);
             setPage(0);
           }}
-          className="w-full max-w-xs rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring sm:max-w-xs"
         />
         <select
           value={statusFilter}
@@ -179,7 +178,7 @@ export default function PromotionsTableClient({
             setStatusFilter(e.target.value);
             setPage(0);
           }}
-          className="rounded-md border bg-background px-3 py-2 text-sm"
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm sm:w-auto"
         >
           <option value="all">{t.allStatuses}</option>
           <option value="active">{t.active}</option>
@@ -191,7 +190,7 @@ export default function PromotionsTableClient({
             setTypeFilter(e.target.value);
             setPage(0);
           }}
-          className="rounded-md border bg-background px-3 py-2 text-sm"
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm sm:w-auto"
         >
           <option value="all">{t.allTypes}</option>
           <option value="pourcentage">{t.percentage}</option>
@@ -282,7 +281,7 @@ export default function PromotionsTableClient({
       </Table>
 
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-muted-foreground">
             {tPagination("info", {
               from: page * PAGE_SIZE + 1,
@@ -320,7 +319,7 @@ export default function PromotionsTableClient({
       >
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-          <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
             <Dialog.Title className="text-base font-semibold">
               {t.confirmDeleteTitle}
             </Dialog.Title>
@@ -362,7 +361,7 @@ export default function PromotionsTableClient({
       >
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-          <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
             <Dialog.Title className="text-base font-semibold">
               {t.cannotDeleteTitle}
             </Dialog.Title>

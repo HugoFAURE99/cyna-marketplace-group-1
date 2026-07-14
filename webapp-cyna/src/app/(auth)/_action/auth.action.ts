@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 
 import { validatePassword } from "@/lib/auth/password-policy";
 import { createAdminClient } from "@/lib/supabase/server";
+import { isActiveAdmin } from "@/lib/auth/roles";
+import { isAdminDestination, sanitizeAuthNext } from "@/lib/auth/mfa-return";
 import { createServerClient } from "@/lib/supabase/server-client";
 
 type AuthActionState = {
@@ -24,7 +26,7 @@ export async function login(
   if (!email || !password) return { errorKey: "errorMissingFields" };
 
   try {
-    const supabase = await createServerClient(formData.get("remember") === "on");
+    const supabase = await createServerClient();
     // On récupère authData pour avoir l'ID de l'utilisateur[cite: 2]
     const { data: authData, error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -39,24 +41,29 @@ export async function login(
     }
 
 
-    //2FA POUR LES ADMINS
-    // ==========================================
     if (authData.user) {
       const { data: profile } = await supabase
         .from("utilisateur")
-        .select("role")
+        .select("role, is_actif")
         .eq("id_compte", authData.user.id)
         .single();
 
-      if (profile?.role === "admin" || profile?.role === "Admin") {
-        // Redirection forcée vers la page MFA avec la destination finale en paramètre
-        const mfaUrl = `/mfa-verify?next=${encodeURIComponent(next)}`;
-        redirect(localizedPath(locale, mfaUrl));
+      if (!profile?.is_actif) {
+        await supabase.auth.signOut({ scope: "local" });
+        return { errorKey: "errorInactive" };
       }
+
+      const safeLocale = normaliseLocale(locale);
+      const destination = sanitizeAuthNext(next, safeLocale);
+      const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      const needsChallenge = assurance?.currentLevel !== "aal2" && assurance?.nextLevel === "aal2";
+      const needsAdminEnrollment = isActiveAdmin(profile) && isAdminDestination(destination, safeLocale);
+      if (needsChallenge || needsAdminEnrollment) {
+        redirect(`/${safeLocale}/mfa-verify?next=${encodeURIComponent(destination)}`);
+      }
+      redirect(destination);
     }
-
-
-    redirect(localizedPath(locale, next));
+    redirect(sanitizeAuthNext(next, normaliseLocale(locale)));
   } catch (error) {
     if (error && typeof error === "object" && "digest" in error) throw error; // Permet à Next.js de gérer le redirect()[cite: 2]
     console.error("[auth] login failed", error);
@@ -174,13 +181,4 @@ export async function updatePassword(
 
 function normaliseLocale(locale: string) {
   return locale === "en" ? "en" : "fr";
-}
-
-function localizedPath(locale: string, candidate: string) {
-  const safe = candidate.startsWith("/") && !candidate.startsWith("//")
-    ? candidate
-    : "/";
-  if (/^\/(fr|en)(\/|$)/.test(safe)) return safe;
-  const prefix = `/${normaliseLocale(locale)}`;
-  return safe === "/" ? prefix : `${prefix}${safe}`;
 }

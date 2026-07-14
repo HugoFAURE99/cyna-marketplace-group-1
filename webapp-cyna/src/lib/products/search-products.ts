@@ -75,7 +75,7 @@ export async function searchCatalog(
   const maxCents = toCents(maxPrice);
   if (minCents !== undefined || maxCents !== undefined) {
     products = products.filter((product) => {
-      const price = product.tariffs[0]?.prix;
+      const price = product.tariffs[0]?.promotionalPriceCents;
       if (price === undefined) {
         return false;
       }
@@ -129,7 +129,8 @@ function sortCatalog(
     return products;
   }
 
-  const priceOf = (product: CatalogProduct) => product.tariffs[0]?.prix ?? null;
+  const priceOf = (product: CatalogProduct) =>
+    product.tariffs[0]?.promotionalPriceCents ?? null;
 
   return [...products].sort((a, b) => {
     switch (sort) {
@@ -167,17 +168,21 @@ function sortCatalog(
 // Slim shape sent to the header live-search dropdown (keeps the JSON payload
 // small and decoupled from the full CatalogProduct).
 export type SearchSuggestion = {
+  automaticPromotion: CatalogProduct["tariffs"][number]["automaticPromotion"];
   id_produit: number;
   nom_pro: string;
   cat_nom: string | null;
   imageUrl: string | null;
   priceCents: number | null;
+  originalPriceCents: number | null;
   type_facturation: string | null;
   est_disponible: boolean;
 };
 
 export function toSuggestion(product: CatalogProduct): SearchSuggestion {
+  const primaryTariff = product.tariffs[0];
   return {
+    automaticPromotion: primaryTariff?.automaticPromotion ?? null,
     id_produit: product.id_produit,
     nom_pro: product.nom_pro,
     cat_nom: product.category?.cat_nom ?? null,
@@ -185,8 +190,9 @@ export function toSuggestion(product: CatalogProduct): SearchSuggestion {
       product.images[0]?.lien_image_produit ??
       product.category?.lien_image_cat ??
       null,
-    priceCents: product.tariffs[0]?.prix ?? null,
-    type_facturation: product.tariffs[0]?.type_facturation ?? null,
+    priceCents: primaryTariff?.promotionalPriceCents ?? null,
+    originalPriceCents: primaryTariff?.prix ?? null,
+    type_facturation: primaryTariff?.type_facturation ?? null,
     est_disponible: product.est_disponible,
   };
 }

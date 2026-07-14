@@ -14,8 +14,14 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { InvoiceDownloadButton } from "@/components/account/invoice-download-button";
+import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import { Input } from "@/components/ui/input";
 import { Link } from "@/i18n/navigation";
+import {
+  getOrderStatusFilterEntries,
+  normalizeOrderStatus,
+  orderStatusFilterValue,
+} from "@/lib/orders/status";
 import type { Json, Tables } from "@/types/database.types";
 
 type OrderLine = {
@@ -65,6 +71,7 @@ type BillingFilter = "all" | "annual" | "monthly" | "one_time";
 
 export function OrdersList({ orders, locale }: { orders: AccountOrder[]; locale: string }) {
   const t = useTranslations("orders");
+  const tStatus = useTranslations("orderStatus");
   const [search, setSearch] = useState("");
   const [year, setYear] = useState("all");
   const [status, setStatus] = useState("all");
@@ -75,7 +82,11 @@ export function OrdersList({ orders, locale }: { orders: AccountOrder[]; locale:
   const [expanded, setExpanded] = useState<number | null>(null);
 
   const years = useMemo(() => Array.from(new Set(orders.map((order) => String(new Date(order.date_commande).getFullYear())))).sort().reverse(), [orders]);
-  const statuses = useMemo(() => Array.from(new Set(orders.map((order) => order.statut_commande))).sort(), [orders]);
+  const statusEntries = useMemo(
+    () => getOrderStatusFilterEntries(orders.map((order) => order.statut_commande)),
+    [orders],
+  );
+  const statuses = statusEntries.map((entry) => entry.value);
   const services = useMemo(() => Array.from(new Set(orders.flatMap((order) => order.ligne_commande.map((line) => categoryName(line, locale)).filter(Boolean)))).sort(), [orders, locale]);
 
   const visibleOrders = useMemo(() => {
@@ -86,7 +97,7 @@ export function OrdersList({ orders, locale }: { orders: AccountOrder[]; locale:
       const haystack = [order.id_commande, order.statut_commande, new Date(order.date_commande).toLocaleDateString(locale), ...names].join(" ").toLocaleLowerCase(locale);
       return (!term || haystack.includes(term))
         && (year === "all" || String(new Date(order.date_commande).getFullYear()) === year)
-        && (status === "all" || order.statut_commande === status)
+        && (status === "all" || orderStatusFilterValue(order.statut_commande) === status)
         && (service === "all" || categories.includes(service))
         && (billing === "all" || order.ligne_commande.some((line) => billingValue(line.prix_tarif?.type_facturation) === billing));
     });
@@ -123,7 +134,20 @@ export function OrdersList({ orders, locale }: { orders: AccountOrder[]; locale:
         <Filter label={t("filters.year")} onChange={setYear} options={years} value={year} />
         <Filter label={t("filters.service")} onChange={setService} options={services} value={service} />
         <Filter label={t("filters.billing")} onChange={(value) => setBilling(value as BillingFilter)} options={["monthly", "annual", "one_time"]} render={(value) => t(`billing.${value}` as Parameters<typeof t>[0])} value={billing} />
-        <Filter label={t("filters.status")} onChange={setStatus} options={statuses} render={(value) => statusText(value, t)} value={status} />
+        <Filter
+          label={t("filters.status")}
+          onChange={setStatus}
+          options={statuses}
+          render={(value) => {
+            const entry = statusEntries.find((item) => item.value === value);
+            return entry?.key === "unknown"
+              ? entry.raw
+              : entry
+                ? tStatus(entry.key)
+                : value;
+          }}
+          value={status}
+        />
       </div>
 
       {visibleOrders.length === 0 ? (
@@ -154,7 +178,7 @@ export function OrdersList({ orders, locale }: { orders: AccountOrder[]; locale:
                     <td className="max-w-64 px-4 py-4 text-slate-700">{order.ligne_commande.map((line) => productName(line, locale)).join(", ") || t("notAvailable")}</td>
                     <td className="px-4 py-4 text-slate-600">{formatDate(order.date_commande, locale)}</td>
                     <td className="px-4 py-4 font-semibold">{formatCurrency(order.montant_total, locale)}</td>
-                    <td className="px-4 py-4"><StatusBadge status={order.statut_commande} t={t} /></td>
+                    <td className="px-4 py-4"><OrderStatusBadge status={order.statut_commande} /></td>
                     <td className="px-4 py-4 text-right"><ExpandButton open={open} onClick={() => setExpanded(open ? null : order.id_commande)} t={t} /></td>
                   </tr>,
                   open ? <tr key={`detail-${order.id_commande}`}><td className="bg-slate-50 px-5 py-5" colSpan={6}><OrderDetails locale={locale} order={order} t={t} /></td></tr> : null,
@@ -165,7 +189,7 @@ export function OrdersList({ orders, locale }: { orders: AccountOrder[]; locale:
           <div className="space-y-3 md:hidden">{(groupOrders ?? []).map((order) => {
             const open = expanded === order.id_commande;
             return <article className="rounded-lg border border-slate-200 bg-white p-4" key={order.id_commande}>
-              <div className="flex items-start justify-between gap-3"><div><p className="font-bold">#{order.id_commande}</p><p className="mt-1 text-sm text-slate-600">{formatDate(order.date_commande, locale)}</p></div><StatusBadge status={order.statut_commande} t={t} /></div>
+              <div className="flex items-start justify-between gap-3"><div><p className="font-bold">#{order.id_commande}</p><p className="mt-1 text-sm text-slate-600">{formatDate(order.date_commande, locale)}</p></div><OrderStatusBadge status={order.statut_commande} /></div>
               <p className="mt-3 font-medium text-slate-900">{order.ligne_commande.map((line) => productName(line, locale)).join(", ") || t("notAvailable")}</p>
               <p className="mt-2 text-lg font-bold">{formatCurrency(order.montant_total, locale)}</p>
               <div className="mt-3"><ExpandButton open={open} onClick={() => setExpanded(open ? null : order.id_commande)} t={t} /></div>
@@ -192,7 +216,7 @@ function ExpandButton({ open, onClick, t }: { open: boolean; onClick: () => void
 
 function OrderDetails({ locale, order, t }: { locale: string; order: AccountOrder; t: ReturnType<typeof useTranslations<"orders">> }) {
   const address = isAddress(order.billing_address_snapshot) ? order.billing_address_snapshot : null;
-  const isFailed = normalizeStatus(order.statut_commande) === "failed";
+  const isFailed = normalizeOrderStatus(order.statut_commande) === "failed";
   const productNameFallback = order.ligne_commande[0] ? (productName(order.ligne_commande[0], locale) || `Commande #${order.id_commande}`) : `Commande #${order.id_commande}`;
   const contactSubject = t("billingIssue", { name: productNameFallback });
   const contactHref = `/faq?category=order&subject=${encodeURIComponent(contactSubject)}&orderId=${order.id_commande}`;
@@ -300,23 +324,6 @@ function OrderDetails({ locale, order, t }: { locale: string; order: AccountOrde
       ) : <p className="mt-3 text-sm text-slate-600">{t("noInvoices")}</p>}
     </section>
   </div>;
-}
-
-function StatusBadge({ status, t }: { status: string; t: ReturnType<typeof useTranslations<"orders">> }) {
-  const normalized = normalizeStatus(status);
-  const styles = { completed: "bg-purple-100 text-purple-800", pending: "bg-amber-100 text-amber-800", cancelled: "bg-slate-100 text-slate-700", failed: "bg-red-100 text-red-800" }[normalized];
-  return <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${styles}`}>{t(`status.${normalized}`)}</span>;
-}
-
-function normalizeStatus(status: string): "completed" | "pending" | "cancelled" | "failed" {
-  const value = status.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  if (["payee", "completed", "validee", "paid"].includes(value)) return "completed";
-  if (["annulee", "cancelled", "canceled"].includes(value)) return "cancelled";
-  if (["failed", "echouee"].includes(value)) return "failed";
-  return "pending";
-}
-function statusText(status: string, t: ReturnType<typeof useTranslations<"orders">>) {
-  return t(`status.${normalizeStatus(status)}`);
 }
 
 function billingValue(value?: string | null): Exclude<BillingFilter, "all"> {

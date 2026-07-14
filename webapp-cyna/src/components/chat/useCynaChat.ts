@@ -30,6 +30,7 @@ export function useCynaChat() {
   const [messages, setMessages] = useState<ChatUiMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const streamingRef = useRef(false);
+  const conversationIdRef = useRef<string | null>(null);
 
   const sendMessage = useCallback(
     async (raw: string) => {
@@ -73,7 +74,9 @@ export function useCynaChat() {
         );
 
       const handleEvent = (event: ChatStreamEvent) => {
-        if (event.type === "text") {
+        if (event.type === "conversation") {
+          conversationIdRef.current = event.id;
+        } else if (event.type === "text") {
           patch((message) => ({
             ...message,
             chunks: [...message.chunks, event.value],
@@ -92,7 +95,11 @@ export function useCynaChat() {
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history, locale }),
+          body: JSON.stringify({
+            conversationId: conversationIdRef.current,
+            messages: history,
+            locale,
+          }),
         });
 
         if (!res.ok || !res.body) {

@@ -16,6 +16,7 @@ import { getCatalogCategories } from "@/lib/products/public-catalog";
 import { getLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
+import { isActiveAdmin } from "@/lib/auth/roles";
 
 export default async function PublicHeader() {
   const t = await getTranslations("header");
@@ -32,13 +33,15 @@ export default async function PublicHeader() {
   // 2b. Nom affiché : on lit le profil (RLS autorise l'utilisateur à voir le
   // sien), avec repli sur la partie locale de l'e-mail.
   let displayName: string | null = null;
+  let isAdmin = false;
   if (user) {
     const { data: profile } = await supabase
       .from("utilisateur")
-      .select("nom_complet")
+      .select("nom_complet, role, is_actif")
       .eq("id_compte", user.id)
       .maybeSingle();
     displayName = profile?.nom_complet ?? user.email?.split("@")[0] ?? null;
+    isAdmin = isActiveAdmin(profile);
   }
 
   return (
@@ -104,7 +107,7 @@ export default async function PublicHeader() {
           <div className="hidden md:block"><LanguageSwitcher /></div>
           <CartButton count={cartCount} />
 
-          <PublicMenuSheet categories={categories} isLoggedIn={!!user} />
+          <PublicMenuSheet categories={categories} isAdmin={isAdmin} isLoggedIn={!!user} />
         </div>
       </div>
     </header>

@@ -1,15 +1,15 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import Spinner from "@/components/ui/spinner";
 
 import { useRouter } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -20,9 +20,6 @@ import {
 } from "@/app/[locale]/(admin)/admin/_actions/category.actions";
 import styles from "./CategoryForm.module.scss";
 
-const DEFAULT_LOCALE = routing.defaultLocale;
-const EXTRA_LOCALES = routing.locales.filter((l) => l !== DEFAULT_LOCALE);
-
 type Category = {
   id_categorie: number;
   cat_nom_fr: string;
@@ -32,7 +29,7 @@ type Category = {
   lien_image_cat?: string | null;
 };
 
-function AddTranslationButton({
+export function AddTranslationButton({
   availableLocales,
   onAdd,
   label,
@@ -109,30 +106,22 @@ export default function CategoryForm({
   const router = useRouter();
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
 
-  const initialNameLocales = readOnly
-    ? EXTRA_LOCALES
-    : EXTRA_LOCALES.filter((l) => {
-        const key = `cat_nom_${l}` as keyof Category;
-        return category?.[key];
-      });
-  const initialDescLocales = readOnly
-    ? EXTRA_LOCALES
-    : EXTRA_LOCALES.filter((l) => {
-        const key = `cat_description_${l}` as keyof Category;
-        return category?.[key];
-      });
-
-  const [nameLocales, setNameLocales] = useState<string[]>(initialNameLocales);
-  const [descLocales, setDescLocales] = useState<string[]>(initialDescLocales);
+  const [englishEnabled, setEnglishEnabled] = useState(
+    Boolean(category?.cat_nom_en || category?.cat_description_en),
+  );
 
   const categorySchema = useMemo(
     () =>
       z.object({
+        has_en_translation: z.boolean(),
         cat_nom_fr: z.string().min(1, tv("nameFrRequired")),
         cat_description_fr: z.string().optional(),
         cat_nom_en: z.string().optional(),
         cat_description_en: z.string().optional(),
-      }),
+      }).refine(
+        (data) => !data.has_en_translation || Boolean(data.cat_nom_en?.trim()),
+        { message: tv("nameEnRequired"), path: ["cat_nom_en"] },
+      ),
     [tv],
   );
 
@@ -147,12 +136,13 @@ export default function CategoryForm({
     resolver: zodResolver(categorySchema),
     defaultValues: category
       ? {
+          has_en_translation: englishEnabled,
           cat_nom_fr: category.cat_nom_fr,
           cat_description_fr: category.cat_description_fr || "",
           cat_nom_en: category.cat_nom_en,
           cat_description_en: category.cat_description_en || "",
         }
-      : undefined,
+      : { has_en_translation: false },
   });
 
   const onSubmit = async (data: CategoryFormData) => {
@@ -168,41 +158,17 @@ export default function CategoryForm({
     }
   };
 
-  const addLocale = (group: "name" | "description", locale: string) => {
-    if (group === "name") {
-      setNameLocales((prev) => [...prev, locale]);
-    } else {
-      setDescLocales((prev) => [...prev, locale]);
+  const setEnglishTranslation = (enabled: boolean) => {
+    setEnglishEnabled(enabled);
+    setValue("has_en_translation", enabled, { shouldValidate: true });
+    if (!enabled) {
+      setValue("cat_nom_en", "");
+      setValue("cat_description_en", "");
     }
   };
-
-  const removeLocale = (group: "name" | "description", locale: string) => {
-    if (group === "name") {
-      setNameLocales((prev) => prev.filter((l) => l !== locale));
-      setValue(`cat_nom_${locale}` as keyof CategoryFormData, "");
-    } else {
-      setDescLocales((prev) => prev.filter((l) => l !== locale));
-      setValue(`cat_description_${locale}` as keyof CategoryFormData, "");
-    }
-  };
-
-  const availableNameLocales = EXTRA_LOCALES.filter(
-    (l) => !nameLocales.includes(l),
-  );
-  const availableDescLocales = EXTRA_LOCALES.filter(
-    (l) => !descLocales.includes(l),
-  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {tActions("back")}
-      </button>
       <h2 className="text-2xl font-bold mb-6">
         {category ? t("editTitle") : t("createTitle")}
       </h2>
@@ -218,37 +184,6 @@ export default function CategoryForm({
           )}
         </div>
 
-        {nameLocales.map((locale) => (
-          <div key={locale} className={styles.field}>
-            <div className="flex items-center justify-between">
-              <Label htmlFor={`cat_nom_${locale}`}>
-                {t("lang", { code: locale.toUpperCase() })}
-              </Label>
-              {!readOnly && (
-                <button
-                  type="button"
-                  onClick={() => removeLocale("name", locale)}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            <Input
-              id={`cat_nom_${locale}`}
-              disabled={readOnly}
-              {...register(`cat_nom_${locale}` as keyof CategoryFormData)}
-            />
-          </div>
-        ))}
-
-        {!readOnly && (
-          <AddTranslationButton
-            availableLocales={availableNameLocales}
-            onAdd={(locale) => addLocale("name", locale)}
-            label={(code) => t("addTranslation", { code })}
-          />
-        )}
       </fieldset>
 
       <fieldset className="space-y-3 rounded-lg border p-4">
@@ -265,50 +200,44 @@ export default function CategoryForm({
           />
         </div>
 
-        {descLocales.map((locale) => (
-          <div key={locale} className={styles.field}>
-            <div className="flex items-center justify-between">
-              <Label htmlFor={`cat_description_${locale}`}>
-                {t("lang", { code: locale.toUpperCase() })}
-              </Label>
-              {!readOnly && (
-                <button
-                  type="button"
-                  onClick={() => removeLocale("description", locale)}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            <Input
-              id={`cat_description_${locale}`}
-              disabled={readOnly}
-              {...register(
-                `cat_description_${locale}` as keyof CategoryFormData,
-              )}
-            />
-          </div>
-        ))}
-
-        {!readOnly && (
-          <AddTranslationButton
-            availableLocales={availableDescLocales}
-            onAdd={(locale) => addLocale("description", locale)}
-            label={(code) => t("addTranslation", { code })}
-          />
-        )}
       </fieldset>
+
+      {englishEnabled ? (
+        <fieldset className="space-y-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
+          <legend className="px-2 text-sm font-semibold">{t("englishTranslation")}</legend>
+          {!readOnly && (
+            <Button className="float-right -mt-2 gap-1" onClick={() => setEnglishTranslation(false)} size="sm" type="button" variant="ghost">
+              <X className="size-4" /> {t("removeTranslation")}
+            </Button>
+          )}
+          <div className={styles.field}>
+            <Label htmlFor="cat_nom_en">{t("nameGroup")}</Label>
+            <Input id="cat_nom_en" disabled={readOnly} {...register("cat_nom_en")} />
+            {errors.cat_nom_en && <span className={styles.error}>{errors.cat_nom_en.message}</span>}
+          </div>
+          <div className={styles.field}>
+            <Label htmlFor="cat_description_en">{t("descriptionGroup")}</Label>
+            <Input id="cat_description_en" disabled={readOnly} {...register("cat_description_en")} />
+          </div>
+        </fieldset>
+      ) : !readOnly ? (
+        <Button className="w-fit gap-2" onClick={() => setEnglishTranslation(true)} type="button" variant="outline">
+          <Plus className="size-4" /> {t("addTranslation", { code: "EN" })}
+        </Button>
+      ) : null}
 
       <div className="mt-6 pt-6 border-t">
         {readOnly ? (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">{t("image")}</h3>
             {category?.lien_image_cat ? (
-              <img
+              <Image
                 src={category.lien_image_cat}
                 alt=""
                 className="max-w-xs rounded-lg border shadow-md"
+                height={240}
+                unoptimized
+                width={320}
               />
             ) : (
               <p className="text-sm text-muted-foreground">{t("noImage")}</p>
@@ -322,18 +251,13 @@ export default function CategoryForm({
         )}
       </div>
 
-      <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
+      <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
         {readOnly ? (
-          <>
-            <Button type="button" variant="outline" onClick={() => router.back()}>
-              {tActions("back")}
+          category && (
+            <Button type="button" onClick={() => router.push(`/admin/categories/${category.id_categorie}`)}>
+              {tActions("edit")}
             </Button>
-            {category && (
-              <Button type="button" onClick={() => router.push(`/admin/categories/${category.id_categorie}`)}>
-                {tActions("edit")}
-              </Button>
-            )}
-          </>
+          )
         ) : (
           <>
             <Button type="button" variant="outline" onClick={() => router.back()}>

@@ -55,9 +55,9 @@ export default async function PromotionsPage({
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{translations.title}</h1>
-        <Button nativeButton={false} render={<Link href="/admin/promotions/new" />}>
+        <Button className="w-full sm:w-auto" nativeButton={false} render={<Link href="/admin/promotions/new" />}>
           {translations.add}
         </Button>
       </div>

@@ -10,9 +10,13 @@ import {
   type CatalogProductQueryRow,
 } from "@/lib/products/public-catalog";
 import { createPublicClient } from "@/lib/supabase/public";
+import { createAdminClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database.types";
+import { resolveCarouselContent } from "@/lib/home/home-content";
 
 export type HomeCarouselSlide = {
+  buttonHref: string;
+  buttonLabel: string;
   id_image: number;
   lien_image_caroussel: string;
   titre_image: string;
@@ -41,7 +45,7 @@ export const HOME_INTRO_LINK_FALLBACK_HREF = "/search";
 // Companion (translation) rows embedded alongside their parent.
 type ImageCarrouselTraductionRow = Pick<
   Tables<"image_carrousel_traduction">,
-  "langue" | "titre_image" | "description_image"
+  "langue" | "titre_image" | "description_image" | "texte_bouton"
 >;
 
 type CategorieTraductionRow = Pick<
@@ -51,7 +55,7 @@ type CategorieTraductionRow = Pick<
 
 type CarouselQueryRow = Pick<
   Tables<"image_carrousel">,
-  "id_image" | "lien_image_caroussel"
+  "id_image" | "lien_bouton" | "lien_image_caroussel" | "ordre"
 > & {
   image_carrousel_traduction: ImageCarrouselTraductionRow[] | null;
 };
@@ -67,13 +71,9 @@ const HOME_INTRO_TEXT_KEYS = {
   body: "home_intro_body",
   eyebrow: "home_intro_eyebrow",
   linkLabel: "home_intro_link_label",
-  linkHref: "home_intro_link_href",
+  linkHref: "home_intro_link_url",
   title: "home_intro_title",
 } as const;
-
-// Single CTA target for the hero carousel button, editable from the CMS
-// (`texte_general`) without a schema or admin change.
-const HOME_CAROUSEL_BUTTON_HREF_KEY = "home_carousel_button_href";
 
 export async function getHomeCarouselSlides(
   locale: Locale,
@@ -84,41 +84,37 @@ export async function getHomeCarouselSlides(
     .select(
       `
       id_image,
+      lien_bouton,
       lien_image_caroussel,
+      ordre,
       image_carrousel_traduction (
         langue,
         titre_image,
-        description_image
+        description_image,
+        texte_bouton
       )
     `,
     )
     .eq("est_actif", true)
-    .order("id_image", { ascending: true })
+    .order("ordre", { ascending: true })
     .limit(5);
 
   if (error) {
     throw new Error(`Erreur chargement carousel public : ${error.message}`);
   }
 
-  return ((data ?? []) as unknown as CarouselQueryRow[]).map((slide) => {
-    const translation = pickTranslation(
-      slide.image_carrousel_traduction,
-      locale,
-    );
-
-    return {
-      id_image: slide.id_image,
-      lien_image_caroussel: slide.lien_image_caroussel,
-      titre_image: translation?.titre_image ?? "",
-      description_image: translation?.description_image ?? null,
-    };
-  });
+  return ((data ?? []) as unknown as CarouselQueryRow[]).map((slide) =>
+    resolveCarouselContent(slide, locale, HOME_CAROUSEL_BUTTON_FALLBACK_HREF),
+  );
 }
 
 export async function getHomeIntroContent(
   locale: Locale,
 ): Promise<HomeIntroContent | null> {
-  const supabase = createPublicClient();
+  // This remains a server-only, explicitly projected public-content read.
+  // Using the server client also keeps newly inserted CMS rows visible if the
+  // deployed public-read policy has drifted from the repository policy.
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("texte_general")
     .select("emplacement_texte, langue, texte")
@@ -139,12 +135,22 @@ export async function getHomeIntroContent(
   const resolve = (placement: string) =>
     pickTranslation(rowsByPlacement.get(placement), locale)?.texte.trim() ||
     undefined;
+  const resolveDestination = (placement: string) => {
+    const rows = rowsByPlacement.get(placement) ?? [];
+    return (
+      rows.find((row) => row.langue === "fr")?.texte.trim() ||
+      rows.find((row) => row.langue === "en")?.texte.trim() ||
+      undefined
+    );
+  };
 
   const content = {
     body: resolve(HOME_INTRO_TEXT_KEYS.body),
     eyebrow: resolve(HOME_INTRO_TEXT_KEYS.eyebrow),
     linkLabel: resolve(HOME_INTRO_TEXT_KEYS.linkLabel),
-    linkHref: resolve(HOME_INTRO_TEXT_KEYS.linkHref),
+    // CTA destinations are shared; ManagedCta adds the active locale to
+    // internal paths while anchors and external URLs remain unchanged.
+    linkHref: resolveDestination(HOME_INTRO_TEXT_KEYS.linkHref),
     title: resolve(HOME_INTRO_TEXT_KEYS.title),
   };
 
@@ -152,25 +158,6 @@ export async function getHomeIntroContent(
   return content.body || content.eyebrow || content.linkLabel || content.title
     ? content
     : null;
-}
-
-export async function getHomeCarouselButtonHref(
-  locale: Locale,
-): Promise<string> {
-  const supabase = createPublicClient();
-  const { data, error } = await supabase
-    .from("texte_general")
-    .select("langue, texte")
-    .eq("emplacement_texte", HOME_CAROUSEL_BUTTON_HREF_KEY);
-
-  if (error) {
-    throw new Error(`Erreur chargement lien carousel : ${error.message}`);
-  }
-
-  return (
-    pickTranslation(data, locale)?.texte.trim() ||
-    HOME_CAROUSEL_BUTTON_FALLBACK_HREF
-  );
 }
 
 export async function getHomeCategories(

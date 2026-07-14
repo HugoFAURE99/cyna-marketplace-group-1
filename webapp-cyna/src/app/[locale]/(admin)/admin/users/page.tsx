@@ -9,7 +9,7 @@ export default async function UsersPage({
   searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
-  searchParams: Promise<{ detail?: string }>;
+  searchParams: Promise<{ detail?: string; mfaTicket?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -53,12 +53,22 @@ export default async function UsersPage({
     subStatus: tUsers("subStatus"),
     loading: tUsers("loading"),
     viewOrder: tUsers("viewOrder"),
+    mfa: tUsers("mfa"),
+    mfaEnabled: tUsers("mfaEnabled"),
+    mfaDisabled: tUsers("mfaDisabled"),
+    resetMfa: tUsers("resetMfa"),
+    resetMfaConfirm: tUsers("resetMfaConfirm"),
+    resetMfaSuccess: tUsers("resetMfaSuccess"),
+    resetMfaError: tUsers("resetMfaError"),
+    resetMfaTicketRequired: tUsers("resetMfaTicketRequired"),
   };
+
+  const query = await searchParams;
 
   return (
     <div>
       <h1 className="mb-6 text-2xl font-bold">{translations.title}</h1>
-      <UsersTableClient users={users} translations={translations} initialDetailId={(await searchParams).detail} />
+      <UsersTableClient users={users} translations={translations} initialDetailId={query.detail} initialMfaTicketId={query.mfaTicket} />
     </div>
   );
 }

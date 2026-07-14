@@ -9,6 +9,8 @@ import CarouselManager from "./CarouselManager";
 import IntroTextsEditor from "./IntroTextsEditor";
 import ShortcutsPanel from "./ShortcutsPanel";
 import type { CarouselSlide, IntroTexts } from "@/app/[locale]/(admin)/admin/_actions/homepage.actions";
+import type { ManagedLinkOption } from "@/lib/navigation/managed-link";
+import type { ManagedLinkPickerTranslations } from "./ManagedLinkPicker";
 
 type Tab = "carousel" | "intro" | "shortcuts";
 
@@ -88,6 +90,8 @@ interface ShortcutTranslations {
 export default function HomepageTabs({
   slides,
   introTexts,
+  linkOptions,
+  linkPickerTranslations,
   translations,
   carouselTranslations,
   introTranslations,
@@ -95,6 +99,8 @@ export default function HomepageTabs({
 }: {
   slides: CarouselSlide[];
   introTexts: IntroTexts;
+  linkOptions: ManagedLinkOption[];
+  linkPickerTranslations: ManagedLinkPickerTranslations & { invalid: string };
   translations: Translations;
   carouselTranslations: CarouselTranslations;
   introTranslations: IntroTranslations;
@@ -162,8 +168,8 @@ export default function HomepageTabs({
 
   return (
     <>
-      <div className="mb-6 border-b">
-        <div className="flex gap-1">
+      <div className="mb-6 max-w-full overflow-x-auto border-b">
+        <div className="flex min-w-max gap-1">
           {tabs.map((tab) => (
             <button
               key={tab.key}
@@ -183,6 +189,8 @@ export default function HomepageTabs({
 
       {activeTab === "carousel" && (
         <CarouselManager
+          linkOptions={linkOptions}
+          linkPickerTranslations={linkPickerTranslations}
           slides={slides}
           translations={carouselTranslations}
           onDirtyChange={setCarouselDirty}
@@ -190,7 +198,12 @@ export default function HomepageTabs({
         />
       )}
       {activeTab === "intro" && (
-        <IntroTextsEditor introTexts={introTexts} translations={introTranslations} />
+        <IntroTextsEditor
+          introTexts={introTexts}
+          linkOptions={linkOptions}
+          linkPickerTranslations={linkPickerTranslations}
+          translations={introTranslations}
+        />
       )}
       {activeTab === "shortcuts" && (
         <ShortcutsPanel translations={shortcutTranslations} />
@@ -202,7 +215,7 @@ export default function HomepageTabs({
       >
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-          <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
             <Dialog.Title className="text-base font-semibold">
               {t.unsavedTitle}
             </Dialog.Title>

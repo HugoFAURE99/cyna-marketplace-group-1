@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo, useRef } from "react";
+import { Search } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,8 @@ import ProductsTableClient from "./ProductsTableClient";
 import PriorityProductsTable from "./PriorityProductsTable";
 import FeaturedProductsManager from "./FeaturedProductsManager";
 import type { getProducts } from "@/app/[locale]/(admin)/admin/_actions/product.actions";
+import { Input } from "@/components/ui/input";
+import { matchesAdminProductSearch } from "@/lib/admin/product-search";
 
 type Product = Awaited<ReturnType<typeof getProducts>>[number];
 
@@ -58,6 +61,7 @@ interface TabsTranslations {
   unsavedSaveAndLeave: string;
   allCategories: string;
   filterByCategory: string;
+  searchPlaceholder: string;
 }
 
 export interface CategoryOption {
@@ -90,6 +94,11 @@ interface FeaturedTranslations {
   confirmRemove: string;
   cancelRemove: string;
   cancel: string;
+  close: string;
+  dragProduct: string;
+  perMonth: string;
+  perYear: string;
+  promotionBadge: string;
 }
 
 export default function ProductsPageTabs({
@@ -113,6 +122,7 @@ export default function ProductsPageTabs({
   const [pendingTab, setPendingTab] = useState<Tab | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
   const prioritySaveRef = useRef<(() => Promise<void>) | null>(null);
@@ -122,10 +132,12 @@ export default function ProductsPageTabs({
 
   const filteredProducts = useMemo(
     () =>
-      categoryFilter
-        ? products.filter((p) => p.id_categorie === categoryFilter)
-        : products,
-    [products, categoryFilter],
+      products.filter(
+        (product) =>
+          (!categoryFilter || product.id_categorie === categoryFilter) &&
+          matchesAdminProductSearch(product, searchQuery),
+      ),
+    [products, categoryFilter, searchQuery],
   );
 
   const handleRegisterPrioritySave = useCallback((fn: () => Promise<void>) => {
@@ -193,14 +205,14 @@ export default function ProductsPageTabs({
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between border-b">
-        <div className="flex gap-1">
+      <div className="mb-6 flex flex-col gap-3 border-b xl:flex-row xl:items-end">
+        <div className="grid w-full shrink-0 grid-cols-3 gap-1 sm:flex sm:w-auto">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
               onClick={() => switchTab(tab.key)}
-              className={`px-4 py-2 text-sm font-medium transition-colors ${
+              className={`min-w-0 whitespace-normal px-3 py-2 text-sm font-medium transition-colors sm:px-4 ${
                 activeTab === tab.key
                   ? "border-b-2 border-primary text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -211,13 +223,25 @@ export default function ProductsPageTabs({
           ))}
         </div>
         {activeTab !== "featured" && (
-          <div className="pb-2">
+          <div className="flex w-full flex-col gap-2 pb-3 sm:flex-row xl:ml-auto xl:min-w-0 xl:max-w-4xl xl:flex-1 xl:pb-2">
+            <label className="relative block w-full min-w-0 sm:flex-[5]">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                aria-label={t.searchPlaceholder}
+                className="h-11 pl-9"
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder={t.searchPlaceholder}
+                type="search"
+                value={searchQuery}
+              />
+            </label>
             <select
               value={categoryFilter ?? ""}
               onChange={(e) =>
                 setCategoryFilter(e.target.value ? Number(e.target.value) : null)
               }
-              className="rounded-md border bg-background px-3 py-1.5 text-sm"
+              aria-label={t.filterByCategory}
+              className="h-11 w-full min-w-0 rounded-md border bg-background px-3 py-1.5 text-sm sm:flex-[4]"
             >
               <option value="">{t.allCategories}</option>
               {categories.map((cat) => (
@@ -232,6 +256,7 @@ export default function ProductsPageTabs({
 
       {activeTab === "products" && (
         <ProductsTableClient
+          key={`${categoryFilter ?? "all"}:${searchQuery}`}
           products={filteredProducts}
           translations={productsTableTranslations}
           pageSize={10}
@@ -265,7 +290,7 @@ export default function ProductsPageTabs({
       >
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-          <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
             <Dialog.Title className="text-base font-semibold">
               {t.unsavedTitle}
             </Dialog.Title>

@@ -5,6 +5,19 @@ import type Stripe from "stripe";
 import { createAdminClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe";
 
+type PromotionProductLink = {
+  id_promotion: number;
+  id_produit: number;
+  produit: { produit_traduction: { langue: string; nom_pro: string }[] | null } | null;
+};
+type PromotionCategoryLink = {
+  id_categorie: number;
+  id_promotion: number;
+  categorie: { categorie_traduction: { cat_nom: string; langue: string }[] | null } | null;
+};
+type ProductLookup = Pick<PromotionProductLink, "id_produit" | "produit">;
+type CategoryLookup = Pick<PromotionCategoryLink, "id_categorie" | "categorie">;
+
 export type PromotionRow = {
   id_promotion: number;
   type_remise: string;
@@ -168,17 +181,17 @@ export async function getPromotions(): Promise<PromotionRow[]> {
   }
 
   const produitMap = new Map<number, { id_produit: number; nom: string }[]>();
-  for (const lp of (produitsRes.data as any[]) || []) {
+  for (const lp of (produitsRes.data ?? []) as unknown as PromotionProductLink[]) {
     const arr = produitMap.get(lp.id_promotion) || [];
-    const trad = lp.produit?.produit_traduction?.find((t: any) => t.langue === "fr");
+    const trad = lp.produit?.produit_traduction?.find((translation) => translation.langue === "fr");
     arr.push({ id_produit: lp.id_produit, nom: trad?.nom_pro || `#${lp.id_produit}` });
     produitMap.set(lp.id_promotion, arr);
   }
 
   const catMap = new Map<number, { id_categorie: number; nom: string }[]>();
-  for (const lc of (categoriesRes.data as any[]) || []) {
+  for (const lc of (categoriesRes.data ?? []) as unknown as PromotionCategoryLink[]) {
     const arr = catMap.get(lc.id_promotion) || [];
-    const trad = lc.categorie?.categorie_traduction?.find((t: any) => t.langue === "fr");
+    const trad = lc.categorie?.categorie_traduction?.find((translation) => translation.langue === "fr");
     arr.push({ id_categorie: lc.id_categorie, nom: trad?.cat_nom || `#${lc.id_categorie}` });
     catMap.set(lc.id_promotion, arr);
   }
@@ -220,13 +233,13 @@ export async function getPromotionById(id: number): Promise<PromotionDetail | nu
       .eq("id_promotion", id),
   ]);
 
-  const produits = ((produitsRes.data as any[]) || []).map((lp) => {
-    const trad = lp.produit?.produit_traduction?.find((t: any) => t.langue === "fr");
+  const produits = ((produitsRes.data ?? []) as unknown as ProductLookup[]).map((lp) => {
+    const trad = lp.produit?.produit_traduction?.find((translation) => translation.langue === "fr");
     return { id_produit: lp.id_produit, nom: trad?.nom_pro || `#${lp.id_produit}` };
   });
 
-  const categories = ((categoriesRes.data as any[]) || []).map((lc) => {
-    const trad = lc.categorie?.categorie_traduction?.find((t: any) => t.langue === "fr");
+  const categories = ((categoriesRes.data ?? []) as unknown as CategoryLookup[]).map((lc) => {
+    const trad = lc.categorie?.categorie_traduction?.find((translation) => translation.langue === "fr");
     return { id_categorie: lc.id_categorie, nom: trad?.cat_nom || `#${lc.id_categorie}` };
   });
 
@@ -483,8 +496,8 @@ export async function getAllProducts(): Promise<{ id_produit: number; nom: strin
     .select("id_produit, produit_traduction ( nom_pro, langue )")
     .order("id_produit");
 
-  return ((data as any[]) || []).map((p) => {
-    const trad = p.produit_traduction?.find((t: any) => t.langue === "fr");
+  return ((data ?? []) as unknown as { id_produit: number; produit_traduction: { langue: string; nom_pro: string }[] | null }[]).map((p) => {
+    const trad = p.produit_traduction?.find((translation) => translation.langue === "fr");
     return { id_produit: p.id_produit, nom: trad?.nom_pro || `#${p.id_produit}` };
   });
 }
@@ -496,8 +509,8 @@ export async function getAllCategories(): Promise<{ id_categorie: number; nom: s
     .select("id_categorie, categorie_traduction ( cat_nom, langue )")
     .order("id_categorie");
 
-  return ((data as any[]) || []).map((c) => {
-    const trad = c.categorie_traduction?.find((t: any) => t.langue === "fr");
+  return ((data ?? []) as unknown as { categorie_traduction: { cat_nom: string; langue: string }[] | null; id_categorie: number }[]).map((c) => {
+    const trad = c.categorie_traduction?.find((translation) => translation.langue === "fr");
     return { id_categorie: c.id_categorie, nom: trad?.cat_nom || `#${c.id_categorie}` };
   });
 }

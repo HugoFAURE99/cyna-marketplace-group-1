@@ -1,6 +1,7 @@
 import PublicHeader from "@/components/layout/public-header/PublicHeader";
 import PublicFooter from "@/components/layout/public-footer/PublicFooter";
 import CynaChatWidget from "@/components/chat/CynaChatWidget";
+import { SiteTransitionReady } from "@/components/layout/SiteTransitionProvider";
 
 export default function PublicLayout({
   children,
@@ -9,6 +10,7 @@ export default function PublicLayout({
 }>) {
   return (
     <div className="flex min-h-screen w-full flex-col">
+      <SiteTransitionReady destination="marketplace" />
       <PublicHeader />
       {/* Spacer offsets the fixed 72px header row. */}
       <div aria-hidden="true" className="h-[72px] shrink-0" />

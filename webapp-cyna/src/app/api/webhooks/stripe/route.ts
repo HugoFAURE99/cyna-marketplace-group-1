@@ -82,6 +82,10 @@ async function handleCompletedCheckout(session: Stripe.Checkout.Session) {
     .update({
       id_compte: accountId,
       mail_utilisateur_invite: customerEmail,
+      montant_total:
+        session.amount_total === null
+          ? undefined
+          : session.amount_total / 100,
       billing_address_snapshot: address
         ? {
             city: address.city,

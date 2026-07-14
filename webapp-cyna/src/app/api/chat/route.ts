@@ -4,6 +4,8 @@
 // verbatim so Gemini 3 thinking models keep their required `thoughtSignature`
 // on function-call parts (rebuilding the part from functionCalls drops it).
 import type { Content, FunctionCall, Part } from "@google/genai";
+import { randomUUID } from "node:crypto";
+import { cookies } from "next/headers";
 
 import { GEMINI_MODEL, getGeminiClient } from "@/lib/gemini";
 import { CHAT_TOOLS, runChatTool, SYSTEM_INSTRUCTION } from "@/lib/gemini/tools";
@@ -11,6 +13,15 @@ import type { ChatStreamEvent, ChatTurn } from "@/lib/gemini/types";
 import { routing } from "@/i18n/routing";
 import type { Locale } from "@/lib/i18n/translations";
 import { createServerClient } from "@/lib/supabase/server-client";
+import {
+  appendChatMessage,
+  CHAT_GUEST_COOKIE,
+  CHAT_RETENTION_DAYS,
+  hashGuestSession,
+  resolveChatConversation,
+} from "@/lib/chat/persistence";
+import { createSafeChatMetadata } from "@/lib/chat/history-metadata";
+import type { ChatCardPayload } from "@/lib/gemini/types";
 
 export const runtime = "nodejs";
 
@@ -22,6 +33,7 @@ const CARD_REVEAL_DELAY_MS = 160;
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 type ChatRequestBody = {
+  conversationId?: string;
   messages?: ChatTurn[];
   locale?: string;
 };
@@ -75,6 +87,42 @@ export async function POST(request: Request) {
     userEmail = null;
   }
 
+  const cookieStore = await cookies();
+  const guestSession = cookieStore.get(CHAT_GUEST_COOKIE)?.value ?? randomUUID();
+  cookieStore.set(CHAT_GUEST_COOKIE, guestSession, {
+    httpOnly: true,
+    maxAge: CHAT_RETENTION_DAYS * 24 * 60 * 60,
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  const lastUserMessage = [...messages]
+    .reverse()
+    .find((message) => message.role === "user" && message.content.trim());
+  if (!lastUserMessage) {
+    return new Response("No user message provided", { status: 400 });
+  }
+
+  let conversationId: string;
+  try {
+    conversationId = await resolveChatConversation({
+      accountId: userId,
+      conversationId:
+        typeof body.conversationId === "string" ? body.conversationId : undefined,
+      guestSessionHash: hashGuestSession(guestSession),
+      locale,
+    });
+    await appendChatMessage({
+      content: lastUserMessage.content,
+      conversationId,
+      role: "user",
+    });
+  } catch (error) {
+    console.error("[/api/chat] Could not persist user turn", error);
+    return new Response("Chat history unavailable", { status: 503 });
+  }
+
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream<Uint8Array>({
@@ -82,7 +130,17 @@ export async function POST(request: Request) {
       const send = (event: ChatStreamEvent) =>
         controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
 
+      let assistantText = "";
+      const renderedCards: ChatCardPayload[] = [];
+      const toolNames: string[] = [];
+
+      const sendCard = (card: ChatCardPayload) => {
+        renderedCards.push(card);
+        send({ type: "card", card });
+      };
+
       try {
+        send({ type: "conversation", id: conversationId });
         const ai = getGeminiClient();
         const contents = toContents(messages);
         const config = {
@@ -108,6 +166,7 @@ export async function POST(request: Request) {
             for (const part of parts) {
               modelParts.push(part);
               if (part.text && !part.thought) {
+                assistantText += part.text;
                 send({ type: "text", value: part.text });
               }
             }
@@ -128,6 +187,7 @@ export async function POST(request: Request) {
 
           const responseParts: Part[] = [];
           for (const call of calls) {
+            toolNames.push(call.name ?? "");
             const toolResult = await runChatTool(
               call.name ?? "",
               (call.args ?? {}) as Record<string, unknown>,
@@ -138,17 +198,17 @@ export async function POST(request: Request) {
             const card = toolResult.card;
             if (card?.kind === "product") {
               for (const item of card.items) {
-                send({ type: "card", card: { kind: "product", items: [item] } });
+                sendCard({ kind: "product", items: [item] });
                 await sleep(CARD_REVEAL_DELAY_MS);
               }
             } else if (card?.kind === "category") {
               for (const item of card.items) {
-                send({ type: "card", card: { kind: "category", items: [item] } });
+                sendCard({ kind: "category", items: [item] });
                 await sleep(CARD_REVEAL_DELAY_MS);
               }
             } else if (card) {
               // Single-item cards (support link, ticket confirmation).
-              send({ type: "card", card });
+              sendCard(card);
               await sleep(CARD_REVEAL_DELAY_MS);
             }
 
@@ -163,9 +223,30 @@ export async function POST(request: Request) {
           contents.push({ role: "user", parts: responseParts });
         }
 
+        await appendChatMessage({
+          content: assistantText || "Assistant response rendered as cards.",
+          conversationId,
+          metadata: createSafeChatMetadata({ cards: renderedCards, tools: toolNames }),
+          role: "assistant",
+        });
         send({ type: "done" });
       } catch (error) {
         console.error("[/api/chat]", error);
+        try {
+          await appendChatMessage({
+            content:
+              assistantText ||
+              (locale === "fr"
+                ? "Désolé, une erreur est survenue. Réessayez plus tard."
+                : "Sorry, an error occurred. Please try again later."),
+            conversationId,
+            metadata: createSafeChatMetadata({ cards: renderedCards, tools: toolNames }),
+            role: "assistant",
+            status: "error",
+          });
+        } catch (persistenceError) {
+          console.error("[/api/chat] Could not persist partial assistant turn", persistenceError);
+        }
         send({
           type: "error",
           message: "Désolé, une erreur est survenue. Réessayez plus tard.",

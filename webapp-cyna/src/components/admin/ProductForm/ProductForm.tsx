@@ -1,15 +1,14 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { ArrowLeft, Pencil, Plus, X } from "lucide-react";
+import { Pencil, Plus, X } from "lucide-react";
 import Spinner from "@/components/ui/spinner";
 
 import { useRouter } from "@/i18n/navigation";
-import { routing } from "@/i18n/routing";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -18,17 +17,15 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import {
   createProduct,
   updateProduct,
+  type TechnicalCharacteristic,
 } from "@/app/[locale]/(admin)/admin/_actions/product.actions";
 import { ProductImageUploader } from "@/components/admin/ProductImageUploader";
+import { TechnicalCharacteristicsEditor } from "@/components/admin/ProductForm/TechnicalCharacteristicsEditor";
 import styles from "./ProductForm.module.scss";
-
-const DEFAULT_LOCALE = routing.defaultLocale;
-const EXTRA_LOCALES = routing.locales.filter((l) => l !== DEFAULT_LOCALE);
 
 type Category = {
   id_categorie: number;
@@ -54,16 +51,15 @@ type Product = {
   }[];
   nom_pro_fr: string;
   pro_description_fr: string;
-  pro_carac_technique_fr: string;
   nom_pro_en: string;
   pro_description_en: string;
-  pro_carac_technique_en: string;
+  technical_characteristic_ids: number[];
 };
 
 const BILLING_OPTIONS = ["mensuel", "annuel"] as const;
 type BillingOption = (typeof BILLING_OPTIONS)[number];
 
-function AddTranslationButton({
+export function AddTranslationButton({
   availableLocales,
   onAdd,
   label,
@@ -128,10 +124,12 @@ function AddTranslationButton({
 
 export default function ProductForm({
   categories,
+  characteristics,
   product,
   readOnly,
 }: {
   categories: Category[];
+  characteristics: TechnicalCharacteristic[];
   product?: Product;
   readOnly?: boolean;
 }) {
@@ -141,20 +139,12 @@ export default function ProductForm({
   const tActions = useTranslations("admin.actions");
   const router = useRouter();
 
-  const initialNameLocales = readOnly
-    ? EXTRA_LOCALES
-    : EXTRA_LOCALES.filter((l) => product?.[`nom_pro_${l}` as keyof Product]);
-  const initialDescLocales = readOnly
-    ? EXTRA_LOCALES
-    : EXTRA_LOCALES.filter((l) => product?.[`pro_description_${l}` as keyof Product]);
-  const initialSpecsLocales = readOnly
-    ? EXTRA_LOCALES
-    : EXTRA_LOCALES.filter((l) => product?.[`pro_carac_technique_${l}` as keyof Product]);
-
-  const [nameLocales, setNameLocales] = useState<string[]>(initialNameLocales);
-  const [descLocales, setDescLocales] = useState<string[]>(initialDescLocales);
-  const [specsLocales, setSpecsLocales] =
-    useState<string[]>(initialSpecsLocales);
+  const [englishEnabled, setEnglishEnabled] = useState(
+    Boolean(product?.nom_pro_en || product?.pro_description_en),
+  );
+  const [technicalCharacteristicIds, setTechnicalCharacteristicIds] = useState<number[]>(
+    product?.technical_characteristic_ids ?? [],
+  );
 
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
   const [removedImageIds, setRemovedImageIds] = useState<number[]>([]);
@@ -174,12 +164,12 @@ export default function ProductForm({
     () =>
       z
         .object({
+          has_en_translation: z.boolean(),
           nom_pro_fr: z.string().min(1, tv("nameFrRequired")),
           pro_description_fr: z.string().min(1, tv("descriptionFrRequired")),
-          pro_carac_technique_fr: z.string().optional(),
           nom_pro_en: z.string().optional(),
           pro_description_en: z.string().optional(),
-          pro_carac_technique_en: z.string().optional(),
+          technical_characteristic_ids: z.array(z.number().int().positive()),
           id_categorie: z.number({ error: tv("categoryRequired") }),
           prix_mensuel: z.number().optional().catch(undefined),
           prix_annuel: z.number().optional().catch(undefined),
@@ -190,6 +180,10 @@ export default function ProductForm({
           statut_produit: z.boolean(),
           est_disponible: z.boolean(),
         })
+        .refine(
+          (d) => !d.has_en_translation || Boolean(d.nom_pro_en?.trim()),
+          { message: tv("nameEnRequired"), path: ["nom_pro_en"] },
+        )
         .refine(
           (d) => !d.billings.includes("mensuel") || (d.prix_mensuel ?? 0) > 0,
           { message: tv("pricePositive"), path: ["prix_mensuel"] },
@@ -213,20 +207,20 @@ export default function ProductForm({
 
   const {
     register,
+    control,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: product
       ? {
+          has_en_translation: englishEnabled,
           nom_pro_fr: product.nom_pro_fr,
           pro_description_fr: product.pro_description_fr,
-          pro_carac_technique_fr: product.pro_carac_technique_fr ?? "",
           nom_pro_en: product.nom_pro_en,
           pro_description_en: product.pro_description_en,
-          pro_carac_technique_en: product.pro_carac_technique_en ?? "",
+          technical_characteristic_ids: product.technical_characteristic_ids,
           id_categorie: product.id_categorie,
           prix_mensuel: tarifByType.mensuel
             ? tarifByType.mensuel.prix / 100
@@ -241,8 +235,11 @@ export default function ProductForm({
           statut_produit: product.statut_produit,
           est_disponible: product.est_disponible,
         }
-      : { billings: [], est_disponible: true, quantite_produit: 0, statut_produit: false },
+      : { billings: [], est_disponible: true, has_en_translation: false, quantite_produit: 0, statut_produit: false, technical_characteristic_ids: [] },
   });
+  const monthlyPrice = useWatch({ control, name: "prix_mensuel" });
+  const productStatus = useWatch({ control, name: "statut_produit" });
+  const productAvailable = useWatch({ control, name: "est_disponible" });
 
   const toggleBilling = (option: BillingOption) => {
     setSelectedBillings((prev) => {
@@ -260,7 +257,7 @@ export default function ProductForm({
         if (option === "annuel") setAnnualTouched(false);
       } else if (option === "annuel") {
         setAnnualTouched(false);
-        const mensuel = watch("prix_mensuel");
+        const mensuel = monthlyPrice;
         if (mensuel && mensuel > 0) {
           setValue("prix_annuel", Math.round(mensuel * 12 * 100) / 100);
         }
@@ -294,32 +291,14 @@ export default function ProductForm({
     }
   };
 
-  const addLocale = (group: string, locale: string) => {
-    const setters: Record<string, React.Dispatch<React.SetStateAction<string[]>>> = {
-      name: setNameLocales,
-      description: setDescLocales,
-      specs: setSpecsLocales,
-    };
-    setters[group]?.((prev) => [...prev, locale]);
+  const setEnglishTranslation = (enabled: boolean) => {
+    setEnglishEnabled(enabled);
+    setValue("has_en_translation", enabled, { shouldValidate: true });
+    if (!enabled) {
+      setValue("nom_pro_en", "");
+      setValue("pro_description_en", "");
+    }
   };
-
-  const removeLocale = (group: string, locale: string) => {
-    const fieldMap: Record<string, keyof ProductFormData> = {
-      name: `nom_pro_${locale}` as keyof ProductFormData,
-      description: `pro_description_${locale}` as keyof ProductFormData,
-      specs: `pro_carac_technique_${locale}` as keyof ProductFormData,
-    };
-    const setters: Record<string, React.Dispatch<React.SetStateAction<string[]>>> = {
-      name: setNameLocales,
-      description: setDescLocales,
-      specs: setSpecsLocales,
-    };
-    setters[group]?.((prev) => prev.filter((l) => l !== locale));
-    setValue(fieldMap[group], "");
-  };
-
-  const availableFor = (active: string[]) =>
-    EXTRA_LOCALES.filter((l) => !active.includes(l));
 
   const billingLabels: Record<BillingOption, string> = {
     mensuel: t("monthly"),
@@ -328,14 +307,6 @@ export default function ProductForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {tActions("back")}
-      </button>
       <h2 className="text-2xl font-bold mb-6">
         {product ? t("submitUpdate") : t("submitCreate")}
       </h2>
@@ -352,37 +323,6 @@ export default function ProductForm({
           )}
         </div>
 
-        {nameLocales.map((locale) => (
-          <div key={locale} className={styles.field}>
-            <div className="flex items-center justify-between">
-              <Label htmlFor={`nom_pro_${locale}`}>
-                {t("lang", { code: locale.toUpperCase() })}
-              </Label>
-              {!readOnly && (
-                <button
-                  type="button"
-                  onClick={() => removeLocale("name", locale)}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            <Input
-              id={`nom_pro_${locale}`}
-              disabled={readOnly}
-              {...register(`nom_pro_${locale}` as keyof ProductFormData)}
-            />
-          </div>
-        ))}
-
-        {!readOnly && (
-          <AddTranslationButton
-            availableLocales={availableFor(nameLocales)}
-            onAdd={(l) => addLocale("name", l)}
-            label={(code) => t("addTranslation", { code })}
-          />
-        )}
       </fieldset>
 
       {/* Description group */}
@@ -401,95 +341,46 @@ export default function ProductForm({
           )}
         </div>
 
-        {descLocales.map((locale) => (
-          <div key={locale} className={styles.field}>
-            <div className="flex items-center justify-between">
-              <Label htmlFor={`pro_description_${locale}`}>
-                {t("lang", { code: locale.toUpperCase() })}
-              </Label>
-              {!readOnly && (
-                <button
-                  type="button"
-                  onClick={() => removeLocale("description", locale)}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            <Input
-              id={`pro_description_${locale}`}
-              disabled={readOnly}
-              {...register(
-                `pro_description_${locale}` as keyof ProductFormData,
-              )}
-            />
-          </div>
-        ))}
-
-        {!readOnly && (
-          <AddTranslationButton
-            availableLocales={availableFor(descLocales)}
-            onAdd={(l) => addLocale("description", l)}
-            label={(code) => t("addTranslation", { code })}
-          />
-        )}
       </fieldset>
 
-      {/* Specs group */}
-      <fieldset className="space-y-3 rounded-lg border p-4">
-        <legend className="px-2 text-sm font-semibold">
-          {t("specsGroup")}
-        </legend>
+      <TechnicalCharacteristicsEditor
+        initialOptions={characteristics}
+        onChange={(ids) => {
+          setTechnicalCharacteristicIds(ids);
+          setValue("technical_characteristic_ids", ids, { shouldDirty: true, shouldValidate: true });
+        }}
+        readOnly={readOnly}
+        value={technicalCharacteristicIds}
+      />
 
-        <div className={styles.field}>
-          <Label htmlFor="pro_carac_technique_fr">{t("defaultLang")}</Label>
-          <Input
-            id="pro_carac_technique_fr"
-            disabled={readOnly}
-            {...register("pro_carac_technique_fr")}
-          />
-        </div>
-
-        {specsLocales.map((locale) => (
-          <div key={locale} className={styles.field}>
-            <div className="flex items-center justify-between">
-              <Label htmlFor={`pro_carac_technique_${locale}`}>
-                {t("lang", { code: locale.toUpperCase() })}
-              </Label>
-              {!readOnly && (
-                <button
-                  type="button"
-                  onClick={() => removeLocale("specs", locale)}
-                  className="text-muted-foreground hover:text-destructive"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-            <Input
-              id={`pro_carac_technique_${locale}`}
-              disabled={readOnly}
-              {...register(
-                `pro_carac_technique_${locale}` as keyof ProductFormData,
-              )}
-            />
+      {englishEnabled ? (
+        <fieldset className="space-y-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
+          <legend className="px-2 text-sm font-semibold">{t("englishTranslation")}</legend>
+          {!readOnly && (
+            <Button className="float-right -mt-2 gap-1" onClick={() => setEnglishTranslation(false)} size="sm" type="button" variant="ghost">
+              <X className="size-4" /> {t("removeTranslation")}
+            </Button>
+          )}
+          <div className={styles.field}>
+            <Label htmlFor="nom_pro_en">{t("nameGroup")}</Label>
+            <Input id="nom_pro_en" disabled={readOnly} {...register("nom_pro_en")} />
+            {errors.nom_pro_en && <span className={styles.error}>{errors.nom_pro_en.message}</span>}
           </div>
-        ))}
-
-        {!readOnly && (
-          <AddTranslationButton
-            availableLocales={availableFor(specsLocales)}
-            onAdd={(l) => addLocale("specs", l)}
-            label={(code) => t("addTranslation", { code })}
-          />
-        )}
-      </fieldset>
+          <div className={styles.field}>
+            <Label htmlFor="pro_description_en">{t("descriptionGroup")}</Label>
+            <Input id="pro_description_en" disabled={readOnly} {...register("pro_description_en")} />
+          </div>
+        </fieldset>
+      ) : !readOnly ? (
+        <Button className="w-fit gap-2" onClick={() => setEnglishTranslation(true)} type="button" variant="outline">
+          <Plus className="size-4" /> {t("addTranslation", { code: "EN" })}
+        </Button>
+      ) : null}
 
       {/* Billing toggle cards */}
       <div className={styles.field}>
         <Label>{t("billing")}</Label>
-        <div className="flex gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           {BILLING_OPTIONS.map((option) => (
             <button
               key={option}
@@ -513,7 +404,7 @@ export default function ProductForm({
       </div>
 
       {/* Price fields — always visible, disabled when billing not selected */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className={`${styles.field} ${!selectedBillings.includes("mensuel") ? "opacity-40" : ""}`}>
           <Label htmlFor="prix_mensuel">{t("priceMonthly")}</Label>
           <Input
@@ -627,17 +518,17 @@ export default function ProductForm({
         <button
           type="button"
           onClick={readOnly ? undefined : () =>
-            setValue("statut_produit", !watch("statut_produit"))
+            setValue("statut_produit", !productStatus)
           }
           className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors ${
             readOnly ? "cursor-default" : "cursor-pointer"
           } ${
-            watch("statut_produit") ? "bg-primary" : "bg-muted"
+            productStatus ? "bg-primary" : "bg-muted"
           }`}
         >
           <span
             className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-              watch("statut_produit") ? "translate-x-5" : "translate-x-0"
+              productStatus ? "translate-x-5" : "translate-x-0"
             }`}
           />
         </button>
@@ -649,37 +540,32 @@ export default function ProductForm({
         </div>
         <button
           aria-label={t("availability")}
-          aria-pressed={watch("est_disponible")}
+          aria-pressed={productAvailable}
           type="button"
           onClick={readOnly ? undefined : () =>
-            setValue("est_disponible", !watch("est_disponible"))
+            setValue("est_disponible", !productAvailable)
           }
           className={`relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors ${
             readOnly ? "cursor-default" : "cursor-pointer"
-          } ${watch("est_disponible") ? "bg-primary" : "bg-muted"}`}
+          } ${productAvailable ? "bg-primary" : "bg-muted"}`}
         >
           <span
             className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-              watch("est_disponible") ? "translate-x-5" : "translate-x-0"
+              productAvailable ? "translate-x-5" : "translate-x-0"
             }`}
           />
         </button>
       </div>
       </div>
 
-      <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
+      <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
         {readOnly ? (
-          <>
-            <Button type="button" variant="outline" onClick={() => router.back()}>
-              {tActions("back")}
+          product && (
+            <Button type="button" onClick={() => router.push(`/admin/products/${product.id_produit}`)}>
+              <Pencil className="mr-1 h-3.5 w-3.5" />
+              {tActions("edit")}
             </Button>
-            {product && (
-              <Button type="button" onClick={() => router.push(`/admin/products/${product.id_produit}`)}>
-                <Pencil className="mr-1 h-3.5 w-3.5" />
-                {tActions("edit")}
-              </Button>
-            )}
-          </>
+          )
         ) : (
           <>
             <Button type="button" variant="outline" onClick={() => router.back()}>

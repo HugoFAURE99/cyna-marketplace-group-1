@@ -9,6 +9,7 @@ import { routing } from "@/i18n/routing";
 import { A11yInitScript } from "@/components/layout/public-header/A11yMenu";
 import type { Locale } from "@/lib/i18n/translations";
 import { NotificationProvider } from "@/components/ui/notification-provider";
+import { SiteTransitionProvider } from "@/components/layout/SiteTransitionProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -79,7 +80,9 @@ export default async function LocaleLayout({
       </head>
       <body className="antialiased">
         <NextIntlClientProvider>
-          <NotificationProvider>{children}</NotificationProvider>
+          <SiteTransitionProvider>
+            <NotificationProvider>{children}</NotificationProvider>
+          </SiteTransitionProvider>
         </NextIntlClientProvider>
       </body>
     </html>

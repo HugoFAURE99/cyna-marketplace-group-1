@@ -1,27 +1,37 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Loader2, AlertCircle } from "lucide-react";
 
+import PromotionalPrice from "@/components/product/PromotionalPrice";
+import GuestCheckoutDialog from "@/components/checkout/GuestCheckoutDialog";
 import { processCheckout } from "@/lib/checkout/checkout.action";
-import { formatPriceCents } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n/translations";
+import type { AutomaticPromotion } from "@/lib/promotions/automatic-promotion";
 
 type CheckoutSummaryProps = {
+  automaticPromotion: AutomaticPromotion | null;
   subtotalCents: number;
+  originalSubtotalCents: number;
   hasMixedIntervals: boolean;
+  isGuest: boolean;
 };
 
 export default function CheckoutSummary({
+  automaticPromotion,
   subtotalCents,
+  originalSubtotalCents,
   hasMixedIntervals,
+  isGuest,
 }: CheckoutSummaryProps) {
   const t = useTranslations("cart");
+  const tp = useTranslations("product");
   const locale = useLocale() as Locale;
   const [isPending, startTransition] = useTransition();
+  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
 
-  const handleCheckout = () => {
+  const startCheckout = () => {
     startTransition(async () => {
       try {
         // 👇 On récupère le résultat de l'action
@@ -38,15 +48,30 @@ export default function CheckoutSummary({
     });
   };
 
+  const handleCheckout = () => {
+    if (isGuest) {
+      setGuestDialogOpen(true);
+      return;
+    }
+
+    startCheckout();
+  };
+
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="flex items-center justify-between">
         <span className="text-base font-semibold text-slate-950">
           {t("subtotal")}
         </span>
-        <span className="text-2xl font-bold text-slate-950">
-          {formatPriceCents(subtotalCents, locale)}
-        </span>
+        <PromotionalPrice
+          automaticPromotion={automaticPromotion}
+          badgeLabel={(discount) => tp("promotionBadge", { discount })}
+          className="justify-end"
+          locale={locale}
+          originalPriceCents={originalSubtotalCents}
+          priceClassName="text-2xl text-slate-950"
+          promotionalPriceCents={subtotalCents}
+        />
       </div>
 
       {hasMixedIntervals && (
@@ -78,6 +103,14 @@ export default function CheckoutSummary({
       <p className="mt-2 text-center text-xs text-slate-400">
         {t("securePayment")}
       </p>
+
+      <GuestCheckoutDialog
+        isPending={isPending}
+        onConfirm={startCheckout}
+        onOpenChange={setGuestDialogOpen}
+        open={guestDialogOpen}
+        returnPath="/cart"
+      />
     </div>
   );
 }

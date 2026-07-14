@@ -1,239 +1,241 @@
 "use server";
 
-import { createAdminClient } from "@/lib/supabase/server";
+import { requireActiveAal2Admin } from "@/lib/auth/admin-guard";
+import { pickTranslation, type Locale } from "@/lib/i18n/translations";
 import { stripe } from "@/lib/stripe";
+import { syncStripeSubscription } from "@/lib/stripe/subscription-sync";
+import { normalizeSubscriptionStatus } from "@/lib/subscriptions/status";
+import { createAdminClient } from "@/lib/supabase/server";
 
 export type SubscriptionRow = {
-  id_abonnement: number;
+  annulation_programmee: boolean;
+  client_email: string;
+  client_name: string | null;
   date_debut: string;
   date_fin: string | null;
+  id_abonnement: number;
+  id_commande: number;
+  nombre_utilisateurs: number;
+  prix: number;
+  produit_nom: string;
   statut_abonnement: string;
   stripe_subscription_id: string | null;
-  client_name: string | null;
-  client_email: string;
-  produit_nom: string;
   type_facturation: string;
-  prix: number;
-  id_commande: number;
 };
 
 export type SubscriptionDetail = SubscriptionRow & {
   commande: {
-    id_commande: number;
     date_commande: string;
+    id_commande: number;
     montant_total: number;
     statut_commande: string;
   } | null;
 };
 
-export async function getSubscriptions(): Promise<SubscriptionRow[]> {
-  const supabase = await createAdminClient();
+type SubscriptionQueryRow = {
+  annulation_programmee: boolean;
+  commande: { mail_utilisateur_invite: string | null } | null;
+  date_debut: string;
+  date_fin: string | null;
+  id_abonnement: number;
+  id_commande: number;
+  id_compte: string | null;
+  nombre_utilisateurs: number;
+  prix_tarif: {
+    prix: number;
+    produit: {
+      produit_traduction: { langue: string; nom_pro: string }[] | null;
+    } | null;
+    type_facturation: string;
+  } | null;
+  statut_abonnement: string;
+  stripe_subscription_id: string | null;
+};
 
-  const { data: abonnements, error } = await supabase
+const SUBSCRIPTION_SELECT = `
+  id_abonnement,
+  date_debut,
+  date_fin,
+  statut_abonnement,
+  stripe_subscription_id,
+  id_commande,
+  id_compte,
+  id_prix,
+  annulation_programmee,
+  nombre_utilisateurs,
+  commande (mail_utilisateur_invite),
+  prix_tarif (
+    prix,
+    type_facturation,
+    produit (produit_traduction (nom_pro, langue))
+  )
+`;
+
+function productName(row: SubscriptionQueryRow, locale: Locale) {
+  return (
+    pickTranslation(row.prix_tarif?.produit?.produit_traduction, locale)
+      ?.nom_pro ?? "—"
+  );
+}
+
+export async function getSubscriptions(
+  locale: Locale,
+): Promise<SubscriptionRow[]> {
+  await requireActiveAal2Admin();
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
     .from("abonnement")
-    .select(`
-      id_abonnement,
-      date_debut,
-      date_fin,
-      statut_abonnement,
-      stripe_subscription_id,
-      id_commande,
-      id_compte,
-      id_prix,
-      prix_tarif (
-        prix,
-        type_facturation,
-        produit (
-          produit_traduction (
-            nom_pro,
-            langue
-          )
-        )
-      )
-    `)
+    .select(SUBSCRIPTION_SELECT)
     .order("date_debut", { ascending: false });
+  if (error || !data) return [];
 
-  if (error || !abonnements) return [];
-
-  const compteIds = [
-    ...new Set(
-      abonnements
-        .map((a: any) => a.id_compte)
-        .filter(Boolean) as string[]
-    ),
+  const rows = data as unknown as SubscriptionQueryRow[];
+  const accountIds = [
+    ...new Set(rows.flatMap((row) => (row.id_compte ? [row.id_compte] : []))),
   ];
-
-  const userMap = new Map<string, { nom_complet: string; adresse_mail: string }>();
-
-  if (compteIds.length > 0) {
+  const userMap = new Map<
+    string,
+    { adresse_mail: string; nom_complet: string }
+  >();
+  if (accountIds.length > 0) {
     const { data: users } = await supabase
       .from("utilisateur")
       .select("id_compte, nom_complet, adresse_mail")
-      .in("id_compte", compteIds);
-
-    for (const u of users ?? []) {
-      userMap.set(u.id_compte, {
-        nom_complet: u.nom_complet,
-        adresse_mail: u.adresse_mail,
-      });
-    }
+      .in("id_compte", accountIds);
+    for (const user of users ?? []) userMap.set(user.id_compte, user);
   }
 
-  return abonnements.map((a: any) => {
-    const user = a.id_compte ? userMap.get(a.id_compte) : null;
-    const pt = a.prix_tarif as any;
-    const traductions = pt?.produit?.produit_traduction as any[] | undefined;
-    const frName =
-      traductions?.find((t: any) => t.langue === "fr")?.nom_pro || "—";
-
+  return rows.map((row) => {
+    const user = row.id_compte ? userMap.get(row.id_compte) : null;
     return {
-      id_abonnement: a.id_abonnement,
-      date_debut: a.date_debut,
-      date_fin: a.date_fin,
-      statut_abonnement: a.statut_abonnement,
-      stripe_subscription_id: a.stripe_subscription_id,
-      client_name: user?.nom_complet || null,
-      client_email: user?.adresse_mail || "—",
-      produit_nom: frName,
-      type_facturation: pt?.type_facturation || "—",
-      prix: pt?.prix || 0,
-      id_commande: a.id_commande,
+      annulation_programmee: row.annulation_programmee,
+      client_email:
+        user?.adresse_mail ?? row.commande?.mail_utilisateur_invite ?? "—",
+      client_name: user?.nom_complet ?? null,
+      date_debut: row.date_debut,
+      date_fin: row.date_fin,
+      id_abonnement: row.id_abonnement,
+      id_commande: row.id_commande,
+      nombre_utilisateurs: Math.max(1, row.nombre_utilisateurs || 1),
+      prix: row.prix_tarif?.prix ?? 0,
+      produit_nom: productName(row, locale),
+      statut_abonnement: normalizeSubscriptionStatus(row.statut_abonnement),
+      stripe_subscription_id: row.stripe_subscription_id,
+      type_facturation: row.prix_tarif?.type_facturation ?? "—",
     };
   });
 }
 
 export async function getSubscriptionDetail(
-  id: number
+  id: number,
+  locale: Locale,
 ): Promise<SubscriptionDetail | null> {
-  const supabase = await createAdminClient();
-
-  const { data: abonnement, error } = await supabase
+  await requireActiveAal2Admin();
+  if (!Number.isInteger(id) || id <= 0) return null;
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
     .from("abonnement")
-    .select(`
-      id_abonnement,
-      date_debut,
-      date_fin,
-      statut_abonnement,
-      stripe_subscription_id,
-      id_commande,
-      id_compte,
-      id_prix,
-      prix_tarif (
-        prix,
-        type_facturation,
-        produit (
-          produit_traduction (
-            nom_pro,
-            langue
-          )
-        )
-      )
-    `)
+    .select(SUBSCRIPTION_SELECT)
     .eq("id_abonnement", id)
-    .single();
+    .maybeSingle();
+  if (error || !data) return null;
 
-  if (error || !abonnement) return null;
-
-  const a = abonnement as any;
-
-  let client_email = "—";
-  let client_name: string | null = null;
-
-  if (a.id_compte) {
+  const row = data as unknown as SubscriptionQueryRow;
+  let clientEmail = row.commande?.mail_utilisateur_invite ?? "—";
+  let clientName: string | null = null;
+  if (row.id_compte) {
     const { data: user } = await supabase
       .from("utilisateur")
       .select("nom_complet, adresse_mail")
-      .eq("id_compte", a.id_compte)
-      .single();
-
+      .eq("id_compte", row.id_compte)
+      .maybeSingle();
     if (user) {
-      client_email = user.adresse_mail;
-      client_name = user.nom_complet;
+      clientEmail = user.adresse_mail;
+      clientName = user.nom_complet;
     }
   }
 
-  const pt = a.prix_tarif as any;
-  const traductions = pt?.produit?.produit_traduction as any[] | undefined;
-  const frName =
-    traductions?.find((t: any) => t.langue === "fr")?.nom_pro || "—";
-
-  let commande: SubscriptionDetail["commande"] = null;
-  if (a.id_commande) {
-    const { data: cmd } = await supabase
-      .from("commande")
-      .select("id_commande, date_commande, montant_total, statut_commande")
-      .eq("id_commande", a.id_commande)
-      .single();
-
-    if (cmd) commande = cmd;
-  }
+  const { data: order } = await supabase
+    .from("commande")
+    .select("id_commande, date_commande, montant_total, statut_commande")
+    .eq("id_commande", row.id_commande)
+    .maybeSingle();
 
   return {
-    id_abonnement: a.id_abonnement,
-    date_debut: a.date_debut,
-    date_fin: a.date_fin,
-    statut_abonnement: a.statut_abonnement,
-    stripe_subscription_id: a.stripe_subscription_id,
-    client_name,
-    client_email,
-    produit_nom: frName,
-    type_facturation: pt?.type_facturation || "—",
-    prix: pt?.prix || 0,
-    id_commande: a.id_commande,
-    commande,
+    annulation_programmee: row.annulation_programmee,
+    client_email: clientEmail,
+    client_name: clientName,
+    commande: order ?? null,
+    date_debut: row.date_debut,
+    date_fin: row.date_fin,
+    id_abonnement: row.id_abonnement,
+    id_commande: row.id_commande,
+    nombre_utilisateurs: Math.max(1, row.nombre_utilisateurs || 1),
+    prix: row.prix_tarif?.prix ?? 0,
+    produit_nom: productName(row, locale),
+    statut_abonnement: normalizeSubscriptionStatus(row.statut_abonnement),
+    stripe_subscription_id: row.stripe_subscription_id,
+    type_facturation: row.prix_tarif?.type_facturation ?? "—",
   };
 }
 
-export async function cancelSubscription(id: number): Promise<void> {
-  const supabase = await createAdminClient();
-
-  const { data: abo } = await supabase
+export async function cancelSubscription(id: number) {
+  await requireActiveAal2Admin();
+  const supabase = createAdminClient();
+  const { data: row } = await supabase
     .from("abonnement")
     .select("stripe_subscription_id")
     .eq("id_abonnement", id)
-    .single();
-
-  if (abo?.stripe_subscription_id) {
-    try {
-      await stripe.subscriptions.cancel(abo.stripe_subscription_id);
-    } catch {
-      // Stripe failure is non-blocking for backoffice
-    }
+    .maybeSingle();
+  if (!row?.stripe_subscription_id) {
+    return { error: "missing_stripe_subscription", ok: false as const };
   }
 
-  await supabase
-    .from("abonnement")
-    .update({ statut_abonnement: "annulé" })
-    .eq("id_abonnement", id);
+  try {
+    const subscription = await stripe.subscriptions.cancel(
+      row.stripe_subscription_id,
+    );
+    await syncStripeSubscription(subscription);
+    return { ok: true as const };
+  } catch (error) {
+    console.error("[subscriptions] Stripe cancellation failed", error);
+    return { error: "stripe_cancel_failed", ok: false as const };
+  }
 }
 
-export async function reactivateSubscription(id: number): Promise<void> {
-  const supabase = await createAdminClient();
-
-  const { data: abo } = await supabase
+export async function reactivateSubscription(id: number) {
+  await requireActiveAal2Admin();
+  const supabase = createAdminClient();
+  const { data: row } = await supabase
     .from("abonnement")
-    .select("stripe_subscription_id")
+    .select("stripe_subscription_id, statut_abonnement")
     .eq("id_abonnement", id)
-    .single();
-
-  if (abo?.stripe_subscription_id) {
-    try {
-      await stripe.subscriptions.resume(abo.stripe_subscription_id, {
-        billing_cycle_anchor: "now",
-      });
-    } catch {
-      // If Stripe resume fails (e.g. sub fully canceled), just update DB status
-    }
+    .maybeSingle();
+  if (
+    !row?.stripe_subscription_id ||
+    normalizeSubscriptionStatus(row.statut_abonnement) !== "paused"
+  ) {
+    return { error: "subscription_not_resumable", ok: false as const };
   }
 
-  await supabase
-    .from("abonnement")
-    .update({ statut_abonnement: "actif" })
-    .eq("id_abonnement", id);
+  try {
+    const subscription = await stripe.subscriptions.resume(
+      row.stripe_subscription_id,
+      { billing_cycle_anchor: "now" },
+    );
+    await syncStripeSubscription(subscription);
+    return { ok: true as const };
+  } catch (error) {
+    console.error("[subscriptions] Stripe resume failed", error);
+    return { error: "stripe_resume_failed", ok: false as const };
+  }
 }
 
-export async function bulkCancelSubscriptions(ids: number[]): Promise<void> {
-  for (const id of ids) {
-    await cancelSubscription(id);
+export async function bulkCancelSubscriptions(ids: number[]) {
+  const failures: number[] = [];
+  for (const id of [...new Set(ids)].filter((value) => Number.isInteger(value))) {
+    const result = await cancelSubscription(id);
+    if (!result.ok) failures.push(id);
   }
+  return { failures, ok: failures.length === 0 };
 }

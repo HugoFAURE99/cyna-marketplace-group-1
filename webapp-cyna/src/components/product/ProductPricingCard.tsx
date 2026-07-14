@@ -10,21 +10,25 @@ import {
   useTransition,
   type KeyboardEvent,
 } from "react";
-import { Minus, Plus, ShoppingCart } from "lucide-react";
+import { CreditCard, Loader2, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
+import GuestCheckoutDialog from "@/components/checkout/GuestCheckoutDialog";
 import { Input } from "@/components/ui/input";
+import PromotionalPrice from "@/components/product/PromotionalPrice";
 import { useRepeatingPress } from "@/hooks/use-repeating-press";
 import { addToCart } from "@/lib/cart/cart.actions";
+import { processBuyNow } from "@/lib/checkout/checkout.action";
 import {
   DEFAULT_LICENSE_USERS,
   MAX_LICENSE_USERS,
   MIN_LICENSE_USERS,
 } from "@/lib/cart/cart-constants";
 import { cn } from "@/lib/utils";
-import { formatPriceCents } from "@/lib/i18n/format";
+import type { Locale } from "@/lib/i18n/translations";
 import type { PublicProductTariff } from "@/lib/products/public-products";
+import { calculatePromotionalPriceCents } from "@/lib/promotions/automatic-promotion";
 import { useNotification } from "@/components/ui/notification-provider";
 
 type ProductPricingCardProps = {
@@ -32,6 +36,9 @@ type ProductPricingCardProps = {
   productName: string;
   isUnavailable: boolean;
   tariffs: PublicProductTariff[];
+  initialTariffId?: number;
+  initialUserCount?: number;
+  isGuest: boolean;
 };
 
 function clampUserCount(value: number, fallback: number) {
@@ -50,16 +57,32 @@ export default function ProductPricingCard({
   productName,
   isUnavailable,
   tariffs,
+  initialTariffId,
+  initialUserCount,
+  isGuest,
 }: ProductPricingCardProps) {
   const t = useTranslations("product");
   const { notify } = useNotification();
-  const locale = useLocale();
-  const [selectedTariffId, setSelectedTariffId] = useState(
-    tariffs[0]?.id_prix ?? null,
+  const locale = useLocale() as Locale;
+  const restoredTariffId = tariffs.some(
+    (tariff) => tariff.id_prix === initialTariffId,
+  )
+    ? initialTariffId
+    : tariffs[0]?.id_prix;
+  const restoredUserCount = clampUserCount(
+    initialUserCount ?? DEFAULT_LICENSE_USERS,
+    DEFAULT_LICENSE_USERS,
   );
-  const [userCount, setUserCount] = useState(DEFAULT_LICENSE_USERS);
-  const [userInput, setUserInput] = useState(String(DEFAULT_LICENSE_USERS));
+  const [selectedTariffId, setSelectedTariffId] = useState(
+    restoredTariffId ?? null,
+  );
+  const [userCount, setUserCount] = useState(restoredUserCount);
+  const [userInput, setUserInput] = useState(String(restoredUserCount));
+  const [pendingAction, setPendingAction] = useState<"cart" | "buy" | null>(
+    null,
+  );
   const [isPending, startTransition] = useTransition();
+  const [guestDialogOpen, setGuestDialogOpen] = useState(false);
 
   const selectedTariff = useMemo(
     () =>
@@ -90,8 +113,15 @@ export default function ProductPricingCard({
   const tariffLabel = (tariff: PublicProductTariff) =>
     tariff.nom_prix_tarif ?? billingLabel(tariff.type_facturation);
 
-  // Total = unit price x number of users.
-  const totalCents = selectedTariff ? selectedTariff.prix * userCount : 0;
+  const originalTotalCents = selectedTariff
+    ? selectedTariff.prix * userCount
+    : 0;
+  const totalCents = selectedTariff
+    ? calculatePromotionalPriceCents(
+        originalTotalCents,
+        selectedTariff.automaticPromotion,
+      )
+    : 0;
 
   const commitUserCount = (value = Number(userInput)) => {
     const next = clampUserCount(value, userCount);
@@ -124,14 +154,48 @@ export default function ProductPricingCard({
     if (!selectedTariff) {
       return;
     }
+    setPendingAction("cart");
     startTransition(async () => {
-      await addToCart({
-        productId,
-        tariffId: selectedTariff.id_prix,
-        licenseUserCount: userCount,
-      });
-      notify(t("addedToCartNotification", { name: productName }));
+      try {
+        await addToCart({
+          productId,
+          tariffId: selectedTariff.id_prix,
+          licenseUserCount: userCount,
+        });
+        notify(t("addedToCartNotification", { name: productName }));
+      } finally {
+        setPendingAction(null);
+      }
     });
+  };
+
+  const startBuyNow = () => {
+    if (!selectedTariff) return;
+    setPendingAction("buy");
+    startTransition(async () => {
+      try {
+        const result = await processBuyNow({
+          locale,
+          productId,
+          tariffId: selectedTariff.id_prix,
+          licenseUserCount: userCount,
+        });
+        window.location.assign(result.url);
+      } catch (error) {
+        console.error("[buy-now] Checkout failed", error);
+        notify(t("buyNowError"), { kind: "error" });
+        setPendingAction(null);
+      }
+    });
+  };
+
+  const handleBuyNow = () => {
+    if (isGuest) {
+      setGuestDialogOpen(true);
+      return;
+    }
+
+    startBuyNow();
   };
 
   return (
@@ -162,10 +226,17 @@ export default function ProductPricingCard({
                   <span className="block text-base font-semibold">
                     {tariffLabel(tariff)}
                   </span>
-                  <span className="block text-sm text-slate-600">
-                    {formatPriceCents(tariff.prix, locale)}
-                    {periodSuffix(tariff.type_facturation)}
-                  </span>
+                  <PromotionalPrice
+                    automaticPromotion={tariff.automaticPromotion}
+                    badgeLabel={(discount) =>
+                      t("promotionBadge", { discount })
+                    }
+                    className="mt-1 justify-center text-sm"
+                    locale={locale}
+                    originalPriceCents={tariff.prix}
+                    periodSuffix={periodSuffix(tariff.type_facturation)}
+                    promotionalPriceCents={tariff.promotionalPriceCents}
+                  />
                 </button>
               );
             })}
@@ -228,10 +299,20 @@ export default function ProductPricingCard({
             {t("users", { count: userCount })}
           </p>
 
-          <p className="mt-5 text-3xl font-bold text-slate-950">
-            {formatPriceCents(totalCents, locale)}
-            {selectedTariff ? periodSuffix(selectedTariff.type_facturation) : ""}
-          </p>
+          {selectedTariff ? (
+            <PromotionalPrice
+              automaticPromotion={selectedTariff.automaticPromotion}
+              badgeLabel={(discount) =>
+                t("promotionBadge", { discount })
+              }
+              className="mt-5"
+              locale={locale}
+              originalPriceCents={originalTotalCents}
+              periodSuffix={periodSuffix(selectedTariff.type_facturation)}
+              priceClassName="text-3xl text-slate-950"
+              promotionalPriceCents={totalCents}
+            />
+          ) : null}
         </>
       ) : (
         <p className="text-sm text-slate-600">{t("pricingUnavailable")}</p>
@@ -246,16 +327,43 @@ export default function ProductPricingCard({
           {t("currentlyUnavailable")}
         </Button>
       ) : (
-        <Button
-          className="mt-5 h-12 w-full bg-purple-700 text-base font-semibold text-white transition hover:bg-purple-800 disabled:opacity-70"
-          disabled={!selectedTariff || isPending}
-          onClick={handleAddToCart}
-          type="button"
-        >
-          <ShoppingCart aria-hidden="true" className="size-5" />
-          {t("addToCart")}
-        </Button>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+          <Button
+            className="h-12 w-full bg-purple-700 text-base font-semibold text-white transition hover:bg-purple-800 disabled:opacity-70"
+            disabled={!selectedTariff || isPending}
+            onClick={handleBuyNow}
+            type="button"
+          >
+            {pendingAction === "buy" ? (
+              <Loader2 aria-hidden="true" className="size-5 animate-spin" />
+            ) : (
+              <CreditCard aria-hidden="true" className="size-5" />
+            )}
+            {pendingAction === "buy" ? t("redirecting") : t("buyNow")}
+          </Button>
+          <Button
+            className="h-12 w-full border-purple-200 bg-white text-base font-semibold text-purple-800 transition hover:bg-purple-50 disabled:opacity-70"
+            disabled={!selectedTariff || isPending}
+            onClick={handleAddToCart}
+            type="button"
+            variant="outline"
+          >
+            {pendingAction === "cart" ? (
+              <Loader2 aria-hidden="true" className="size-5 animate-spin" />
+            ) : (
+              <ShoppingCart aria-hidden="true" className="size-5" />
+            )}
+            {t("addToCart")}
+          </Button>
+        </div>
       )}
+      <GuestCheckoutDialog
+        isPending={isPending && pendingAction === "buy"}
+        onConfirm={startBuyNow}
+        onOpenChange={setGuestDialogOpen}
+        open={guestDialogOpen}
+        returnPath={`/products/${productId}?tariff=${selectedTariffId ?? ""}&seats=${userCount}`}
+      />
     </section>
   );
 }

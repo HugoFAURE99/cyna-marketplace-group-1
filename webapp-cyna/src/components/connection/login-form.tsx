@@ -92,23 +92,6 @@ export function LoginForm({
                   </div>
                 </div>
               </Field>
-              {/* Nouvelle case : Se souvenir de moi */}
-              <Field>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="remember"
-                    name="remember"
-                    className="h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-600"
-                  />
-                  <label
-                    htmlFor="remember"
-                    className="text-sm text-muted-foreground cursor-pointer"
-                  >
-                    {t("rememberMe")}
-                  </label>
-                </div>
-              </Field>
               <Field>
                 <Button variant="brand" type="submit" disabled={isPending}>
                   {isPending ? t("loading") : t("submit")}

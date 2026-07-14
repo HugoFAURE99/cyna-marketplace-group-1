@@ -5,10 +5,45 @@ import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 
 import { validatePassword } from "@/lib/auth/password-policy";
+import { isValidProfileName, normalizeProfileName } from "@/lib/account/profile-name";
 import { createAdminClient } from "@/lib/supabase/server";
 import { createServerClient } from "@/lib/supabase/server-client";
 
 type ActionState = { errorKey?: string; successKey?: string; rawError?: string };
+
+export async function updateProfileName(
+  _prevState: ActionState | null,
+  formData: FormData,
+): Promise<ActionState | null> {
+  const fullName = normalizeProfileName(String(formData.get("fullName") ?? ""));
+  if (!isValidProfileName(fullName)) return { errorKey: "errorInvalidName" };
+
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { errorKey: "errorUpdateFailed" };
+
+  const admin = createAdminClient();
+  const { data: profile } = await admin
+    .from("utilisateur")
+    .select("is_actif")
+    .eq("id_compte", user.id)
+    .maybeSingle();
+  if (!profile?.is_actif) return { errorKey: "errorUpdateFailed" };
+
+  const { error } = await admin
+    .from("utilisateur")
+    .update({ nom_complet: fullName })
+    .eq("id_compte", user.id);
+  if (error) return { errorKey: "errorUpdateFailed" };
+
+  const locale = await getLocale();
+  revalidatePath(`/${locale}`, "layout");
+  revalidatePath(`/${locale}/user-dashboard/infos`);
+  revalidatePath(`/${locale}/user-dashboard/user-edition`);
+  return { successKey: "successNameUpdate" };
+}
 
 export async function updateEmail(
   _prevState: ActionState | null,

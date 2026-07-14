@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useCallback, useEffect, useMemo, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -97,10 +98,13 @@ function SortableRow({
       <TableCell className="font-medium">{index + 1}</TableCell>
       <TableCell>
         {product.image ? (
-          <img
+          <Image
             src={product.image}
             alt=""
             className="h-10 w-10 rounded object-cover"
+            height={40}
+            unoptimized
+            width={40}
           />
         ) : (
           <span className="text-muted-foreground">—</span>
@@ -140,7 +144,9 @@ export default function PriorityProductsTable({
     useUnsavedChanges(isDirty);
 
   const itemsRef = useRef(items);
-  itemsRef.current = items;
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   useEffect(() => {
     onDirtyChange?.(isDirty);
@@ -277,7 +283,7 @@ export default function PriorityProductsTable({
       <Dialog.Root open={showUnsavedDialog} onOpenChange={(open) => { if (!open) cancelNavigation(); }}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-          <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
             <Dialog.Title className="text-base font-semibold">
               {t.unsavedTitle}
             </Dialog.Title>

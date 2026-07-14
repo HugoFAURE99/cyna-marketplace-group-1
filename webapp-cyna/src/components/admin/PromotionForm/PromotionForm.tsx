@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, Plus, X, Search } from "lucide-react";
+import { Plus, X, Search } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -100,22 +100,13 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
 
   return (
     <div>
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {t("back")}
-      </button>
-
       <h2 className="mb-6 text-xl font-bold">
         {isEdit ? t("editTitle") : t("createTitle")}
       </h2>
 
-      <form onSubmit={handleSubmit} className="max-w-lg space-y-5">
+      <form onSubmit={handleSubmit} className="w-full max-w-lg space-y-5">
         {/* Type + Valeur on same line */}
-        <div className="flex gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex-1">
             <Label>{t("typeRemise")}</Label>
             <select
@@ -144,7 +135,7 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
         {/* Date expiration + no expiration toggle */}
         <div>
           <Label>{t("expiration")}</Label>
-          <div className="mt-1 flex items-center gap-3">
+          <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Input
               type="date"
               value={dateExpiration}
@@ -183,7 +174,7 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
         </div>
 
         {/* Discount duration (Stripe) */}
-        <div className="flex gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex-1">
             <Label>{t("duration")}</Label>
             <select
@@ -214,7 +205,7 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
         {/* Code promo / Automatique toggle */}
         <div>
           <Label className="mb-2 block">{t("promoMode")}</Label>
-          <div className="inline-flex rounded-lg border bg-muted p-0.5">
+          <div className="grid w-full grid-cols-2 rounded-lg border bg-muted p-0.5 sm:inline-flex sm:w-auto">
             <button
               type="button"
               onClick={() => setIsCodePromo(false)}
@@ -274,7 +265,7 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
 
         {/* Selected products */}
         <div className={isGlobal ? "pointer-events-none opacity-40" : ""}>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <Label>{t("targetProducts")}</Label>
             <Button
               type="button"
@@ -314,7 +305,7 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
 
         {/* Selected categories */}
         <div className={isGlobal ? "pointer-events-none opacity-40" : ""}>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <Label>{t("targetCategories")}</Label>
             <Button
               type="button"
@@ -352,18 +343,27 @@ export default function PromotionForm({ promotion, allProducts, allCategories }:
           )}
         </div>
 
-        {/* Submit */}
-        <Button type="submit" disabled={saving} className="w-full">
-          {saving ? (
-            <>
-              <Spinner /> {t("saving")}
-            </>
-          ) : isEdit ? (
-            t("save")
-          ) : (
-            t("create")
-          )}
-        </Button>
+        <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
+          <Button
+            disabled={saving}
+            onClick={() => router.back()}
+            type="button"
+            variant="outline"
+          >
+            {t("cancel")}
+          </Button>
+          <Button type="submit" disabled={saving}>
+            {saving ? (
+              <>
+                <Spinner /> {t("saving")}
+              </>
+            ) : isEdit ? (
+              t("save")
+            ) : (
+              t("create")
+            )}
+          </Button>
+        </div>
       </form>
 
       {/* Product picker modal */}
@@ -450,7 +450,7 @@ function PickerModal({
     >
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg max-h-[80vh] flex flex-col">
+        <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 flex max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
           <Dialog.Title className="text-base font-semibold">{title}</Dialog.Title>
 
           <div className="relative mt-3">

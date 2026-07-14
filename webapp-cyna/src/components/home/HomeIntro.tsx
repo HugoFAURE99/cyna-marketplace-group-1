@@ -1,8 +1,7 @@
 // "Why CYNA" intro block; renders nothing when no content is configured.
 import { ArrowRight } from "lucide-react";
-import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/i18n/navigation";
+import { ManagedCta } from "@/components/navigation/ManagedCta";
 import type { HomeIntroContent } from "@/lib/home/public-home";
 
 type HomeIntroProps = {
@@ -13,8 +12,6 @@ export default async function HomeIntro({ content }: HomeIntroProps) {
   if (!content) {
     return null;
   }
-
-  const t = await getTranslations("home");
 
   return (
     <section
@@ -40,13 +37,14 @@ export default async function HomeIntro({ content }: HomeIntroProps) {
         </p>
       )}
       {content.linkLabel && (
-        <Link
+        <ManagedCta
           className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-purple-700 transition hover:text-purple-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
-          href={content.linkHref ?? "/search"}
+          fallbackHref="/search"
+          href={content.linkHref}
         >
-          {t("browseAllProducts")}
+          {content.linkLabel}
           <ArrowRight aria-hidden="true" className="size-4" />
-        </Link>
+        </ManagedCta>
       )}
     </section>
   );

@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
-import { ArrowLeft, Eye, ArrowUpDown, FileText } from "lucide-react";
+import { Eye, ArrowUpDown, FileText } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -14,6 +14,13 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/ui/spinner";
+import AdminBackButton from "@/components/admin/AdminBackButton";
+import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
+import {
+  getOrderStatusFilterEntries,
+  normalizeOrderStatus,
+  orderStatusFilterValue,
+} from "@/lib/orders/status";
 import {
   getOrderDetail,
   type OrderRow,
@@ -61,46 +68,6 @@ interface Translations {
 
 const PAGE_SIZE = 10;
 
-// Colours keyed by the actual (French) status values written by the
-// checkout/webhook, plus legacy/seed values. Lookup is case-insensitive and
-// falls back to grey for anything unknown, so the page never breaks if the
-// status vocabulary evolves.
-const STATUS_COLORS: Record<string, string> = {
-  "validée": "bg-green-100 text-green-800",
-  "payée": "bg-green-100 text-green-800",
-  "active": "bg-green-100 text-green-800",
-  "en attente": "bg-yellow-100 text-yellow-800",
-  "en cours": "bg-yellow-100 text-yellow-800",
-  "échouée": "bg-red-100 text-red-800",
-  "expirée": "bg-gray-100 text-gray-800",
-  // legacy / seed values
-  payee: "bg-green-100 text-green-800",
-  en_cours: "bg-yellow-100 text-yellow-800",
-  echoue: "bg-red-100 text-red-800",
-  expire: "bg-gray-100 text-gray-800",
-};
-
-function statusColor(status: string): string {
-  return STATUS_COLORS[status.toLowerCase()] || "bg-gray-100 text-gray-800";
-}
-
-// Maps a raw (French) status value to a translation key, so the label follows
-// the active locale. Unknown values fall back to the raw value.
-const STATUS_LABEL_KEYS: Record<string, keyof Translations> = {
-  "en attente": "statusEnAttente",
-  "validée": "statusValidee",
-  "payée": "statusPayee",
-  "active": "statusActive",
-  "en cours": "statusEnCours",
-  "échouée": "statusEchoue",
-  "expirée": "statusExpire",
-  // legacy / seed values
-  payee: "statusPayee",
-  en_cours: "statusEnCours",
-  echoue: "statusEchoue",
-  expire: "statusExpire",
-};
-
 type SortKey = "id_commande" | "date_commande" | "montant_total" | "statut_commande";
 type SortDir = "asc" | "desc";
 
@@ -127,14 +94,8 @@ function BillingBadge({ type, translations }: { type: string; translations: Tran
   );
 }
 
-function StatusBadge({ status, label }: { status: string; label: string }) {
-  return (
-    <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusColor(status)}`}
-    >
-      {label}
-    </span>
-  );
+function SortHeader({ active, label, onSort, sortField }: { active: boolean; label: string; onSort: (field: SortKey) => void; sortField: SortKey }) {
+  return <button className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => onSort(sortField)} type="button">{label}<ArrowUpDown className={`h-3.5 w-3.5 ${active ? "text-foreground" : "text-muted-foreground/50"}`} /></button>;
 }
 
 export default function OrdersTableClient({
@@ -154,38 +115,29 @@ export default function OrdersTableClient({
   const [sortKey, setSortKey] = useState<SortKey>("date_commande");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [detail, setDetail] = useState<OrderDetail | null>(null);
-  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(Boolean(initialDetailId));
   const router = useRouter();
   const pathname = usePathname();
   const tPagination = useTranslations("admin.pagination");
+  const tStatus = useTranslations("orderStatus");
 
   useEffect(() => {
-    if (initialDetailId) {
-      const id = Number(initialDetailId);
-      if (!isNaN(id)) {
-        setIsLoadingDetail(true);
-        getOrderDetail(id).then((data) => {
-          setDetail(data);
-          setIsLoadingDetail(false);
-        });
+    let cancelled = false;
+    const id = Number(initialDetailId);
+    Promise.resolve().then(async () => {
+      if (!initialDetailId || Number.isNaN(id)) {
+        if (!cancelled) { setDetail(null); setIsLoadingDetail(false); }
+        return;
       }
-    } else {
-      setDetail(null);
-      setIsLoadingDetail(false);
-    }
+      if (!cancelled) setIsLoadingDetail(true);
+      const data = await getOrderDetail(id);
+      if (!cancelled) { setDetail(data); setIsLoadingDetail(false); }
+    });
+    return () => { cancelled = true; };
   }, [initialDetailId]);
 
-  // Localised label for a raw (French) status value, with fallback to the value.
-  const statusLabel = (s: string) => {
-    const key = STATUS_LABEL_KEYS[s.toLowerCase()];
-    return key ? t[key] : s;
-  };
-
-  // Filter options are derived from the statuses actually present in the data,
-  // so the dropdown always matches reality regardless of the vocabulary.
-  const statusOptions = useMemo(
-    () =>
-      [...new Set(orders.map((o) => o.statut_commande).filter(Boolean))].sort(),
+  const statusEntries = useMemo(
+    () => getOrderStatusFilterEntries(orders.map((order) => order.statut_commande)),
     [orders],
   );
 
@@ -202,7 +154,9 @@ export default function OrdersTableClient({
     }
 
     if (statusFilter !== "all") {
-      result = result.filter((o) => o.statut_commande === statusFilter);
+      result = result.filter(
+        (order) => orderStatusFilterValue(order.statut_commande) === statusFilter,
+      );
     }
 
     if (dateFrom) {
@@ -230,7 +184,9 @@ export default function OrdersTableClient({
       } else if (sortKey === "id_commande") {
         cmp = a.id_commande - b.id_commande;
       } else if (sortKey === "statut_commande") {
-        cmp = a.statut_commande.localeCompare(b.statut_commande);
+        cmp = normalizeOrderStatus(a.statut_commande).localeCompare(
+          normalizeOrderStatus(b.statut_commande),
+        );
       }
       return sortDir === "asc" ? cmp : -cmp;
     });
@@ -258,29 +214,11 @@ export default function OrdersTableClient({
     setIsLoadingDetail(false);
   };
 
-  const SortHeader = ({ label, sortField }: { label: string; sortField: SortKey }) => (
-    <button
-      type="button"
-      onClick={() => toggleSort(sortField)}
-      className="inline-flex items-center gap-1 hover:text-foreground"
-    >
-      {label}
-      <ArrowUpDown className={`h-3.5 w-3.5 ${sortKey === sortField ? "text-foreground" : "text-muted-foreground/50"}`} />
-    </button>
-  );
-
   // ─── Detail view ───
   if (detail) {
     return (
       <div>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t.back}
-        </button>
+        <AdminBackButton className="mb-4" label={t.back} />
 
         <h2 className="mb-6 text-xl font-bold">
           {t.detailTitle} #{detail.id_commande}
@@ -309,10 +247,7 @@ export default function OrdersTableClient({
           </div>
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">{t.status}</span>
-            <StatusBadge
-              status={detail.statut_commande}
-              label={statusLabel(detail.statut_commande)}
-            />
+            <OrderStatusBadge status={detail.statut_commande} />
           </div>
           {detail.invoice_url && (
             <div className="pt-2">
@@ -410,7 +345,7 @@ export default function OrdersTableClient({
             setSearch(e.target.value);
             setPage(0);
           }}
-          className="w-full max-w-xs rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring sm:max-w-xs"
         />
         <select
           value={statusFilter}
@@ -418,12 +353,12 @@ export default function OrdersTableClient({
             setStatusFilter(e.target.value);
             setPage(0);
           }}
-          className="rounded-md border bg-background px-3 py-2 text-sm"
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm sm:w-auto"
         >
           <option value="all">{t.allStatuses}</option>
-          {statusOptions.map((s) => (
-            <option key={s} value={s}>
-              {statusLabel(s)}
+          {statusEntries.map((entry) => (
+            <option key={entry.value} value={entry.value}>
+              {entry.key === "unknown" ? entry.raw : tStatus(entry.key)}
             </option>
           ))}
         </select>
@@ -457,18 +392,18 @@ export default function OrdersTableClient({
         <TableHeader>
           <TableRow>
             <TableHead>
-              <SortHeader label={t.orderId} sortField="id_commande" />
+              <SortHeader active={sortKey === "id_commande"} label={t.orderId} onSort={toggleSort} sortField="id_commande" />
             </TableHead>
             <TableHead>
-              <SortHeader label={t.date} sortField="date_commande" />
+              <SortHeader active={sortKey === "date_commande"} label={t.date} onSort={toggleSort} sortField="date_commande" />
             </TableHead>
             <TableHead>{t.client}</TableHead>
             <TableHead>
-              <SortHeader label={t.total} sortField="montant_total" />
+              <SortHeader active={sortKey === "montant_total"} label={t.total} onSort={toggleSort} sortField="montant_total" />
             </TableHead>
             <TableHead>{t.billingType}</TableHead>
             <TableHead>
-              <SortHeader label={t.status} sortField="statut_commande" />
+              <SortHeader active={sortKey === "statut_commande"} label={t.status} onSort={toggleSort} sortField="statut_commande" />
             </TableHead>
             <TableHead>{t.actions}</TableHead>
           </TableRow>
@@ -518,10 +453,7 @@ export default function OrdersTableClient({
                   )}
                 </TableCell>
                 <TableCell>
-                  <StatusBadge
-                    status={order.statut_commande}
-                    label={statusLabel(order.statut_commande)}
-                  />
+                  <OrderStatusBadge status={order.statut_commande} />
                 </TableCell>
                 <TableCell>
                   <Button
@@ -540,7 +472,7 @@ export default function OrdersTableClient({
       </Table>
 
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-muted-foreground">
             {tPagination("info", {
               from: page * PAGE_SIZE + 1,
