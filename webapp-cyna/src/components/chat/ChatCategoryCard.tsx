@@ -1,7 +1,7 @@
 "use client";
 
 // Compact category card rendered inside the chat from a tool result. Links to
-// the catalog search pre-filtered to that category.
+// the dedicated storefront page for that category.
 import { ChevronRight, Layers } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
@@ -14,7 +14,7 @@ export default function ChatCategoryCard({
 }) {
   return (
     <Link
-      href={`/search?category=${category.id_categorie}`}
+      href={`/categories/${category.id_categorie}`}
       className="group flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-purple-300 hover:text-purple-700 hover:shadow-md"
     >
       <Layers aria-hidden="true" className="size-4 shrink-0 text-purple-600" />

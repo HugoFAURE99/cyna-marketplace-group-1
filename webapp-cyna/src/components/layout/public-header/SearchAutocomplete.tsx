@@ -8,8 +8,8 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { ImageOff, Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import PromotionalPrice from "@/components/product/PromotionalPrice";
 import { Link, useRouter } from "@/i18n/navigation";
-import { formatPriceCents } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n/translations";
 import type { SearchSuggestion } from "@/lib/products/search-products";
 import { cn } from "@/lib/utils";
@@ -139,18 +139,6 @@ export default function SearchAutocomplete({
     }
   };
 
-  const priceLabel = (product: SearchSuggestion) => {
-    if (!product.est_disponible) {
-      return tp("unavailable");
-    }
-    if (product.priceCents === null) {
-      return tp("pricingUnavailable");
-    }
-    return `${formatPriceCents(product.priceCents, locale)}${periodSuffix(
-      product.type_facturation,
-    )}`;
-  };
-
   return (
     <div className="relative w-full" ref={containerRef}>
       <form
@@ -256,15 +244,31 @@ export default function SearchAutocomplete({
                             {product.cat_nom}
                           </span>
                         )}
-                        <span
-                          className={cn(
-                            "ml-auto shrink-0 font-semibold",
-                            product.est_disponible
-                              ? "text-purple-700"
-                              : "text-black",
+                        <span className="ml-auto shrink-0">
+                          {!product.est_disponible ? (
+                            <span className="font-semibold text-black">
+                              {tp("unavailable")}
+                            </span>
+                          ) : product.priceCents !== null &&
+                            product.originalPriceCents !== null ? (
+                            <PromotionalPrice
+                              automaticPromotion={product.automaticPromotion}
+                              badgeLabel={(discount) =>
+                                tp("promotionBadge", { discount })
+                              }
+                              className="justify-end text-xs"
+                              locale={locale}
+                              originalPriceCents={product.originalPriceCents}
+                              periodSuffix={periodSuffix(
+                                product.type_facturation,
+                              )}
+                              promotionalPriceCents={product.priceCents}
+                            />
+                          ) : (
+                            <span className="font-semibold text-purple-700">
+                              {tp("pricingUnavailable")}
+                            </span>
                           )}
-                        >
-                          {priceLabel(product)}
                         </span>
                       </span>
                     </span>

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { routing } from "@/i18n/routing";
 import type { Locale } from "@/lib/i18n/translations";
 import { NotificationProvider } from "@/components/ui/notification-provider";
-import { IdleSessionGuard } from "@/components/auth/IdleSessionGuard";
+import { SiteTransitionProvider } from "@/components/layout/SiteTransitionProvider";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -74,7 +74,9 @@ export default async function LocaleLayout({
     >
       <body className="antialiased">
         <NextIntlClientProvider>
-          <NotificationProvider><IdleSessionGuard />{children}</NotificationProvider>
+          <SiteTransitionProvider>
+            <NotificationProvider>{children}</NotificationProvider>
+          </SiteTransitionProvider>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -8,6 +8,7 @@ import type { TablesInsert } from "@/types/database.types";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import { planEnglishTranslation } from "@/lib/admin/translation-mutation";
+import { planCategoryDeletion } from "@/lib/admin/category-deletion";
 
 const DEFAULT_LOCALE = routing.defaultLocale;
 
@@ -223,26 +224,25 @@ export async function updateCategory(
   return { id_categorie: id };
 }
 
-export async function deleteCategory(id: number) {
+export type DeleteCategoryResult = {
+  blocked: { id: number; productCount: number }[];
+  deletedIds: number[];
+  failures: { code: "delete_failed" | "usage_check_failed"; id: number }[];
+};
+
+async function getCategoryUsage(ids: number[]) {
   const supabase = createAdminClient();
-
-  // 1. Vérification que la catégorie n'est pas utilisée par des produits.
-  const { count, error: countError } = await supabase
+  if (!ids.length) return { categoryIds: [] as number[], error: false };
+  const { data, error } = await supabase
     .from("produit")
-    .select("id_produit", { count: "exact" })
-    .eq("id_categorie", id);
+    .select("id_categorie")
+    .in("id_categorie", ids);
+  if (error) return { categoryIds: [] as number[], error: true };
+  return { categoryIds: (data ?? []).map((product) => product.id_categorie), error: false };
+}
 
-  if (countError) {
-    throw new Error(`Erreur vérification catégorie : ${countError.message}`);
-  }
-
-  if (count && count > 0) {
-    throw new Error(
-      "Impossible de supprimer une catégorie utilisée par des produits",
-    );
-  }
-
-  // 2. Supprimer l'image si elle existe
+async function deleteCategoryRecord(id: number) {
+  const supabase = createAdminClient();
   const { data: categoryData } = await supabase
     .from("categorie")
     .select("lien_image_cat")
@@ -260,7 +260,6 @@ export async function deleteCategory(id: number) {
     }
   }
 
-  // 3. Suppression de la catégorie (traductions en cascade).
   const { error } = await supabase
     .from("categorie")
     .delete()
@@ -269,37 +268,68 @@ export async function deleteCategory(id: number) {
   if (error) {
     throw new Error(`Erreur suppression catégorie : ${error.message}`);
   }
+}
 
+function revalidateCategoryPages() {
   for (const locale of routing.locales) {
     revalidatePath(`/${locale}/admin/categories`, "page");
   }
 }
 
-export async function deleteCategories(ids: number[]) {
-  const supabase = createAdminClient();
+export async function deleteCategory(id: number): Promise<DeleteCategoryResult> {
+  const usage = await getCategoryUsage([id]);
+  if (usage.error) {
+    return {
+      blocked: [],
+      deletedIds: [],
+      failures: [{ code: "usage_check_failed", id }],
+    };
+  }
+  const plan = planCategoryDeletion([id], usage.categoryIds);
+  if (plan.blocked.length) {
+    return {
+      blocked: plan.blocked,
+      deletedIds: [],
+      failures: [],
+    };
+  }
 
-  // Check which categories are used by products
-  const { data: usedCategories } = await supabase
-    .from("produit")
-    .select("id_categorie")
-    .in("id_categorie", ids);
+  try {
+    await deleteCategoryRecord(id);
+    revalidateCategoryPages();
+    return { blocked: [], deletedIds: [id], failures: [] };
+  } catch {
+    return {
+      blocked: [],
+      deletedIds: [],
+      failures: [{ code: "delete_failed", id }],
+    };
+  }
+}
 
-  const usedIds = new Set((usedCategories ?? []).map((p) => p.id_categorie));
-  const deletableIds = ids.filter((id) => !usedIds.has(id));
-  const blockedCount = ids.length - deletableIds.length;
+export async function deleteCategories(ids: number[]): Promise<DeleteCategoryResult> {
+  const uniqueIds = [...new Set(ids.filter((id) => Number.isInteger(id) && id > 0))];
+  const usage = await getCategoryUsage(uniqueIds);
+  if (usage.error) {
+    return {
+      blocked: [],
+      deletedIds: [],
+      failures: uniqueIds.map((id) => ({ code: "usage_check_failed" as const, id })),
+    };
+  }
+  const { blocked, deletableIds } = planCategoryDeletion(uniqueIds, usage.categoryIds);
 
   const results = await Promise.allSettled(
-    deletableIds.map((id) => deleteCategory(id)),
+    deletableIds.map((id) => deleteCategoryRecord(id)),
   );
-
-  const failures = results.filter((r) => r.status === "rejected");
-  const totalFailures = failures.length + blockedCount;
-
-  if (totalFailures > 0) {
-    throw new Error(
-      `${totalFailures} catégorie(s) n'ont pas pu être supprimées.`,
-    );
-  }
+  const deletedIds = deletableIds.filter((_, index) => results[index].status === "fulfilled");
+  const failures = deletableIds.flatMap((id, index) =>
+    results[index].status === "rejected"
+      ? [{ code: "delete_failed" as const, id }]
+      : [],
+  );
+  if (deletedIds.length) revalidateCategoryPages();
+  return { blocked, deletedIds, failures };
 }
 
 async function uploadCategoryImage(

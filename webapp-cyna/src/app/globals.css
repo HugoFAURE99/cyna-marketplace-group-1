@@ -132,6 +132,33 @@
   --sidebar-ring: oklch(0.496 0.265 301.924);
 }
 
+/* Native controls do not inherit the shared Button component's cursor style. */
+.admin-theme
+  :where(
+    a[href],
+    button:not(:disabled),
+    select:not(:disabled),
+    summary,
+    label[for],
+    input[type="checkbox"]:not(:disabled),
+    input[type="radio"]:not(:disabled),
+    [role="button"]:not([aria-disabled="true"]):not(.cursor-grab),
+    [role="link"]:not([aria-disabled="true"])
+  ) {
+  cursor: pointer;
+}
+
+.admin-theme
+  :where(
+    button:disabled,
+    select:disabled,
+    input[type="checkbox"]:disabled,
+    input[type="radio"]:disabled,
+    [aria-disabled="true"]
+  ) {
+  cursor: not-allowed;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -172,6 +199,72 @@
 .cyna-notification-out {
   animation: cyna-notification-out 240ms ease-in both;
   will-change: opacity;
+}
+
+@keyframes cyna-site-transition-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cyna-site-transition-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes cyna-site-transition-dot-rise {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-0.65rem);
+  }
+}
+
+.cyna-site-transition {
+  opacity: 0;
+  will-change: opacity;
+}
+
+html[data-cyna-site-transition="active"],
+html[data-cyna-site-transition="active"] body {
+  overflow: hidden;
+}
+
+.cyna-site-transition[data-phase="entering"] {
+  animation: cyna-site-transition-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cyna-site-transition[data-phase="leaving"] {
+  animation: cyna-site-transition-out 360ms ease-in both;
+}
+
+.cyna-site-transition-dot {
+  animation: cyna-site-transition-dot-rise 840ms ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cyna-site-transition[data-phase="entering"],
+  .cyna-site-transition[data-phase="leaving"] {
+    animation-duration: 1ms;
+  }
+
+  .cyna-site-transition-dot {
+    animation: none;
+    opacity: 0.7;
+  }
 }
 
 .cynai-launcher {

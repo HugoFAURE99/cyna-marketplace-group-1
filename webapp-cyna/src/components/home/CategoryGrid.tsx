@@ -28,7 +28,7 @@ export default async function CategoryGrid({ categories }: CategoryGridProps) {
           {categories.map((category) => (
             <Link
               className="group relative min-h-40 overflow-hidden rounded-md border border-slate-200 bg-slate-950 text-white shadow-sm transition hover:-translate-y-0.5 hover:border-purple-200"
-              href={`/search?category=${category.id_categorie}`}
+              href={`/categories/${category.id_categorie}`}
               key={category.id_categorie}
             >
               {category.lien_image_cat ? (

@@ -13,7 +13,6 @@
     "close": "Fermer la notification"
   },
   "header": {
-    "backOffice": "Back-office",
     "homeAriaLabel": "Accueil CYNA",
     "searchPlaceholder": "Rechercher des produits",
     "searchButton": "Rechercher",
@@ -28,6 +27,7 @@
   },
   "menu": {
     "backOffice": "Back-office",
+    "enteringBackOffice": "Backoffice",
     "menu": "Menu",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
@@ -43,7 +43,6 @@
     "contact": "Contact",
     "faq": "Aide",
     "aboutCyna": "À propos de CYNA",
-    "faq": "Aide",
     "orders": "Commandes",
     "subscriptions": "Abonnements"
   },
@@ -115,7 +114,11 @@
     },
     "perMonth": "/mois",
     "perYear": "/an",
+    "promotionBadge": "Promo {discount}",
     "addToCart": "Ajouter au panier",
+    "buyNow": "Acheter maintenant",
+    "buyNowError": "Le paiement n’a pas pu être lancé. Vérifiez votre sélection et réessayez.",
+    "redirecting": "Redirection…",
     "addedToCart": "Ajouté au panier",
     "addedToCartNotification": "{name} a été ajouté au panier.",
     "currentlyUnavailable": "Actuellement indisponible",
@@ -127,6 +130,16 @@
   "category": {
     "notFound": "Catégorie introuvable",
     "empty": "Aucun produit dans cette catégorie pour le moment."
+  },
+  "categoryPage": {
+    "notFound": "Catégorie introuvable",
+    "eyebrow": "Catégorie de produits",
+    "imageAlt": "Image de la catégorie {name}",
+    "productCount": "{count, plural, =0 {Aucun produit} one {# produit} other {# produits}}",
+    "products": "Produits",
+    "advancedFilters": "Filtres avancés",
+    "empty": "Aucun produit n’est encore disponible dans cette catégorie.",
+    "emptyHint": "Revenez plus tard ou parcourez l’ensemble du catalogue."
   },
   "cart": {
     "title": "Panier",
@@ -148,6 +161,15 @@
     "redirecting": "Redirection...",
     "securePayment": "Paiement sécurisé via Stripe.",
     "mixedIntervalsError": "Vous ne pouvez pas mélanger des abonnements mensuels et annuels dans la même commande. Veuillez uniformiser vos choix de facturation."
+  },
+  "guestCheckout": {
+    "title": "Comment souhaitez-vous continuer ?",
+    "description": "Payez en invité, ou connectez-vous pour regrouper commandes, factures et abonnements. Stripe vous demandera votre e-mail.",
+    "continueAsGuest": "Continuer en invité",
+    "redirecting": "Redirection…",
+    "signIn": "Se connecter",
+    "createAccount": "Créer un compte",
+    "close": "Fermer"
   },
   "search": {
     "title": "Recherche",
@@ -202,8 +224,7 @@
       "errorMissingFields": "Tous les champs sont requis.",
       "errorUnconfirmed": "Confirmez votre adresse e-mail avant de vous connecter.",
       "errorUnavailable": "La connexion est temporairement indisponible. Veuillez réessayer.",
-      "errorInactive": "Ce compte est inactif. Contactez le support si vous pensez qu’il s’agit d’une erreur.",
-      "sessionExpired": "Vous avez été déconnecté après 30 minutes d’inactivité."
+      "errorInactive": "Ce compte est inactif. Contactez le support si vous pensez qu’il s’agit d’une erreur."
     },
     "register": {
       "title": "Créer un compte",
@@ -262,6 +283,7 @@
     "descSetup": "Scannez ce QR code avec votre application d'authentification, puis saisissez le code affiché.",
     "authCodeLabel": "Code d'authentification",
     "submitButton": "Valider et continuer",
+    "exitAndSignOut": "Quitter et se déconnecter",
     "retry": "Réessayer",
     "qrAlt": "QR code de configuration de la double authentification",
     "manualSecret": "Clé de configuration manuelle",
@@ -275,7 +297,8 @@
   },
   "admin": {
     "nav": {
-      "viewCyna": "Voir CYNA",
+      "viewCyna": "CYNA Marketplace",
+      "switchingToCyna": "Marketplace",
       "logout": "Se déconnecter",
       "backoffice": "Back-office",
       "homepage": "Page d'accueil",
@@ -287,6 +310,7 @@
       "promotions": "Promotions",
       "subscriptions": "Abonnements",
       "support": "Support"
+      ,"chatbot": "Historique du chatbot"
     },
     "orders": {
       "title": "Commandes",
@@ -385,7 +409,16 @@
         "endings": "Fins programmées",
         "endingValue": "Valeur des fins",
         "renewalTable": "Renouvellements à venir",
-        "endingTable": "Fins programmées",
+        "annualTitle": "Prévisions annuelles",
+        "annualWindow": "Abonnements annuels arrivant à échéance du {from} au {to}",
+        "annualRenewals": "Renouvellements annuels",
+        "annualRenewalValue": "Valeur des renouvellements annuels",
+        "annualEndings": "Fins annuelles programmées",
+        "annualEndingValue": "Valeur des fins annuelles",
+        "annualTable": "12 prochains mois civils",
+        "outlookType": "Type",
+        "outlookRenewal": "Renouvellement",
+        "outlookEnding": "Fin programmée",
         "products": "Répartition par produit",
         "billing": "Répartition des plans",
         "statuses": "Répartition des statuts",
@@ -482,6 +515,7 @@
       "title": "Abonnements",
       "tabAll": "Tous les abonnements",
       "tabExpiring": "Échéance sous 30 jours",
+      "tabAnnual": "Prévisions annuelles",
       "search": "Rechercher par client, produit ou ID...",
       "allStatuses": "Tous les statuts",
       "allBillingTypes": "Tous les plans",
@@ -521,6 +555,45 @@
       "billingMensuel": "Mensuel",
       "billingAnnuel": "Annuel",
       "reactivate": "Réactiver"
+      ,"seats": "Postes",
+      "scheduledEnding": "Fin programmée",
+      "operationError": "Stripe n’a pas pu terminer cette opération. Aucun statut local n’a été modifié.",
+      "statusTrialing": "Période d’essai",
+      "statusPastDue": "Paiement en retard",
+      "statusPaused": "En pause",
+      "statusIncomplete": "Incomplet",
+      "statusIncompleteExpired": "Incomplet (expiré)",
+      "statusUnpaid": "Impayé"
+    },
+    "chatbot": {
+      "title": "Historique du chatbot",
+      "subtitle": "Consultez les conversations conservées des clients et invités. Elles expirent après 90 jours.",
+      "search": "Rechercher dans les conversations",
+      "audience": "Public",
+      "locale": "Langue",
+      "all": "Tous",
+      "account": "Compte",
+      "guest": "Invité",
+      "apply": "Appliquer les filtres",
+      "preview": "Premier message",
+      "messagesLabel": "Messages",
+      "lastActivity": "Dernière activité",
+      "actions": "Actions",
+      "view": "Voir",
+      "empty": "Aucune conversation conservée ne correspond à ces filtres.",
+      "pagination": "Pages de conversations",
+      "resultCount": "{count, plural, one {# conversation} other {# conversations}}",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "back": "Retour aux conversations",
+      "notFound": "Cette conversation n’existe pas ou a expiré.",
+      "transcriptTitle": "Transcription de la conversation",
+      "messages": "{count, plural, one {# message} other {# messages}}",
+      "user": "Utilisateur",
+      "assistant": "Assistant",
+      "partialError": "La réponse de l’assistant s’est terminée par une erreur.",
+      "delete": "Supprimer définitivement",
+      "deleteConfirm": "Supprimer définitivement cette conversation et tous ses messages ? Cette action est irréversible."
     },
     "support": {
       "title": "Support",
@@ -700,6 +773,27 @@
         "saving": "Enregistrement...",
         "saved": "Enregistré !"
       },
+      "links": {
+        "placeholder": "Rechercher une destination CYNA ou saisir une URL...",
+        "hint": "Choisissez une page CYNA ou saisissez un chemin relatif, une ancre ou une URL HTTP(S) sûre.",
+        "noResults": "Aucune destination suggérée ne correspond. Vous pouvez conserver l’URL saisie manuellement.",
+        "invalid": "Saisissez un chemin CYNA, une ancre ou une URL HTTP(S) valide.",
+        "groups": {
+          "page": "Pages",
+          "anchor": "Sections de l’accueil",
+          "category": "Catégories",
+          "product": "Produits"
+        },
+        "home": "Page d’accueil",
+        "catalog": "Catalogue produits",
+        "faq": "FAQ et support",
+        "about": "À propos de CYNA",
+        "legal": "Mentions légales",
+        "terms": "Conditions générales",
+        "topProducts": "Section des produits mis en avant",
+        "categoryFallback": "Catégorie n°{id}",
+        "productFallback": "Produit n°{id}"
+      },
       "shortcuts": {
         "title": "Raccourcis",
         "productsTitle": "Produits",
@@ -836,7 +930,10 @@
       "confirmCategories": "Supprimer {count} catégorie(s) ? Cette action est définitive.",
       "priorityOn": "Prioritaire",
       "priorityOff": "Non prioritaire",
-      "error": "Certains éléments n'ont pas pu être supprimés."
+      "error": "Certaines catégories n’ont pas pu être supprimées en raison d’une erreur inattendue.",
+      "categoriesDeleted": "{count, plural, one {# catégorie a été supprimée.} other {# catégories ont été supprimées.}}",
+      "categoriesInUse": "{count, plural, one {Une catégorie est encore utilisée par des produits et n’a pas été supprimée.} other {# catégories sont encore utilisées par des produits et n’ont pas été supprimées.}}",
+      "categoryInUse": "{name} : {count, plural, one {# produit utilise cette catégorie.} other {# produits utilisent cette catégorie.}}"
     },
     "priority": {
       "title": "Produits prioritaires",
@@ -859,6 +956,7 @@
       "featuredEmpty": "La gestion de l'ordre des mis en avant sera disponible prochainement.",
       "allCategories": "Toutes les catégories",
       "filterByCategory": "Filtrer par catégorie"
+      ,"searchPlaceholder": "Rechercher par ID, produit ou catégorie"
     },
     "pagination": {
       "info": "{from}–{to} sur {total}",
@@ -884,7 +982,11 @@
       "confirmRemoveMessage": "Retirer \"{name}\" des produits mis en avant ?",
       "confirmRemove": "Retirer",
       "cancelRemove": "Annuler",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "close": "Fermer",
+      "dragProduct": "Glisser pour réordonner ce produit",
+      "perMonth": "/mois",
+      "perYear": "/an"
     },
     "delete": {
       "title": "Confirmer la suppression",
@@ -894,7 +996,8 @@
       "confirm": "Confirmer",
       "deleting": "Suppression...",
       "productError": "La suppression a échoué. Réessaie.",
-      "categoryError": "Impossible de supprimer cette catégorie. Elle est peut-être utilisée par des produits."
+      "categoryError": "La catégorie n’a pas pu être supprimée en raison d’une erreur inattendue.",
+      "categoryInUse": "{count, plural, one {Cette catégorie ne peut pas être supprimée car # produit l’utilise.} other {Cette catégorie ne peut pas être supprimée car # produits l’utilisent.}}"
     }
   },
   "validation": {
@@ -1127,6 +1230,12 @@
       }
     }
   },
+  "orderStatus": {
+    "pending": "En attente",
+    "paid": "Payée",
+    "failed": "Échouée",
+    "canceled": "Annulée"
+  },
   "orders": {
     "title": "Vos commandes",
     "invoiceWarning": "Si vous ne parvenez pas à télécharger une facture, veuillez contacter le support.",
@@ -1200,6 +1309,12 @@
   "user_edition": {
     "title": "Édition du profil",
     "editEmailTitle": "Modifier l'adresse email",
+    "editNameTitle": "Modifier le nom complet",
+    "fullNameLabel": "Nom complet",
+    "fullNameHint": "2 à 100 caractères. La casse et les noms composés sont conservés.",
+    "updateNameButton": "Mettre à jour le nom",
+    "successNameUpdate": "Votre nom a été mis à jour.",
+    "errorInvalidName": "Saisissez un nom complet de 2 à 100 caractères.",
     "newEmailLabel": "Nouvelle adresse email",
     "emailPlaceholder": "votre@email.com",
     "updateEmailButton": "Mettre à jour l'email",

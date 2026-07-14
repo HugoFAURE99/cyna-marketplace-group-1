@@ -37,6 +37,9 @@ const styles = StyleSheet.create({
   name: { paddingRight: 5, width: "48%" },
   metric: { paddingRight: 5, textAlign: "right", width: "15%" },
   revenue: { fontFamily: "Helvetica-Bold", paddingRight: 5, textAlign: "right", width: "30%" },
+  reportName: { paddingRight: 5, width: "43%" },
+  reportMetric: { paddingRight: 5, textAlign: "right", width: "12%" },
+  reportRevenue: { fontFamily: "Helvetica-Bold", fontSize: 8, paddingRight: 5, textAlign: "right", width: "26%" },
   empty: { color: "#64748b", paddingVertical: 12, textAlign: "center" },
   subscriptionRow: { flexDirection: "row", justifyContent: "space-between" },
   subscriptionItem: { backgroundColor: "#f8fafc", borderRadius: 4, marginBottom: 7, padding: 9, width: "31.8%" },
@@ -47,6 +50,13 @@ const styles = StyleSheet.create({
   dueSeats: { paddingRight: 5, textAlign: "right", width: "8%" },
   dueAmount: { fontFamily: "Helvetica-Bold", paddingRight: 5, textAlign: "right", width: "16%" },
   dueDate: { paddingRight: 5, textAlign: "right", width: "16%" },
+  annualCustomer: { paddingLeft: 5, width: "18%" },
+  annualProduct: { paddingRight: 5, width: "21%" },
+  annualKind: { paddingRight: 5, width: "13%" },
+  annualPlan: { paddingRight: 5, width: "10%" },
+  annualSeats: { paddingRight: 5, textAlign: "right", width: "8%" },
+  annualAmount: { fontFamily: "Helvetica-Bold", paddingRight: 5, textAlign: "right", width: "15%" },
+  annualDate: { paddingRight: 5, textAlign: "right", width: "15%" },
   note: { color: "#64748b", fontSize: 7, marginTop: 7 },
 });
 
@@ -81,6 +91,13 @@ const copy = {
     seats: "Seats",
     amount: "Amount",
     dueDate: "Due date",
+    annualOutlook: "Annual subscription outlook",
+    annualPeriod: "Next calendar year",
+    annualRenewals: "Annual renewals",
+    annualEndings: "Annual scheduled endings",
+    outlookType: "Type",
+    renewal: "Renewal",
+    ending: "Ending",
     moreRows: "Showing the first 20 of {count} rows.",
     product: "Product",
     category: "Category",
@@ -119,6 +136,13 @@ const copy = {
     seats: "Postes",
     amount: "Montant",
     dueDate: "Échéance",
+    annualOutlook: "Prévisions annuelles des abonnements",
+    annualPeriod: "Prochaine année civile",
+    annualRenewals: "Renouvellements annuels",
+    annualEndings: "Fins annuelles programmées",
+    outlookType: "Type",
+    renewal: "Renouvellement",
+    ending: "Fin programmée",
     moreRows: "Affichage des 20 premières lignes sur {count}.",
     product: "Produit",
     category: "Catégorie",
@@ -133,13 +157,15 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
   const t = copy[data.locale];
   const currency = new Intl.NumberFormat(data.locale, { style: "currency", currency: "EUR" });
   const number = new Intl.NumberFormat(data.locale);
+  const currencyText = (value: number) => sanitizePdfNumberText(currency.format(value));
+  const numberText = (value: number) => sanitizePdfNumberText(number.format(value));
   const timestamp = new Intl.DateTimeFormat(data.locale, { dateStyle: "medium", timeStyle: "short", timeZone: data.range.timeZone }).format(new Date(data.generatedAt));
   const maxTrend = Math.max(1, ...data.trend.map((point) => point.revenue));
   const kpis = [
-    { label: t.revenue, value: currency.format(data.current.grossRevenue), change: data.current.changes.grossRevenue },
-    { label: t.orders, value: number.format(data.current.orderCount), change: data.current.changes.orderCount },
-    { label: t.average, value: currency.format(data.current.averageOrderValue), change: data.current.changes.averageOrderValue },
-    { label: t.customers, value: number.format(data.current.uniqueCustomers), change: data.current.changes.uniqueCustomers },
+    { label: t.revenue, value: currencyText(data.current.grossRevenue), change: data.current.changes.grossRevenue },
+    { label: t.orders, value: numberText(data.current.orderCount), change: data.current.changes.orderCount },
+    { label: t.average, value: currencyText(data.current.averageOrderValue), change: data.current.changes.averageOrderValue },
+    { label: t.customers, value: numberText(data.current.uniqueCustomers), change: data.current.changes.uniqueCustomers },
   ];
 
   return (
@@ -166,7 +192,7 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
             <View key={point.key} style={styles.trendRow}>
               <Text style={styles.trendLabel}>{point.label}</Text>
               <View style={styles.trendTrack}><View style={[styles.trendBar, { width: `${Math.max(1, (point.revenue / maxTrend) * 100)}%` }]} /></View>
-              <Text style={styles.trendValue}>{currency.format(point.revenue)} · {point.orders}</Text>
+              <Text style={styles.trendValue}>{currencyText(point.revenue)} · {numberText(point.orders)}</Text>
             </View>
           )) : <Text style={styles.empty}>{t.noData}</Text>}
         </View>
@@ -175,12 +201,12 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
           <Text style={styles.sectionTitle}>{t.subscriptions}</Text>
           <Text style={styles.note}>{t.forecast}: {data.subscriptions.horizon} {t.days} ({data.subscriptions.asOf} - {data.subscriptions.to})</Text>
           <View style={[styles.subscriptionRow, { flexWrap: "wrap", marginTop: 8 }]}>
-            <View style={styles.subscriptionItem}><Text>{t.active}</Text><Text style={styles.subscriptionValue}>{number.format(data.subscriptions.active)}</Text></View>
-            <View style={styles.subscriptionItem}><Text>{t.activeSeats}</Text><Text style={styles.subscriptionValue}>{number.format(data.subscriptions.activeSeats)}</Text></View>
-            <View style={styles.subscriptionItem}><Text>{t.renewals}</Text><Text style={styles.subscriptionValue}>{number.format(data.subscriptions.upcomingRenewalCount)}</Text></View>
-            <View style={styles.subscriptionItem}><Text>{t.renewalValue}</Text><Text style={styles.subscriptionValue}>{currency.format(data.subscriptions.upcomingRenewalValue)}</Text></View>
-            <View style={styles.subscriptionItem}><Text>{t.endings}</Text><Text style={styles.subscriptionValue}>{number.format(data.subscriptions.scheduledEndingCount)}</Text></View>
-            <View style={styles.subscriptionItem}><Text>{t.endingValue}</Text><Text style={styles.subscriptionValue}>{currency.format(data.subscriptions.scheduledEndingValue)}</Text></View>
+            <View style={styles.subscriptionItem}><Text>{t.active}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.active)}</Text></View>
+            <View style={styles.subscriptionItem}><Text>{t.activeSeats}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.activeSeats)}</Text></View>
+            <View style={styles.subscriptionItem}><Text>{t.renewals}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.upcomingRenewalCount)}</Text></View>
+            <View style={styles.subscriptionItem}><Text>{t.renewalValue}</Text><Text style={styles.subscriptionValue}>{currencyText(data.subscriptions.upcomingRenewalValue)}</Text></View>
+            <View style={styles.subscriptionItem}><Text>{t.endings}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.scheduledEndingCount)}</Text></View>
+            <View style={styles.subscriptionItem}><Text>{t.endingValue}</Text><Text style={styles.subscriptionValue}>{currencyText(data.subscriptions.scheduledEndingValue)}</Text></View>
           </View>
         </View>
       </Page>
@@ -189,21 +215,35 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
         <View style={styles.pageBackground} />
         <ReportChrome generated={timestamp} pageLabel={t.page} />
         <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t.annualOutlook}</Text>
+          <Text style={styles.note}>{t.annualPeriod}: {data.subscriptions.asOf} - {data.subscriptions.annualTo}</Text>
+          <View style={[styles.subscriptionRow, { marginBottom: 10, marginTop: 8 }]}>
+            <View style={[styles.subscriptionItem, { width: "48%" }]}><Text>{t.annualRenewals}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.annualRenewalCount)} · {currencyText(data.subscriptions.annualRenewalValue)}</Text></View>
+            <View style={[styles.subscriptionItem, { width: "48%" }]}><Text>{t.annualEndings}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.annualScheduledEndingCount)} · {currencyText(data.subscriptions.annualScheduledEndingValue)}</Text></View>
+          </View>
+          <AnnualDueTable currency={currencyText} data={data.subscriptions.annualOutlook} labels={t} />
+        </View>
+      </Page>
+
+      <Page size="A4" style={styles.page}>
+        <View style={styles.pageBackground} />
+        <ReportChrome generated={timestamp} pageLabel={t.page} />
+        <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.topProducts}</Text>
-          <ReportTable headers={[t.product, t.orders, t.quantity]} rows={data.topProducts.slice(0, 15).map((item) => ({ id: String(item.id), name: item.name, metric: number.format(item.orders), quantity: number.format(item.quantity), revenue: currency.format(item.revenue) }))} noData={t.noData} />
+          <ReportTable headers={[t.product, t.orders, t.quantity]} rows={data.topProducts.slice(0, 15).map((item) => ({ id: String(item.id), name: item.name, metric: numberText(item.orders), quantity: numberText(item.quantity), revenue: currencyText(item.revenue) }))} noData={t.noData} />
         </View>
 
         <View style={styles.split}>
           <View style={styles.splitColumn}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t.categories}</Text>
-              <ReportTable compact headers={[t.category, t.quantity, ""]} rows={data.categories.slice(0, 8).map((item, index) => ({ id: String(item.id ?? index), name: item.name, metric: "", quantity: number.format(item.quantity), revenue: currency.format(item.revenue) }))} noData={t.noData} />
+              <ReportTable compact headers={[t.category, t.quantity, ""]} rows={data.categories.slice(0, 8).map((item, index) => ({ id: String(item.id ?? index), name: item.name, metric: "", quantity: numberText(item.quantity), revenue: currencyText(item.revenue) }))} noData={t.noData} />
             </View>
           </View>
           <View style={styles.splitColumn}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t.billing}</Text>
-              <ReportTable compact headers={[t.plan, t.quantity, ""]} rows={data.billingMix.slice(0, 8).map((item, index) => ({ id: String(index), name: item.plan, metric: "", quantity: number.format(item.quantity), revenue: currency.format(item.revenue) }))} noData={t.noData} />
+              <ReportTable compact headers={[t.plan, t.quantity, ""]} rows={data.billingMix.slice(0, 8).map((item, index) => ({ id: String(index), name: item.plan, metric: "", quantity: numberText(item.quantity), revenue: currencyText(item.revenue) }))} noData={t.noData} />
             </View>
           </View>
         </View>
@@ -214,7 +254,7 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
         <ReportChrome generated={timestamp} pageLabel={t.page} />
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.renewals}</Text>
-          <SubscriptionDueTable currency={currency} data={data.subscriptions.upcomingRenewals} labels={t} />
+          <SubscriptionDueTable currency={currencyText} data={data.subscriptions.upcomingRenewals} labels={t} />
         </View>
       </Page>
 
@@ -223,7 +263,7 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
         <ReportChrome generated={timestamp} pageLabel={t.page} />
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.endings}</Text>
-          <SubscriptionDueTable currency={currency} data={data.subscriptions.scheduledEndings} labels={t} />
+          <SubscriptionDueTable currency={currencyText} data={data.subscriptions.scheduledEndings} labels={t} />
         </View>
       </Page>
 
@@ -234,13 +274,13 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
           <View style={styles.splitColumn}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t.subscriptionProducts}</Text>
-              <SubscriptionBreakdownTable currency={currency} items={data.subscriptions.productBreakdown} noData={t.noData} />
+              <SubscriptionBreakdownTable currency={currencyText} items={data.subscriptions.productBreakdown} noData={t.noData} />
             </View>
           </View>
           <View style={styles.splitColumn}>
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>{t.subscriptionBilling}</Text>
-              <SubscriptionBreakdownTable currency={currency} items={data.subscriptions.billingBreakdown} noData={t.noData} />
+              <SubscriptionBreakdownTable currency={currencyText} items={data.subscriptions.billingBreakdown} noData={t.noData} />
             </View>
           </View>
         </View>
@@ -253,20 +293,28 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
   );
 }
 
+function AnnualDueTable({ currency, data, labels }: {
+  currency: (value: number) => string;
+  data: CommerceReportData["subscriptions"]["annualOutlook"];
+  labels: (typeof copy)[keyof typeof copy];
+}) {
+  return <View><View style={styles.tableHeader}><Text style={styles.annualCustomer}>{labels.customer}</Text><Text style={styles.annualProduct}>{labels.product}</Text><Text style={styles.annualKind}>{labels.outlookType}</Text><Text style={styles.annualPlan}>{labels.plan}</Text><Text style={styles.annualSeats}>{labels.seats}</Text><Text style={styles.annualAmount}>{labels.amount}</Text><Text style={styles.annualDate}>{labels.dueDate}</Text></View>{data.length ? data.slice(0, 20).map((item) => <View key={item.id} style={styles.tableRow} wrap={false}><Text style={styles.annualCustomer}>{item.customerName || item.contactEmail || "-"}</Text><Text style={styles.annualProduct}>{item.productName}</Text><Text style={styles.annualKind}>{item.kind === "renewal" ? labels.renewal : labels.ending}</Text><Text style={styles.annualPlan}>{item.billingPlan}</Text><Text style={styles.annualSeats}>{item.seats}</Text><Text style={styles.annualAmount}>{currency(item.value)}</Text><Text style={styles.annualDate}>{item.dueDate}</Text></View>) : <Text style={styles.empty}>{labels.noData}</Text>}{data.length > 20 && <Text style={styles.note}>{labels.moreRows.replace("{count}", String(data.length))}</Text>}</View>;
+}
+
 function SubscriptionDueTable({ currency, data, labels }: {
-  currency: Intl.NumberFormat;
+  currency: (value: number) => string;
   data: CommerceReportData["subscriptions"]["upcomingRenewals"];
   labels: (typeof copy)[keyof typeof copy];
 }) {
-  return <View><View style={styles.tableHeader}><Text style={styles.dueCustomer}>{labels.customer}</Text><Text style={styles.dueProduct}>{labels.product}</Text><Text style={styles.duePlan}>{labels.plan}</Text><Text style={styles.dueSeats}>{labels.seats}</Text><Text style={styles.dueAmount}>{labels.amount}</Text><Text style={styles.dueDate}>{labels.dueDate}</Text></View>{data.length ? data.slice(0, 20).map((item) => <View key={item.id} style={styles.tableRow} wrap={false}><Text style={styles.dueCustomer}>{item.customerName || item.contactEmail || "-"}</Text><Text style={styles.dueProduct}>{item.productName}</Text><Text style={styles.duePlan}>{item.billingPlan}</Text><Text style={styles.dueSeats}>{item.seats}</Text><Text style={styles.dueAmount}>{currency.format(item.value)}</Text><Text style={styles.dueDate}>{item.dueDate}</Text></View>) : <Text style={styles.empty}>{labels.noData}</Text>}{data.length > 20 && <Text style={styles.note}>{labels.moreRows.replace("{count}", String(data.length))}</Text>}</View>;
+  return <View><View style={styles.tableHeader}><Text style={styles.dueCustomer}>{labels.customer}</Text><Text style={styles.dueProduct}>{labels.product}</Text><Text style={styles.duePlan}>{labels.plan}</Text><Text style={styles.dueSeats}>{labels.seats}</Text><Text style={styles.dueAmount}>{labels.amount}</Text><Text style={styles.dueDate}>{labels.dueDate}</Text></View>{data.length ? data.slice(0, 20).map((item) => <View key={item.id} style={styles.tableRow} wrap={false}><Text style={styles.dueCustomer}>{item.customerName || item.contactEmail || "-"}</Text><Text style={styles.dueProduct}>{item.productName}</Text><Text style={styles.duePlan}>{item.billingPlan}</Text><Text style={styles.dueSeats}>{item.seats}</Text><Text style={styles.dueAmount}>{currency(item.value)}</Text><Text style={styles.dueDate}>{item.dueDate}</Text></View>) : <Text style={styles.empty}>{labels.noData}</Text>}{data.length > 20 && <Text style={styles.note}>{labels.moreRows.replace("{count}", String(data.length))}</Text>}</View>;
 }
 
 function SubscriptionBreakdownTable({ currency, items, noData }: {
-  currency: Intl.NumberFormat;
+  currency: (value: number) => string;
   items: { count: number; label: string; value: number }[];
   noData: string;
 }) {
-  return <View>{items.length ? items.slice(0, 20).map((item, index) => <View key={`${item.label}-${index}`} style={styles.tableRow} wrap={false}><Text style={styles.rank}>{index + 1}</Text><Text style={styles.name}>{item.label}</Text><Text style={styles.metric}>{item.count}</Text><Text style={styles.revenue}>{currency.format(item.value)}</Text></View>) : <Text style={styles.empty}>{noData}</Text>}</View>;
+  return <View>{items.length ? items.slice(0, 20).map((item, index) => <View key={`${item.label}-${index}`} style={styles.tableRow} wrap={false}><Text style={styles.rank}>{index + 1}</Text><Text style={styles.name}>{item.label}</Text><Text style={styles.metric}>{item.count}</Text><Text style={styles.revenue}>{currency(item.value)}</Text></View>) : <Text style={styles.empty}>{noData}</Text>}</View>;
 }
 
 function SubscriptionStatusTable({ items, noData }: { items: { count: number; label: string }[]; noData: string }) {
@@ -274,11 +322,18 @@ function SubscriptionStatusTable({ items, noData }: { items: { count: number; la
 }
 
 function ReportChrome({ generated, pageLabel }: { generated: string; pageLabel: string }) {
-  return <><View style={styles.header}><Text style={styles.brand}>CYNA</Text><Text style={styles.headerMeta}>{generated}</Text></View><View style={styles.footer}><Text>CYNA BackOffice · {generated}</Text><Text render={({ pageNumber, totalPages }) => `${pageLabel} ${pageNumber} / ${totalPages}`} /></View></>;
+  return <><View fixed style={styles.header}><Text style={styles.brand} render={() => "CYNA"} /><Text style={styles.headerMeta} render={() => generated} /></View><View fixed style={styles.footer}><Text render={() => `CYNA BackOffice · ${generated}`} /><Text render={({ pageNumber, totalPages }) => `${pageLabel} ${pageNumber} / ${totalPages}`} /></View></>;
 }
 
 function ReportTable({ compact = false, headers, noData, rows }: { compact?: boolean; headers: [string, string, string]; noData: string; rows: { id: string; metric: string; name: string; quantity: string; revenue: string }[] }) {
-  return <View><View style={styles.tableHeader}><Text style={styles.rank}>#</Text><Text style={styles.name}>{headers[0]}</Text>{!compact && <Text style={styles.metric}>{headers[1]}</Text>}<Text style={styles.metric}>{compact ? headers[1] : headers[2]}</Text><Text style={styles.revenue}>EUR</Text></View>{rows.length ? rows.slice(0, 20).map((row, index) => <View key={row.id} style={styles.tableRow} wrap={false}><Text style={styles.rank}>{index + 1}</Text><Text style={styles.name}>{row.name}</Text>{!compact && <Text style={styles.metric}>{row.metric}</Text>}<Text style={styles.metric}>{row.quantity}</Text><Text style={styles.revenue}>{row.revenue}</Text></View>) : <Text style={styles.empty}>{noData}</Text>}</View>;
+  const nameStyle = compact ? styles.name : styles.reportName;
+  const metricStyle = compact ? styles.metric : styles.reportMetric;
+  const revenueStyle = compact ? styles.revenue : styles.reportRevenue;
+  return <View><View style={styles.tableHeader}><Text style={styles.rank}>#</Text><Text style={nameStyle}>{headers[0]}</Text>{!compact && <Text style={metricStyle}>{headers[1]}</Text>}<Text style={metricStyle}>{compact ? headers[1] : headers[2]}</Text><Text style={revenueStyle}>EUR</Text></View>{rows.length ? rows.slice(0, 20).map((row, index) => <View key={row.id} style={styles.tableRow} wrap={false}><Text style={styles.rank}>{index + 1}</Text><Text style={nameStyle}>{row.name}</Text>{!compact && <Text style={metricStyle}>{row.metric}</Text>}<Text style={metricStyle}>{row.quantity}</Text><Text style={revenueStyle}>{row.revenue}</Text></View>) : <Text style={styles.empty}>{noData}</Text>}</View>;
+}
+
+export function sanitizePdfNumberText(value: string): string {
+  return value.replace(/[\u00a0\u202f]/g, " ");
 }
 
 function formatChange(value: number | null): string {

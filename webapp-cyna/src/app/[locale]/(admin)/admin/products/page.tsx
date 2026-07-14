@@ -19,6 +19,7 @@ export default async function ProductsPage({
   const tPriority = await getTranslations("admin.priority");
   const tTabs = await getTranslations("admin.tabs");
   const tFeatured = await getTranslations("admin.featured");
+  const tProduct = await getTranslations("product");
   const [products, categoriesRaw] = await Promise.all([
     getProducts(locale),
     getCategories(locale).catch(() => []),
@@ -85,6 +86,11 @@ export default async function ProductsPage({
     confirmRemove: tFeatured("confirmRemove"),
     cancelRemove: tFeatured("cancelRemove"),
     cancel: tFeatured("cancel"),
+    close: tFeatured("close"),
+    dragProduct: tFeatured("dragProduct"),
+    perMonth: tFeatured("perMonth"),
+    perYear: tFeatured("perYear"),
+    promotionBadge: tProduct("promotionBadge", { discount: "{discount}" }),
   };
 
   const tabsTranslations = {
@@ -99,13 +105,14 @@ export default async function ProductsPage({
     unsavedSaveAndLeave: tPriority("unsavedSaveAndLeave"),
     allCategories: tTabs("allCategories"),
     filterByCategory: tTabs("filterByCategory"),
+    searchPlaceholder: tTabs("searchPlaceholder"),
   };
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
-        <Button nativeButton={false} render={<Link href="/admin/products/new" />}>
+        <Button className="w-full sm:w-auto" nativeButton={false} render={<Link href="/admin/products/new" />}>
           {t("add")}
         </Button>
       </div>

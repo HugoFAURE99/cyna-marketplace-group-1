@@ -17,6 +17,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import AvailabilityBadge from "@/components/product/AvailabilityBadge";
 import ContactSalesInfo from "@/components/product/ContactSalesInfo";
+import PromotionalPrice from "@/components/product/PromotionalPrice";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -349,14 +350,22 @@ export default function CartItemCard({ item }: CartItemCardProps) {
               </div>
             </div>
 
-            <div className="ml-auto text-right">
-              <p className="text-xs text-slate-400">
+            <div className="ml-auto flex flex-col items-end text-right">
+              <p className="text-xs text-slate-500">
                 {formatPriceCents(item.unitPriceCents, locale)}
-                {periodSuffix(item.typeFacturation)}
+                {periodSuffix(item.typeFacturation)} · {tp("users", { count: item.licenseUserCount })}
               </p>
-              <p className="text-lg font-bold text-slate-950">
-                {formatPriceCents(item.lineTotalCents, locale)}
-              </p>
+              <PromotionalPrice
+                automaticPromotion={item.automaticPromotion}
+                badgeLabel={(discount) =>
+                  tp("promotionBadge", { discount })
+                }
+                className="justify-end"
+                locale={locale}
+                originalPriceCents={item.originalLineTotalCents}
+                priceClassName="text-lg text-slate-950"
+                promotionalPriceCents={item.lineTotalCents}
+              />
             </div>
           </div>
         </div>

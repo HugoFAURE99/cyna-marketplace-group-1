@@ -6,8 +6,8 @@
 import { ImageOff } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import PromotionalPrice from "@/components/product/PromotionalPrice";
 import { Link } from "@/i18n/navigation";
-import { formatPriceCents } from "@/lib/i18n/format";
 import type { Locale } from "@/lib/i18n/translations";
 import type { SearchSuggestion } from "@/lib/products/search-products";
 
@@ -55,16 +55,29 @@ export default function ChatProductCard({
         <h4 className="truncate text-sm font-semibold text-slate-950">
           {product.nom_pro}
         </h4>
-        <p className="text-xs font-semibold text-purple-700">
-          {product.priceCents != null
-            ? `${formatPriceCents(product.priceCents, locale)}${period}`
-            : t("pricingUnavailable")}
+        <div className="text-xs">
+          {product.priceCents != null && product.originalPriceCents != null ? (
+            <PromotionalPrice
+              automaticPromotion={product.automaticPromotion}
+              badgeLabel={(discount) =>
+                t("promotionBadge", { discount })
+              }
+              locale={locale}
+              originalPriceCents={product.originalPriceCents}
+              periodSuffix={period}
+              promotionalPriceCents={product.priceCents}
+            />
+          ) : (
+            <span className="font-semibold text-purple-700">
+              {t("pricingUnavailable")}
+            </span>
+          )}
           {unavailable && (
             <span className="ml-1 font-medium text-black">
               · {t("unavailable")}
             </span>
           )}
-        </p>
+        </div>
       </div>
     </Link>
   );

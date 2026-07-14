@@ -4,6 +4,7 @@ import HomepageTabs from "@/components/admin/Homepage/HomepageTabs";
 import {
   getCarouselSlides,
   getIntroTexts,
+  getManagedLinkOptions,
 } from "@/app/[locale]/(admin)/admin/_actions/homepage.actions";
 import type { Locale } from "@/lib/i18n/translations";
 
@@ -20,10 +21,12 @@ export default async function AdminPage({
   const tIntro = await getTranslations("admin.homepage.intro");
   const tShortcuts = await getTranslations("admin.homepage.shortcuts");
   const tTabs = await getTranslations("admin.homepage.tabs");
+  const tLinks = await getTranslations("admin.homepage.links");
 
-  const [slides, introTexts] = await Promise.all([
+  const [slides, introTexts, linkOptions] = await Promise.all([
     getCarouselSlides(),
     getIntroTexts(),
+    getManagedLinkOptions(locale),
   ]);
 
   const translations = {
@@ -98,6 +101,18 @@ export default async function AdminPage({
     categoriesDescription: tShortcuts("categoriesDescription"),
     go: tShortcuts("go"),
   };
+  const linkPickerTranslations = {
+    groups: {
+      anchor: tLinks("groups.anchor"),
+      category: tLinks("groups.category"),
+      page: tLinks("groups.page"),
+      product: tLinks("groups.product"),
+    },
+    hint: tLinks("hint"),
+    invalid: tLinks("invalid"),
+    noResults: tLinks("noResults"),
+    placeholder: tLinks("placeholder"),
+  };
 
   return (
     <div>
@@ -105,6 +120,8 @@ export default async function AdminPage({
       <HomepageTabs
         slides={slides}
         introTexts={introTexts}
+        linkOptions={linkOptions}
+        linkPickerTranslations={linkPickerTranslations}
         translations={translations}
         carouselTranslations={carouselTranslations}
         introTranslations={introTranslations}

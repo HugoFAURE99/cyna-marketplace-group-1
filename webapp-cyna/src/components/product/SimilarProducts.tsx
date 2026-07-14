@@ -1,8 +1,10 @@
 // "Similar Services" grid; renders nothing when there are none.
 import { ImageOff } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
+import PromotionalPrice from "@/components/product/PromotionalPrice";
 import { Link } from "@/i18n/navigation";
+import type { Locale } from "@/lib/i18n/translations";
 import type { SimilarProduct } from "@/lib/products/public-products";
 
 type SimilarProductsProps = {
@@ -17,6 +19,13 @@ export default async function SimilarProducts({
   }
 
   const t = await getTranslations("product");
+  const locale = (await getLocale()) as Locale;
+
+  const periodSuffix = (type: string) => {
+    if (type === "mensuel") return t("perMonth");
+    if (type === "annuel") return t("perYear");
+    return "";
+  };
 
   return (
     <section className="mt-16">
@@ -29,6 +38,7 @@ export default async function SimilarProducts({
             product.images[0]?.lien_image_produit ??
             product.category?.lien_image_cat ??
             null;
+          const primaryTariff = product.tariffs[0];
 
           return (
             <Link
@@ -56,6 +66,23 @@ export default async function SimilarProducts({
                 <h3 className="font-semibold text-slate-950">
                   {product.nom_pro}
                 </h3>
+                {primaryTariff ? (
+                  <PromotionalPrice
+                    automaticPromotion={primaryTariff.automaticPromotion}
+                    badgeLabel={(discount) =>
+                      t("promotionBadge", { discount })
+                    }
+                    className="mt-1 text-sm"
+                    locale={locale}
+                    originalPriceCents={primaryTariff.prix}
+                    periodSuffix={periodSuffix(
+                      primaryTariff.type_facturation,
+                    )}
+                    promotionalPriceCents={
+                      primaryTariff.promotionalPriceCents
+                    }
+                  />
+                ) : null}
               </div>
             </Link>
           );

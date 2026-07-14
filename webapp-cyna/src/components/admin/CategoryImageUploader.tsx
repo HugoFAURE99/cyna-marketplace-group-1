@@ -51,11 +51,11 @@ export function CategoryImageUploader({
       <h3 className="text-lg font-semibold">{t("image")}</h3>
 
       {previewUrl ? (
-        <div className="relative inline-block">
+        <div className="relative inline-block max-w-full">
           <Image
             src={previewUrl}
             alt=""
-            className="max-w-xs rounded-lg border shadow-md"
+            className="h-auto max-w-full rounded-lg border shadow-md"
             height={240}
             unoptimized
             width={320}
@@ -73,7 +73,7 @@ export function CategoryImageUploader({
       ) : (
         <div
           {...getRootProps()}
-          className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
+          className={`cursor-pointer rounded-lg border-2 border-dashed p-5 text-center transition-colors sm:p-8 ${
             isDragActive
               ? "border-blue-500 bg-blue-50"
               : "border-gray-300 hover:border-gray-400"

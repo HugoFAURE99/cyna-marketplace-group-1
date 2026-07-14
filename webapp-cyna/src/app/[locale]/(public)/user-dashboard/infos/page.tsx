@@ -89,7 +89,7 @@ export default async function Account({
       </div>
 
       <div className="w-full min-w-0 max-w-3xl rounded-lg border border-slate-200 bg-white p-5 sm:p-8">
-        <h2 className="text-lg font-semibold capitalize text-slate-900">
+        <h2 className="text-lg font-semibold text-slate-900">
           {user.firstName} {user.lastName}
         </h2>
 

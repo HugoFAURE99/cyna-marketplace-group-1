@@ -5,7 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { ArrowLeft, Pencil, Plus, X } from "lucide-react";
+import { Pencil, Plus, X } from "lucide-react";
 import Spinner from "@/components/ui/spinner";
 
 import { useRouter } from "@/i18n/navigation";
@@ -307,14 +307,6 @@ export default function ProductForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {tActions("back")}
-      </button>
       <h2 className="text-2xl font-bold mb-6">
         {product ? t("submitUpdate") : t("submitCreate")}
       </h2>
@@ -388,7 +380,7 @@ export default function ProductForm({
       {/* Billing toggle cards */}
       <div className={styles.field}>
         <Label>{t("billing")}</Label>
-        <div className="flex gap-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           {BILLING_OPTIONS.map((option) => (
             <button
               key={option}
@@ -412,7 +404,7 @@ export default function ProductForm({
       </div>
 
       {/* Price fields — always visible, disabled when billing not selected */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className={`${styles.field} ${!selectedBillings.includes("mensuel") ? "opacity-40" : ""}`}>
           <Label htmlFor="prix_mensuel">{t("priceMonthly")}</Label>
           <Input
@@ -566,19 +558,14 @@ export default function ProductForm({
       </div>
       </div>
 
-      <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
+      <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
         {readOnly ? (
-          <>
-            <Button type="button" variant="outline" onClick={() => router.back()}>
-              {tActions("back")}
+          product && (
+            <Button type="button" onClick={() => router.push(`/admin/products/${product.id_produit}`)}>
+              <Pencil className="mr-1 h-3.5 w-3.5" />
+              {tActions("edit")}
             </Button>
-            {product && (
-              <Button type="button" onClick={() => router.push(`/admin/products/${product.id_produit}`)}>
-                <Pencil className="mr-1 h-3.5 w-3.5" />
-                {tActions("edit")}
-              </Button>
-            )}
-          </>
+          )
         ) : (
           <>
             <Button type="button" variant="outline" onClick={() => router.back()}>

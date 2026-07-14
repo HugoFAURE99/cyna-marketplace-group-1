@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
 import { UpdateEmailForm } from "@/components/user-edition/update-email-form";
 import { RequestPasswordResetForm } from "@/components/user-edition/request-password-reset-form";
+import { UpdateNameForm } from "@/components/user-edition/update-name-form";
 
 export default async function UserEdition({
   params,
@@ -24,16 +25,18 @@ export default async function UserEdition({
   } = await supabase.auth.getUser();
 
   let email = "";
+  let fullName = "";
 
   if (authUser) {
     const { data: dbUser } = await supabase
       .from("utilisateur")
-      .select("adresse_mail")
+      .select("adresse_mail, nom_complet")
       .eq("id_compte", authUser.id)
       .single();
     if (dbUser && dbUser.adresse_mail) {
       email = dbUser.adresse_mail;
     }
+    fullName = dbUser?.nom_complet ?? "";
   }
 
   return (
@@ -49,6 +52,10 @@ export default async function UserEdition({
       </div>
 
       <div className="sm:p-6 space-y-8 sm:space-y-12">
+        <UpdateNameForm initialName={fullName} />
+
+        <hr className="border-slate-100" />
+
         {/* Formulaire pour l'adresse email */}
         <UpdateEmailForm initialEmail={email} />
 

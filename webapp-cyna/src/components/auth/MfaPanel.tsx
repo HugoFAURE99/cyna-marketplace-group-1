@@ -3,10 +3,11 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
+import { Loader2, LogOut, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { createBrowserClient } from "@/lib/supabase/browser-client";
+import { logout } from "@/app/(auth)/_action/auth.action";
 import { requestMfaRecovery } from "@/app/(auth)/_action/mfa.action";
 import { normalizeTotpQrCode } from "@/lib/auth/totp-qr";
 
@@ -188,6 +189,17 @@ export function MfaPanel({ mode, next }: { mode: "challenge" | "required-admin-e
             )}
           </>
         )}
+        <div className="mt-5 border-t border-slate-200 pt-4">
+          <form action={logout}>
+            <button
+              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-purple-200 hover:bg-purple-50 hover:text-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700"
+              type="submit"
+            >
+              <LogOut aria-hidden="true" className="size-4" />
+              {t("exitAndSignOut")}
+            </button>
+          </form>
+        </div>
       </section>
     </main>
   );

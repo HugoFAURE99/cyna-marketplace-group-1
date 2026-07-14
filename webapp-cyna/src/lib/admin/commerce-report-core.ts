@@ -10,17 +10,7 @@ import type {
 } from "@/lib/admin/commerce-report-types";
 import { enumerateReportDays, reportDateKey } from "@/lib/admin/report-range";
 import type { Locale } from "@/lib/i18n/translations";
-
-export const COMPLETED_ORDER_STATUSES = new Set([
-  "active",
-  "complete",
-  "completed",
-  "paid",
-  "payee",
-  "payé",
-  "validee",
-  "validée",
-]);
+import { isPaidOrderStatus } from "@/lib/orders/status";
 
 export type CommerceOrderLine = {
   billingPlan: string;
@@ -42,12 +32,8 @@ export type CommerceOrder = {
   total: number;
 };
 
-function statusKey(value: string): string {
-  return value.trim().toLocaleLowerCase("fr-FR");
-}
-
 export function isCompletedOrderStatus(value: string): boolean {
-  return COMPLETED_ORDER_STATUSES.has(statusKey(value));
+  return isPaidOrderStatus(value);
 }
 
 function roundCurrency(value: number): number {

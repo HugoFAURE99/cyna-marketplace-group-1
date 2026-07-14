@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Package, Layers, Users, BarChart3, ShoppingCart, Percent, RefreshCw, LifeBuoy, ExternalLink, LogOut } from "lucide-react";
+import { Home, Package, Layers, Users, BarChart3, ShoppingCart, Percent, RefreshCw, LifeBuoy, LogOut, BotMessageSquare } from "lucide-react";
 import { logout } from "@/app/(auth)/_action/auth.action";
 
 import {
@@ -18,7 +18,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Link } from "@/i18n/navigation";
-import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
+import SiteModeSwitch from "@/components/layout/SiteModeSwitch";
 
 const menuItems = [
   { labelKey: "homepage", href: "/admin", icon: Home, exact: true },
@@ -28,6 +28,7 @@ const menuItems = [
   { labelKey: "orders", href: "/admin/orders", icon: ShoppingCart, exact: false },
   { labelKey: "subscriptions", href: "/admin/subscriptions", icon: RefreshCw, exact: false },
   { labelKey: "support", href: "/admin/support", icon: LifeBuoy, exact: false },
+  { labelKey: "chatbot", href: "/admin/chatbot", icon: BotMessageSquare, exact: false },
   { labelKey: "promotions", href: "/admin/promotions", icon: Percent, exact: false },
   { labelKey: "sales", href: "/admin/sales", icon: BarChart3, exact: false },
 ] as const;
@@ -43,7 +44,9 @@ interface Labels {
   support: string;
   promotions: string;
   sales: string;
+  chatbot: string;
   viewCyna: string;
+  switchingToCyna: string;
   logout: string;
 }
 
@@ -70,7 +73,7 @@ export default function AdminSidebarClient({ labels }: { labels: Labels }) {
             priority
           />
           <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
-            Admin
+            {labels.backoffice}
           </span>
         </Link>
       </SidebarHeader>
@@ -98,17 +101,18 @@ export default function AdminSidebarClient({ labels }: { labels: Labels }) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter className="border-t border-sidebar-border p-3">
-        <Link className="flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-medium transition hover:bg-sidebar-accent" href="/">
-          <ExternalLink aria-hidden="true" className="size-4" />
-          {labels.viewCyna}
-        </Link>
+        <SiteModeSwitch
+          direction="exit"
+          href="/"
+          label={labels.viewCyna}
+          pendingLabel={labels.switchingToCyna}
+        />
         <form action={logout}>
           <button className="flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md px-2 text-left text-sm font-medium transition hover:bg-sidebar-accent" type="submit">
             <LogOut aria-hidden="true" className="size-4" />
             {labels.logout}
           </button>
         </form>
-        <LanguageSwitcher fullWidth placement="top" />
       </SidebarFooter>
     </Sidebar>
   );

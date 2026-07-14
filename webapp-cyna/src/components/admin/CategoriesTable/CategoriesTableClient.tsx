@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -72,6 +73,8 @@ export default function CategoriesTableClient({
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [blocked, setBlocked] = useState<{ name: string; productCount: number }[]>([]);
+  const [deletedCount, setDeletedCount] = useState(0);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const tBulk = useTranslations("admin.bulk");
@@ -133,11 +136,27 @@ export default function CategoriesTableClient({
 
   const handleBulkDelete = () => {
     setError(null);
+    setBlocked([]);
+    setDeletedCount(0);
     startTransition(async () => {
       try {
-        await deleteCategories([...selected]);
-        setSelected(new Set());
-        setConfirmOpen(false);
+        const result = await deleteCategories([...selected]);
+        const blockedDetails = result.blocked.map((item) => ({
+          name:
+            categories.find((category) => category.id_categorie === item.id)?.cat_nom ??
+            `#${item.id}`,
+          productCount: item.productCount,
+        }));
+        setBlocked(blockedDetails);
+        setDeletedCount(result.deletedIds.length);
+        setSelected(new Set([
+          ...result.blocked.map((item) => item.id),
+          ...result.failures.map((item) => item.id),
+        ]));
+        setError(result.failures.length ? tBulk("error") : null);
+        if (!result.blocked.length && !result.failures.length) {
+          setConfirmOpen(false);
+        }
         router.refresh();
       } catch {
         setError(tBulk("error"));
@@ -147,7 +166,7 @@ export default function CategoriesTableClient({
 
   return (
     <>
-      <div className={`mb-4 flex items-center gap-3 rounded-lg border px-4 py-2 transition-opacity ${selected.size > 0 ? "bg-muted/50" : "opacity-40 pointer-events-none bg-muted/30"}`}>
+      <div className={`mb-4 flex flex-wrap items-center gap-2 rounded-lg border px-3 py-3 transition-opacity sm:gap-3 sm:px-4 ${selected.size > 0 ? "bg-muted/50" : "opacity-40 pointer-events-none bg-muted/30"}`}>
           <span className="text-sm font-medium">
             {tBulk("selected", { count: selected.size })}
           </span>
@@ -162,7 +181,7 @@ export default function CategoriesTableClient({
             </Dialog.Trigger>
             <Dialog.Portal>
               <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-              <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+              <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
                 <Dialog.Title className="text-base font-semibold">
                   {tBulk("confirmTitle")}
                 </Dialog.Title>
@@ -171,6 +190,28 @@ export default function CategoriesTableClient({
                 </Dialog.Description>
                 {error && (
                   <p className="mt-3 text-sm text-destructive">{error}</p>
+                )}
+                {deletedCount > 0 && (
+                  <p className="mt-3 text-sm font-medium text-green-700">
+                    {tBulk("categoriesDeleted", { count: deletedCount })}
+                  </p>
+                )}
+                {blocked.length > 0 && (
+                  <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+                    <p className="font-semibold">
+                      {tBulk("categoriesInUse", { count: blocked.length })}
+                    </p>
+                    <ul className="mt-2 list-disc space-y-1 pl-5">
+                      {blocked.map((item) => (
+                        <li key={item.name}>
+                          {tBulk("categoryInUse", {
+                            count: item.productCount,
+                            name: item.name,
+                          })}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
                 <div className="mt-5 flex justify-end gap-2">
                   <Dialog.Close
@@ -256,9 +297,15 @@ export default function CategoriesTableClient({
               <TableCell>{category.cat_description ?? "—"}</TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center gap-2">
-                  <Link href={`/admin/categories/${category.id_categorie}`}>
+                  <Button
+                    nativeButton={false}
+                    render={<Link href={`/admin/categories/${category.id_categorie}`} />}
+                    size="sm"
+                    variant="outline"
+                  >
+                    <Pencil className="mr-1 h-3.5 w-3.5" />
                     {t.edit}
-                  </Link>
+                  </Button>
                   <DeleteCategoryButton
                     categoryId={category.id_categorie}
                     categoryName={category.cat_nom}

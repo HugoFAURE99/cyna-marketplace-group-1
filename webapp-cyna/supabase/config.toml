@@ -9,6 +9,3 @@ major_version = 17
 
 [db.seed]
 enabled = false
-
-[auth.sessions]
-inactivity_timeout = "30m"

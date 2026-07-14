@@ -5,7 +5,6 @@ import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import {
   Eye,
-  ArrowLeft,
   AlertTriangle,
   ClipboardList,
   Play,
@@ -22,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Spinner from "@/components/ui/spinner";
+import AdminBackButton from "@/components/admin/AdminBackButton";
 import type { Enums } from "@/types/database.types";
 import {
   updateTicketStatus,
@@ -294,9 +294,7 @@ export default function SupportTableClient({
 
     return (
       <div className="flex flex-col gap-6">
-        <Button variant="outline" size="sm" onClick={handleBack} className="w-fit">
-          <ArrowLeft className="mr-1 h-4 w-4" /> {t.back}
-        </Button>
+        <AdminBackButton label={t.back} onClick={handleBack} />
 
         <div className="flex items-center gap-3">
           <h2 className="text-xl font-bold">
@@ -511,12 +509,12 @@ export default function SupportTableClient({
           placeholder={t.search}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(0); }}
-          className="w-full max-w-xs rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring sm:max-w-xs"
         />
         <select
           value={categoryFilter}
           onChange={(e) => { setCategoryFilter(e.target.value); setPage(0); }}
-          className="rounded-md border bg-background px-3 py-2 text-sm"
+          className="w-full rounded-md border bg-background px-3 py-2 text-sm sm:w-auto"
         >
           <option value="all">{t.allCategories}</option>
           <option value="billing">{t.categoryBilling}</option>
@@ -530,7 +528,7 @@ export default function SupportTableClient({
         </select>
 
         {selectedIds.size > 0 && tab === "new" && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               variant="destructive"
               size="sm"
@@ -698,7 +696,7 @@ export default function SupportTableClient({
       </Table>
 
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-muted-foreground">
             {tPagination("info", {
               from: page * PAGE_SIZE + 1,

@@ -56,6 +56,8 @@ export type BillingBreakdown = {
 
 export type SubscriptionHorizon = 7 | 30 | 60 | 90;
 
+export type SubscriptionDueKind = "renewal" | "scheduled_ending";
+
 export type SubscriptionDueItem = {
   billingPlan: string;
   contactEmail: string | null;
@@ -63,6 +65,7 @@ export type SubscriptionDueItem = {
   daysRemaining: number;
   dueDate: string;
   id: number;
+  kind: SubscriptionDueKind;
   orderId: number;
   productId: number | null;
   productName: string;
@@ -84,6 +87,12 @@ export type SubscriptionProductBreakdown = SubscriptionCountBreakdown & {
 export type SubscriptionHealthData = {
   active: number;
   activeSeats: number;
+  annualOutlook: SubscriptionDueItem[];
+  annualRenewalCount: number;
+  annualRenewalValue: number;
+  annualScheduledEndingCount: number;
+  annualScheduledEndingValue: number;
+  annualTo: string;
   asOf: string;
   billingBreakdown: SubscriptionCountBreakdown[];
   horizon: SubscriptionHorizon;

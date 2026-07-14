@@ -1,7 +1,7 @@
 // Fixed public site header: logo, search, cart, and the menu drawer.
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
-import { CircleUserRound, LogIn, Settings } from "lucide-react";
+import { CircleUserRound, LogIn } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
 import CartButton from "@/components/layout/public-header/CartButton";
@@ -80,15 +80,6 @@ export default async function PublicHeader() {
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {/* État de connexion (visible sur écrans ≥ sm) */}
-          {isAdmin && (
-            <Link
-              className="hidden h-11 items-center gap-1.5 rounded-md border border-purple-200 bg-purple-50 px-3 text-sm font-semibold text-purple-800 transition hover:bg-purple-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 xl:inline-flex"
-              href={`/mfa-verify?next=${encodeURIComponent(`/${locale}/admin`)}`}
-            >
-              <Settings aria-hidden="true" className="size-4" />
-              {t("backOffice")}
-            </Link>
-          )}
           {user ? (
             <Link
               className="hidden h-11 max-w-[200px] items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 shadow-xs transition hover:border-purple-200 hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 lg:inline-flex"

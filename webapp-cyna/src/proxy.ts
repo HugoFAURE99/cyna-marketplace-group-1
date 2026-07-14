@@ -5,14 +5,13 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { routing } from "@/i18n/routing";
 import { isActiveAdmin } from "@/lib/auth/roles";
-import { SESSION_ACTIVITY_COOKIE } from "@/lib/auth/session-activity-constants";
 
 const handleI18nRouting = createMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
   // Keep the locale redirect/rewrite response: Supabase cookies and refresh
   // headers must be added to this same object or the rewrite can be lost.
-  let response = handleI18nRouting(request);
+  const response = handleI18nRouting(request);
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -55,23 +54,12 @@ export async function proxy(request: NextRequest) {
 
   if (user && !profile?.is_actif) {
     await supabase.auth.signOut({ scope: "local" });
-    response.cookies.delete(SESSION_ACTIVITY_COOKIE);
     if (!isAuthRoute) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = `/${locale}/login`;
       loginUrl.search = "?error=errorInactive";
       return NextResponse.redirect(loginUrl);
     }
-    return response;
-  }
-
-  if (user && !request.cookies.has(SESSION_ACTIVITY_COOKIE) && !isAuthRoute) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = `/${locale}/login`;
-    loginUrl.search = "?message=sessionExpired";
-    response = NextResponse.redirect(loginUrl);
-    await supabase.auth.signOut({ scope: "local" });
-    response.cookies.delete(SESSION_ACTIVITY_COOKIE);
     return response;
   }
 

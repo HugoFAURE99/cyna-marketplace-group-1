@@ -33,6 +33,13 @@ type Product = Awaited<ReturnType<typeof getProducts>>[number];
 
 type SortDirection = "asc" | "desc" | null;
 type SortKey = "name" | "category" | "status" | "priority" | "stock" | "priceMonthly" | "priceAnnual";
+const CATEGORY_NAME_LIMIT = 8;
+
+function truncateCategoryName(value: string): string {
+  return value.length > CATEGORY_NAME_LIMIT
+    ? `${value.slice(0, CATEGORY_NAME_LIMIT)}...`
+    : value;
+}
 
 interface Translations {
   image: string;
@@ -302,7 +309,7 @@ export default function ProductsTableClient({
 
   return (
     <>
-      <div className={`mb-4 flex items-center gap-3 rounded-lg border px-4 py-2 transition-opacity ${selected.size > 0 ? "bg-muted/50" : "opacity-40 pointer-events-none bg-muted/30"}`}>
+      <div className={`mb-4 flex flex-wrap items-center gap-2 rounded-lg border px-3 py-3 transition-opacity sm:gap-3 sm:px-4 ${selected.size > 0 ? "bg-muted/50" : "opacity-40 pointer-events-none bg-muted/30"}`}>
           <span className="text-sm font-medium">
             {tBulk("selected", { count: selected.size })}
           </span>
@@ -350,7 +357,7 @@ export default function ProductsTableClient({
             </Dialog.Trigger>
             <Dialog.Portal>
               <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-              <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+              <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
                 <Dialog.Title className="text-base font-semibold">
                   {tBulk("confirmTitle")}
                 </Dialog.Title>
@@ -480,7 +487,19 @@ export default function ProductsTableClient({
                   )}
                 </div>
               </TableCell>
-              <TableCell>{product.categorie?.cat_nom || "—"}</TableCell>
+              <TableCell>
+                {product.categorie?.cat_nom ? (
+                  <span
+                    aria-label={product.categorie.cat_nom}
+                    className="block max-w-28 whitespace-nowrap"
+                    title={product.categorie.cat_nom}
+                  >
+                    {truncateCategoryName(product.categorie.cat_nom)}
+                  </span>
+                ) : (
+                  "—"
+                )}
+              </TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center gap-2">
                   <ToggleStatusButton
@@ -542,7 +561,7 @@ export default function ProductsTableClient({
       </Table>
 
       {pageSize && totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-muted-foreground">
             {tPagination("info", {
               from: page * pageSize + 1,

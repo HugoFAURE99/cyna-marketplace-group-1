@@ -9,11 +9,13 @@ import type {
   PublicProductImage,
   PublicProductTariff,
 } from "@/lib/products/public-products";
+import { enrichProductsWithAutomaticPromotions } from "@/lib/promotions/automatic-promotions.server";
 import type { Tables } from "@/types/database.types";
 
 // A product as shown in any listing (home, category, search). `description`
 // is carried for fuzzy-search matching; cards ignore it.
 export type CatalogProduct = {
+  id_categorie: number;
   id_produit: number;
   nom_pro: string;
   description: string | null;
@@ -33,6 +35,13 @@ export type CatalogTechnicalCharacteristic = {
   id_caracteristique: number;
   nom_caracteristique: string;
   ordre_affichage: number;
+};
+
+export type CatalogCategory = {
+  cat_description: string | null;
+  cat_nom: string;
+  id_categorie: number;
+  lien_image_cat: string | null;
 };
 
 // Companion (translation) rows embedded alongside their parent.
@@ -64,6 +73,7 @@ type CatalogTechnicalCharacteristicQueryRow = Pick<
 export type CatalogProductQueryRow = Pick<
   Tables<"produit">,
   | "date_ajout"
+  | "id_categorie"
   | "id_produit"
   | "is_priorite"
   | "mis_avant"
@@ -93,6 +103,7 @@ export type CatalogProductQueryRow = Pick<
 // for fuzzy search on top of the card query shape.
 export const CATALOG_PRODUCT_SELECT = `
   date_ajout,
+  id_categorie,
   id_produit,
   is_priorite,
   mis_avant,
@@ -218,6 +229,7 @@ export function normalizeCatalogProduct(
   );
 
   return {
+    id_categorie: row.id_categorie,
     id_produit: row.id_produit,
     nom_pro: productTranslation?.nom_pro ?? "",
     description: productTranslation?.pro_description ?? null,
@@ -268,9 +280,11 @@ export function normalizeCatalogProduct(
         );
 
         return {
+          automaticPromotion: null,
           id_prix: tariff.id_prix,
           nom_prix_tarif: tariffTranslation?.nom_prix_tarif ?? null,
           prix: tariff.prix,
+          promotionalPriceCents: tariff.prix,
           stripe_price_id: tariff.stripe_price_id,
           type_facturation: tariff.type_facturation,
           unite: tariffTranslation?.unite ?? null,
@@ -304,9 +318,10 @@ export async function getCatalogProducts(
     throw new Error(`Erreur chargement catalogue public : ${error.message}`);
   }
 
-  return ((data ?? []) as unknown as CatalogProductQueryRow[])
+  const products = ((data ?? []) as unknown as CatalogProductQueryRow[])
     .map((row) => normalizeCatalogProduct(row, locale))
     .sort(compareBySearchOrder);
+  return enrichProductsWithAutomaticPromotions(products);
 }
 
 // Active products for a set of ids (used by the cart to enrich its lines).
@@ -331,9 +346,10 @@ export async function getCatalogProductsByIds(
     throw new Error(`Erreur chargement produits panier : ${error.message}`);
   }
 
-  return ((data ?? []) as unknown as CatalogProductQueryRow[]).map((row) =>
-    normalizeCatalogProduct(row, locale),
+  const products = ((data ?? []) as unknown as CatalogProductQueryRow[]).map(
+    (row) => normalizeCatalogProduct(row, locale),
   );
+  return enrichProductsWithAutomaticPromotions(products);
 }
 
 // Lightweight category list (id + localised name) for the search filters,
@@ -368,6 +384,46 @@ export async function getCatalogCategories(
       cat_nom: pickTranslation(row.categorie_traduction, locale)?.cat_nom ?? "",
     }))
     .sort((a, b) => a.cat_nom.localeCompare(b.cat_nom, locale));
+}
+
+export async function getCatalogCategoryById(
+  id: number,
+  locale: Locale,
+): Promise<CatalogCategory | null> {
+  if (!Number.isInteger(id) || id <= 0) return null;
+
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("categorie")
+    .select(`
+      id_categorie,
+      lien_image_cat,
+      categorie_traduction (
+        langue,
+        cat_nom,
+        cat_description
+      )
+    `)
+    .eq("id_categorie", id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Erreur chargement categorie publique : ${error.message}`);
+  }
+  if (!data) return null;
+
+  const row = data as unknown as Pick<Tables<"categorie">, "id_categorie" | "lien_image_cat"> & {
+    categorie_traduction:
+      | Pick<Tables<"categorie_traduction">, "langue" | "cat_nom" | "cat_description">[]
+      | null;
+  };
+  const translation = pickTranslation(row.categorie_traduction, locale);
+  return {
+    cat_description: translation?.cat_description ?? null,
+    cat_nom: translation?.cat_nom ?? "",
+    id_categorie: row.id_categorie,
+    lien_image_cat: row.lien_image_cat,
+  };
 }
 
 export async function getCatalogTechnicalCharacteristics(

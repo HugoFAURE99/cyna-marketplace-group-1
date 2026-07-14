@@ -6,7 +6,6 @@ import { validatePassword } from "@/lib/auth/password-policy";
 import { createAdminClient } from "@/lib/supabase/server";
 import { isActiveAdmin } from "@/lib/auth/roles";
 import { isAdminDestination, sanitizeAuthNext } from "@/lib/auth/mfa-return";
-import { clearServerSessionActivity, markServerSessionActive } from "@/lib/auth/session-activity";
 import { createServerClient } from "@/lib/supabase/server-client";
 
 type AuthActionState = {
@@ -51,11 +50,9 @@ export async function login(
 
       if (!profile?.is_actif) {
         await supabase.auth.signOut({ scope: "local" });
-        await clearServerSessionActivity();
         return { errorKey: "errorInactive" };
       }
 
-      await markServerSessionActive();
       const safeLocale = normaliseLocale(locale);
       const destination = sanitizeAuthNext(next, safeLocale);
       const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
@@ -137,7 +134,6 @@ export async function register(
 export async function logout() {
   const supabase = await createServerClient();
   await supabase.auth.signOut();
-  await clearServerSessionActivity();
   const { getLocale } = await import("next-intl/server");
   redirect(`/${normaliseLocale(await getLocale())}`);
 }

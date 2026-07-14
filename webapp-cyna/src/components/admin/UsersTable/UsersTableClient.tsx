@@ -3,7 +3,7 @@
 import { useState, useMemo, useTransition, useEffect } from "react";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, Eye, ExternalLink, ShieldOff } from "lucide-react";
+import { Eye, ExternalLink, ShieldOff } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
   Table,
@@ -16,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@base-ui/react/dialog";
 import Spinner from "@/components/ui/spinner";
+import AdminBackButton from "@/components/admin/AdminBackButton";
+import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
 import {
   toggleUserStatus,
   updateUserRole,
@@ -89,7 +91,7 @@ const STATUS_COLORS: Record<string, string> = {
   expire: "bg-gray-100 text-gray-800",
 };
 
-function StatusBadge({ status }: { status: string }) {
+function SubscriptionStatusBadge({ status }: { status: string }) {
   return (
     <span
       className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[status] || "bg-gray-100 text-gray-800"}`}
@@ -192,14 +194,7 @@ export default function UsersTableClient({
   if (detail) {
     return (
       <div>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t.back}
-        </button>
+        <AdminBackButton className="mb-4" label={t.back} />
 
         <h2 className="mb-6 text-xl font-bold">{t.detailTitle}</h2>
 
@@ -286,7 +281,7 @@ export default function UsersTableClient({
                   </TableCell>
                   <TableCell>{c.montant_total.toFixed(2)} €</TableCell>
                   <TableCell>
-                    <StatusBadge status={c.statut_commande} />
+                    <OrderStatusBadge status={c.statut_commande} />
                   </TableCell>
                   <TableCell>
                     <Link href={`/admin/orders?detail=${c.id_commande}`}>
@@ -336,7 +331,7 @@ export default function UsersTableClient({
                       : "—"}
                   </TableCell>
                   <TableCell>
-                    <StatusBadge status={a.statut_abonnement} />
+                    <SubscriptionStatusBadge status={a.statut_abonnement} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -367,7 +362,7 @@ export default function UsersTableClient({
           setSearch(e.target.value);
           setPage(0);
         }}
-        className="mb-4 w-full max-w-sm rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        className="mb-4 w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring sm:max-w-sm"
       />
 
       <Table>
@@ -450,7 +445,7 @@ export default function UsersTableClient({
       </Table>
 
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-between">
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-sm text-muted-foreground">
             {tPagination("info", {
               from: page * PAGE_SIZE + 1,
@@ -487,7 +482,7 @@ export default function UsersTableClient({
       >
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-          <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
             <Dialog.Title className="text-base font-semibold">
               {t.confirmDeleteTitle}
             </Dialog.Title>

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase/server-client'
 import { sanitizeAuthNext } from '@/lib/auth/mfa-return'
-import { markServerSessionActive } from '@/lib/auth/session-activity'
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
@@ -19,7 +18,6 @@ export async function GET(request: Request) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
 
         if (!error) {
-            await markServerSessionActive()
             return NextResponse.redirect(new URL(redirectPath, request.url))
         }
     }

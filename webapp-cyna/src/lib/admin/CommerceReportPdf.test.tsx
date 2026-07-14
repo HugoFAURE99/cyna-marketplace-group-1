@@ -4,12 +4,25 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 import { describe, expect, it } from "vitest";
 
-import { CommerceReportPdf } from "@/lib/admin/CommerceReportPdf";
+import {
+  CommerceReportPdf,
+  sanitizePdfNumberText,
+} from "@/lib/admin/CommerceReportPdf";
 import { aggregateCommerceReport, type CommerceOrder } from "@/lib/admin/commerce-report-core";
 import { createReportRange } from "@/lib/admin/report-range";
 import { aggregateSubscriptionHealth } from "@/lib/admin/subscription-health";
 
 describe("commerce PDF", () => {
+  it("replaces PDF-unsafe French number spaces", () => {
+    const formatted = new Intl.NumberFormat("fr", {
+      currency: "EUR",
+      style: "currency",
+    }).format(12_135);
+    const safe = sanitizePdfNumberText(formatted);
+    expect(safe).toBe("12 135,00 €");
+    expect(safe).not.toMatch(/[\u00a0\u202f]/);
+  });
+
   it("renders a readable branded multipage report", async () => {
     const range = createReportRange("custom", { from: "2026-07-01", to: "2026-07-31" });
     const orders: CommerceOrder[] = Array.from({ length: 20 }, (_, index) => ({
@@ -47,7 +60,7 @@ describe("commerce PDF", () => {
     if (process.env.PDF_FIXTURE_PATH) await writeFile(process.env.PDF_FIXTURE_PATH, buffer);
 
     const document = await getDocument({ data: new Uint8Array(buffer) }).promise;
-    expect(document.numPages).toBe(5);
+    expect(document.numPages).toBe(6);
     let text = "";
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
       const page = await document.getPage(pageNumber);
@@ -66,6 +79,7 @@ describe("commerce PDF", () => {
     expect(text).toContain("Upcoming renewals");
     expect(text).toContain("Showing the first 20 of 21 rows.");
     expect(text).toContain("Scheduled endings");
+    expect(text).toContain("Annual subscription outlook");
     expect(text).toContain("Subscription status distribution");
     expect(text).toContain(`Page ${document.numPages} / ${document.numPages}`);
   }, 20_000);
@@ -77,9 +91,27 @@ describe("commerce PDF", () => {
       horizon: 7,
       subscriptions: [],
     });
-    const data = aggregateCommerceReport({ locale: "fr", range, subscriptionHealth, orders: [], generatedAt: new Date("2026-07-31T18:00:00Z") });
+    const orders: CommerceOrder[] = [{
+      customerId: "customer-large",
+      date: "2026-07-30T10:00:00Z",
+      guestEmail: null,
+      id: 99,
+      lines: [{
+        billingPlan: "annuel",
+        categoryId: 1,
+        categoryName: "Protection",
+        productId: 99,
+        productName: "Protection Grand Compte",
+        quantity: 9,
+        subtotal: 12_135,
+      }],
+      status: "Validée",
+      total: 12_135,
+    }];
+    const data = aggregateCommerceReport({ locale: "fr", range, subscriptionHealth, orders, generatedAt: new Date("2026-07-31T18:00:00Z") });
     const element = createElement(CommerceReportPdf, { data }) as unknown as Parameters<typeof renderToBuffer>[0];
     const buffer = await renderToBuffer(element);
+    if (process.env.PDF_FIXTURE_PATH) await writeFile(process.env.PDF_FIXTURE_PATH, buffer);
     const document = await getDocument({ data: new Uint8Array(buffer) }).promise;
     let text = "";
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
@@ -89,5 +121,6 @@ describe("commerce PDF", () => {
     expect(text).toContain("Période sélectionnée");
     expect(text).toContain("Renouvellements à venir");
     expect(text).toContain("Répartition des statuts d'abonnement");
+    expect(text).toContain("12 135,00 €");
   }, 20_000);
 });

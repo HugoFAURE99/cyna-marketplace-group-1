@@ -85,7 +85,7 @@ export default function CategoryMenu({
           {categories.map((category) => (
             <Link
               className={itemClass}
-              href={`/search?category=${category.id_categorie}`}
+              href={`/categories/${category.id_categorie}`}
               key={category.id_categorie}
               onClick={() => setOpen(false)}
             >

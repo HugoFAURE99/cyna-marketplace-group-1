@@ -16,6 +16,7 @@ import {
   type TechnicalCharacteristicMutationError,
 } from "@/lib/admin/technical-characteristics";
 import { requireActiveAal2Admin } from "@/lib/auth/admin-guard";
+import { enrichProductsWithAutomaticPromotions } from "@/lib/promotions/automatic-promotions.server";
 
 const DEFAULT_LOCALE = routing.defaultLocale;
 
@@ -366,7 +367,7 @@ export async function getProducts(locale: Locale = DEFAULT_LOCALE) {
     throw new Error(`Erreur chargement produits : ${error.message}`);
   }
 
-  return (data ?? []).map((product) => {
+  const products = (data ?? []).map((product) => {
     const sortedImages = [...(product.image_produit ?? [])].sort(
       (a, b) => (a.ordre_affichage ?? 0) - (b.ordre_affichage ?? 0),
     );
@@ -391,6 +392,18 @@ export async function getProducts(locale: Locale = DEFAULT_LOCALE) {
       image: sortedImages[0]?.lien_image_produit ?? null,
     };
   });
+
+  const promoted = await enrichProductsWithAutomaticPromotions(
+    products.map((product) => ({
+      ...product,
+      tariffs: product.prix_tarif,
+    })),
+  );
+
+  return promoted.map(({ tariffs, ...product }) => ({
+    ...product,
+    prix_tarif: tariffs,
+  }));
 }
 
 export async function getProductById(id: number) {

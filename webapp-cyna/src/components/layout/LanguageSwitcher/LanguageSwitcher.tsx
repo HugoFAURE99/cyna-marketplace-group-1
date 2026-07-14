@@ -24,10 +24,12 @@ export default function LanguageSwitcher({
   fullWidth = false,
   label,
   placement = "bottom",
+  showLocaleCode = false,
 }: {
   fullWidth?: boolean;
   label?: string;
   placement?: "bottom" | "top";
+  showLocaleCode?: boolean;
 } = {}) {
   const t = useTranslations("common");
   const locale = useLocale();
@@ -77,15 +79,19 @@ export default function LanguageSwitcher({
         aria-label={t("languageSwitcher")}
         className={cn(
           "flex min-h-11 cursor-pointer items-center justify-center transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 active:bg-slate-200",
-          fullWidth ? "w-full justify-between rounded-md px-3" : "size-11 rounded-full",
+          fullWidth
+            ? "w-full justify-between rounded-md px-3"
+            : showLocaleCode
+              ? "h-11 min-h-11 w-auto gap-2 rounded-md border border-slate-200 bg-white px-2.5 shadow-xs"
+              : "size-11 rounded-full",
         )}
         onClick={() => setOpen((value) => !value)}
         type="button"
       >
         {label && <span className="text-sm font-medium text-slate-700">{label}</span>}
-        <span className={cn("flex items-center", label && "gap-2")}>
+        <span className={cn("flex items-center", (label || showLocaleCode) && "gap-2")}>
           {CurrentFlag && <CurrentFlag className={FLAG_CLASS} />}
-          {label && <span className="text-xs font-semibold uppercase text-slate-500">{locale}</span>}
+          {(label || showLocaleCode) && <span className="text-xs font-semibold uppercase text-slate-600">{locale}</span>}
         </span>
       </button>
 

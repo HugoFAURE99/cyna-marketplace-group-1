@@ -1,13 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import ProductForm from "@/components/admin/ProductForm/ProductForm";
+import AdminBackButton from "@/components/admin/AdminBackButton";
 import {
   getProductById,
   getCategories,
   getTechnicalCharacteristics,
 } from "@/app/[locale]/(admin)/admin/_actions/product.actions";
-import { Link } from "@/i18n/navigation";
-import { ArrowLeft } from "lucide-react";
 import type { Locale } from "@/lib/i18n/translations";
 
 export default async function ProductDetailPage({
@@ -27,13 +26,11 @@ export default async function ProductDetailPage({
 
   return (
     <div>
-      <Link
+      <AdminBackButton
+        className="mb-4"
         href="/admin/products"
-        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {tActions("back")}
-      </Link>
+        label={tActions("back")}
+      />
       <h1>{t("detail")}</h1>
       <ProductForm product={product} categories={categories} characteristics={characteristics} readOnly />
     </div>

@@ -1,12 +1,13 @@
 "use client";
 
-import { FileText, Info, LayoutGrid, LifeBuoy, LogIn, LogOut, Menu, Scale, Settings, UserPlus, UserRound, X } from "lucide-react";
+import { FileText, Info, LayoutGrid, LifeBuoy, LogIn, LogOut, Menu, Scale, UserPlus, UserRound, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { logout } from "@/app/(auth)/_action/auth.action";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
+import SiteModeSwitch from "@/components/layout/SiteModeSwitch";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "@/i18n/navigation";
 
@@ -32,7 +33,6 @@ export default function PublicMenuSheet({ categories, isAdmin = false, isLoggedI
           <div className="min-w-0 space-y-2">
             {isLoggedIn ? <>
               <Link className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-3 text-sm font-semibold text-white hover:bg-purple-800" href="/user-dashboard/infos" onClick={close}><UserRound aria-hidden="true" className="size-4" />{t("myAccount")}</Link>
-              {isAdmin && <Link className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-purple-700 px-3 text-sm font-semibold text-purple-700 hover:bg-purple-50" href="/mfa-verify?next=%2Fadmin" onClick={close}><Settings aria-hidden="true" className="size-4" />{t("backOffice")}</Link>}
               <form action={logout}><button className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-purple-200 px-3 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100" onClick={close} type="submit"><LogOut aria-hidden="true" className="size-4" />{t("logOut")}</button></form>
             </> : <>
               <Link className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-3 text-sm font-semibold text-white hover:bg-purple-800" href="/login" onClick={close}><LogIn aria-hidden="true" className="size-4" />{t("logIn")}</Link>
@@ -42,9 +42,23 @@ export default function PublicMenuSheet({ categories, isAdmin = false, isLoggedI
           <SheetClose aria-label={t("closeMenu")} className="inline-flex size-11 cursor-pointer items-center justify-center rounded-md border border-slate-200 text-slate-700 transition hover:border-purple-200 hover:bg-purple-50 hover:text-purple-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100"><X aria-hidden="true" className="size-6" /></SheetClose>
         </div>
 
+        {isAdmin && (
+          <div className="mt-2 grid grid-cols-[minmax(0,1fr)_44px] gap-2">
+            <SiteModeSwitch
+              className="bg-gradient-to-r from-purple-700 via-purple-700 to-fuchsia-600 shadow-sm hover:from-purple-800 hover:via-purple-700 hover:to-fuchsia-700"
+              direction="enter"
+              href="/mfa-verify?next=%2Fadmin"
+              label={t("backOffice")}
+              onNavigate={close}
+              pendingLabel={t("enteringBackOffice")}
+              tone="brand"
+            />
+          </div>
+        )}
+
         <nav aria-label={tHeader("categories")} className="mt-7 md:hidden">
           <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-400"><LayoutGrid aria-hidden="true" className="size-4" />{tHeader("categories")}</p>
-          <ul className="space-y-1"><li><Link className="block min-h-11 rounded-md px-3 py-3 text-sm font-medium hover:bg-purple-50 hover:text-purple-700" href="/search" onClick={close}>{tHeader("allProducts")}</Link></li>{categories.map((category) => <li key={category.id_categorie}><Link className="block min-h-11 rounded-md px-3 py-3 text-sm hover:bg-purple-50 hover:text-purple-700" href={`/search?category=${category.id_categorie}`} onClick={close}>{category.cat_nom}</Link></li>)}</ul>
+          <ul className="space-y-1"><li><Link className="block min-h-11 rounded-md px-3 py-3 text-sm font-medium hover:bg-purple-50 hover:text-purple-700" href="/search" onClick={close}>{tHeader("allProducts")}</Link></li>{categories.map((category) => <li key={category.id_categorie}><Link className="block min-h-11 rounded-md px-3 py-3 text-sm hover:bg-purple-50 hover:text-purple-700" href={`/categories/${category.id_categorie}`} onClick={close}>{category.cat_nom}</Link></li>)}</ul>
         </nav>
 
         <nav aria-label={t("information")} className="mt-7"><p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">{t("information")}</p><ul className="space-y-1">{informationLinks.map((item) => <li key={item.href}><Link className="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-purple-50 hover:text-purple-700" href={item.href} onClick={close}><item.icon aria-hidden="true" className="size-4" />{t(item.labelKey)}</Link></li>)}</ul></nav>

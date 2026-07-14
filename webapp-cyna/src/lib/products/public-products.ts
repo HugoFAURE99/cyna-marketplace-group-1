@@ -8,6 +8,8 @@ import {
   sortImages,
   sortTariffs,
 } from "@/lib/products/public-catalog";
+import type { AutomaticPromotion } from "@/lib/promotions/automatic-promotion";
+import { enrichProductsWithAutomaticPromotions } from "@/lib/promotions/automatic-promotions.server";
 import type { Tables } from "@/types/database.types";
 
 // Language-neutral product fields that stay on the base row.
@@ -34,9 +36,11 @@ export type PublicProductImage = Pick<
 >;
 
 export type PublicProductTariff = {
+  automaticPromotion: AutomaticPromotion | null;
   id_prix: number;
   nom_prix_tarif: string | null;
   prix: number;
+  promotionalPriceCents: number;
   stripe_price_id: string;
   type_facturation: string;
   unite: string | null;
@@ -53,11 +57,12 @@ export type PublicProductDetail = ProductNeutral & {
 
 export type SimilarProduct = Pick<
   ProductNeutral,
-  "date_ajout" | "est_disponible" | "id_produit" | "is_priorite" | "ordre_priorite"
+  "date_ajout" | "est_disponible" | "id_categorie" | "id_produit" | "is_priorite" | "ordre_priorite"
 > & {
   nom_pro: string;
   category: PublicProductCategory | null;
   images: PublicProductImage[];
+  tariffs: PublicProductTariff[];
 };
 
 // Companion (translation) rows embedded alongside their parent.
@@ -118,11 +123,12 @@ type ProductQueryRow = ProductNeutral & {
 
 type SimilarProductQueryRow = Pick<
   ProductNeutral,
-  "date_ajout" | "est_disponible" | "id_produit" | "is_priorite" | "ordre_priorite"
+  "date_ajout" | "est_disponible" | "id_categorie" | "id_produit" | "is_priorite" | "ordre_priorite"
 > & {
   produit_traduction: ProduitTraductionRow[] | null;
   categorie: CategoryQueryRow | null;
   image_produit: PublicProductImage[] | null;
+  prix_tarif: TariffQueryRow[] | null;
 };
 
 const PRODUCT_SELECT = `
@@ -176,6 +182,7 @@ const PRODUCT_SELECT = `
 
 const SIMILAR_PRODUCT_SELECT = `
   date_ajout,
+  id_categorie,
   id_produit,
   is_priorite,
   ordre_priorite,
@@ -197,6 +204,17 @@ const SIMILAR_PRODUCT_SELECT = `
     id_image,
     lien_image_produit,
     ordre_affichage
+  ),
+  prix_tarif (
+    id_prix,
+    prix,
+    stripe_price_id,
+    type_facturation,
+    prix_tarif_traduction (
+      langue,
+      nom_prix_tarif,
+      unite
+    )
   )
 `;
 
@@ -250,7 +268,11 @@ export async function getPublicProductById(productId: number, locale: Locale) {
     return null;
   }
 
-  return normalizeProduct(data as unknown as ProductQueryRow, locale);
+  const product = normalizeProduct(data as unknown as ProductQueryRow, locale);
+  const [promotedProduct] = await enrichProductsWithAutomaticPromotions([
+    product,
+  ]);
+  return promotedProduct;
 }
 
 export async function getSimilarProducts(
@@ -272,8 +294,11 @@ export async function getSimilarProducts(
     throw new Error(`Erreur chargement produits similaires : ${error.message}`);
   }
 
-  return ((data ?? []) as unknown as SimilarProductQueryRow[])
-    .map((row) => normalizeSimilarProduct(row, locale))
+  const products = ((data ?? []) as unknown as SimilarProductQueryRow[]).map(
+    (row) => normalizeSimilarProduct(row, locale),
+  );
+
+  return (await enrichProductsWithAutomaticPromotions(products))
     .sort(compareBySearchOrder)
     .slice(0, 3);
 }
@@ -302,9 +327,11 @@ function resolveTariff(
   const translation = pickTranslation(row.prix_tarif_traduction, locale);
 
   return {
+    automaticPromotion: null,
     id_prix: row.id_prix,
     nom_prix_tarif: translation?.nom_prix_tarif ?? null,
     prix: row.prix,
+    promotionalPriceCents: row.prix,
     stripe_price_id: row.stripe_price_id,
     type_facturation: row.type_facturation,
     unite: translation?.unite ?? null,
@@ -344,6 +371,7 @@ function normalizeSimilarProduct(
 
   return {
     date_ajout: row.date_ajout,
+    id_categorie: row.id_categorie,
     id_produit: row.id_produit,
     is_priorite: row.is_priorite,
     ordre_priorite: row.ordre_priorite,
@@ -351,5 +379,8 @@ function normalizeSimilarProduct(
     nom_pro: translation?.nom_pro ?? "",
     category: resolveCategory(row.categorie, locale),
     images: sortImages(row.image_produit ?? []),
+    tariffs: sortTariffs(
+      (row.prix_tarif ?? []).map((tariff) => resolveTariff(tariff, locale)),
+    ),
   };
 }

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import Spinner from "@/components/ui/spinner";
 
 import { useRouter } from "@/i18n/navigation";
@@ -169,14 +169,6 @@ export default function CategoryForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className={styles.form}>
-      <button
-        type="button"
-        onClick={() => router.back()}
-        className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {tActions("back")}
-      </button>
       <h2 className="text-2xl font-bold mb-6">
         {category ? t("editTitle") : t("createTitle")}
       </h2>
@@ -259,18 +251,13 @@ export default function CategoryForm({
         )}
       </div>
 
-      <div className="flex justify-end gap-3 mt-6 pt-6 border-t">
+      <div className="mt-6 flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
         {readOnly ? (
-          <>
-            <Button type="button" variant="outline" onClick={() => router.back()}>
-              {tActions("back")}
+          category && (
+            <Button type="button" onClick={() => router.push(`/admin/categories/${category.id_categorie}`)}>
+              {tActions("edit")}
             </Button>
-            {category && (
-              <Button type="button" onClick={() => router.push(`/admin/categories/${category.id_categorie}`)}>
-                {tActions("edit")}
-              </Button>
-            )}
-          </>
+          )
         ) : (
           <>
             <Button type="button" variant="outline" onClick={() => router.back()}>

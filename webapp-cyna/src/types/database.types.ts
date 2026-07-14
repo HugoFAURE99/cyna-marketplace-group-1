@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -250,6 +250,82 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "categorie"
             referencedColumns: ["id_categorie"]
+          },
+        ]
+      }
+      chat_conversation: {
+        Row: {
+          created_at: string
+          expires_at: string
+          guest_session_hash: string | null
+          id_compte: string | null
+          id_conversation: string
+          locale: Database["public"]["Enums"]["langue"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          guest_session_hash?: string | null
+          id_compte?: string | null
+          id_conversation?: string
+          locale?: Database["public"]["Enums"]["langue"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          guest_session_hash?: string | null
+          id_compte?: string | null
+          id_conversation?: string
+          locale?: Database["public"]["Enums"]["langue"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_conversation_id_compte_fkey"
+            columns: ["id_compte"]
+            isOneToOne: false
+            referencedRelation: "utilisateur"
+            referencedColumns: ["id_compte"]
+          },
+        ]
+      }
+      chat_message: {
+        Row: {
+          content: string
+          created_at: string
+          id_conversation: string
+          id_message: number
+          metadata: Json
+          role: string
+          status: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id_conversation: string
+          id_message?: never
+          metadata?: Json
+          role: string
+          status?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id_conversation?: string
+          id_message?: never
+          metadata?: Json
+          role?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_message_id_conversation_fkey"
+            columns: ["id_conversation"]
+            isOneToOne: false
+            referencedRelation: "chat_conversation"
+            referencedColumns: ["id_conversation"]
           },
         ]
       }
@@ -1059,6 +1135,7 @@ export type Database = {
       }
       est_admin: { Args: never; Returns: boolean }
       finalize_paid_order: { Args: { p_order_id: number }; Returns: boolean }
+      purge_expired_chat_conversations: { Args: never; Returns: number }
       replace_product_technical_characteristics: {
         Args: { p_characteristic_ids: number[]; p_product_id: number }
         Returns: undefined

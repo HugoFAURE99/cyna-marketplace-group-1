@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { getSubscriptions } from "@/app/[locale]/(admin)/admin/_actions/subscription.actions";
+import { getSubscriptionDetail, getSubscriptions } from "@/app/[locale]/(admin)/admin/_actions/subscription.actions";
 import SubscriptionsTableClient from "@/components/admin/SubscriptionsTable/SubscriptionsTableClient";
 import type { Locale } from "@/lib/i18n/translations";
 
@@ -15,12 +15,20 @@ export default async function SubscriptionsPage({
   setRequestLocale(locale);
 
   const tSub = await getTranslations("admin.subscriptions");
-  const subscriptions = await getSubscriptions();
+  const query = await searchParams;
+  const detailId = Number(query.detail);
+  const [subscriptions, initialDetail] = await Promise.all([
+    getSubscriptions(locale),
+    Number.isInteger(detailId) && detailId > 0
+      ? getSubscriptionDetail(detailId, locale)
+      : Promise.resolve(null),
+  ]);
 
   const translations = {
     title: tSub("title"),
     tabAll: tSub("tabAll"),
     tabExpiring: tSub("tabExpiring"),
+    tabAnnual: tSub("tabAnnual"),
     search: tSub("search"),
     allStatuses: tSub("allStatuses"),
     allBillingTypes: tSub("allBillingTypes"),
@@ -59,6 +67,15 @@ export default async function SubscriptionsPage({
     billingMensuel: tSub("billingMensuel"),
     billingAnnuel: tSub("billingAnnuel"),
     reactivate: tSub("reactivate"),
+    seats: tSub("seats"),
+    scheduledEnding: tSub("scheduledEnding"),
+    operationError: tSub("operationError"),
+    statusTrialing: tSub("statusTrialing"),
+    statusPastDue: tSub("statusPastDue"),
+    statusPaused: tSub("statusPaused"),
+    statusIncomplete: tSub("statusIncomplete"),
+    statusIncompleteExpired: tSub("statusIncompleteExpired"),
+    statusUnpaid: tSub("statusUnpaid"),
   };
 
   return (
@@ -67,7 +84,7 @@ export default async function SubscriptionsPage({
       <SubscriptionsTableClient
         subscriptions={subscriptions}
         translations={translations}
-        initialDetailId={(await searchParams).detail}
+        initialDetail={initialDetail}
       />
     </div>
   );

@@ -15,9 +15,11 @@ import {
   getSimilarProducts,
 } from "@/lib/products/public-products";
 import type { Locale } from "@/lib/i18n/translations";
+import { createServerClient } from "@/lib/supabase/server-client";
 
 type ProductPageProps = {
   params: Promise<{ id: string; locale: Locale }>;
+  searchParams?: Promise<{ seats?: string; tariff?: string }>;
 };
 
 export async function generateMetadata({
@@ -44,8 +46,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const { id, locale } = await params;
+  const restoredSelection = await searchParams;
   setRequestLocale(locale);
   const productId = parseProductId(id);
 
@@ -64,6 +67,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     product.id_categorie,
     locale,
   );
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const t = await getTranslations("product");
 
@@ -90,7 +97,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {product.category && (
                 <Link
                   className="inline-block text-xs font-semibold uppercase tracking-wide text-purple-700 transition hover:text-purple-900"
-                  href={`/search?category=${product.category.id_categorie}`}
+                  href={`/categories/${product.category.id_categorie}`}
                 >
                   {product.category.cat_nom}
                 </Link>
@@ -110,6 +117,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
               )}
             </div>
             <ProductPricingCard
+              initialTariffId={parsePositiveInteger(restoredSelection?.tariff)}
+              initialUserCount={parsePositiveInteger(restoredSelection?.seats)}
+              isGuest={!user}
               isUnavailable={!product.est_disponible}
               productId={product.id_produit}
               productName={product.nom_pro}
@@ -122,6 +132,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
     </main>
   );
+}
+
+function parsePositiveInteger(value?: string) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 // Reject non-numeric or non-positive ids so they 404 instead of querying.

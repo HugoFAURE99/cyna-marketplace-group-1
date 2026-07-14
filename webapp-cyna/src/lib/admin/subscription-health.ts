@@ -6,6 +6,10 @@ import type {
   SubscriptionProductBreakdown,
 } from "@/lib/admin/commerce-report-types";
 import { reportDateKey } from "@/lib/admin/report-range";
+import {
+  isActiveSubscriptionStatus,
+  normalizeSubscriptionStatus,
+} from "@/lib/subscriptions/status";
 
 export type SubscriptionHealthSource = {
   billingPlan: string;
@@ -22,16 +26,24 @@ export type SubscriptionHealthSource = {
   status: string;
 };
 
-const ACTIVE_STATUSES = new Set(["active", "actif", "trialing"]);
-
-export function isActiveSubscriptionStatus(status: string): boolean {
-  return ACTIVE_STATUSES.has(status.trim().toLocaleLowerCase("fr-FR"));
-}
+export { isActiveSubscriptionStatus } from "@/lib/subscriptions/status";
 
 function addDays(key: string, days: number): string {
   const date = new Date(`${key}T12:00:00Z`);
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);
+}
+
+function addCalendarYear(key: string): string {
+  const [year, month, day] = key.split("-").map(Number);
+  const lastDay = new Date(Date.UTC(year + 1, month, 0)).getUTCDate();
+  return `${year + 1}-${String(month).padStart(2, "0")}-${String(Math.min(day, lastDay)).padStart(2, "0")}`;
+}
+
+export function isAnnualBillingPlan(plan: string): boolean {
+  return ["annuel", "annual", "year", "yearly"].includes(
+    plan.trim().toLocaleLowerCase("fr-FR"),
+  );
 }
 
 export function isSubscriptionDueWithinHorizon(
@@ -44,6 +56,24 @@ export function isSubscriptionDueWithinHorizon(
   const asOf = reportDateKey(generatedAt);
   const dueDate = reportDateKey(endDate);
   return dueDate >= asOf && dueDate <= addDays(asOf, horizon);
+}
+
+export function isAnnualSubscriptionWithinOutlook(
+  endDate: string | null,
+  status: string,
+  billingPlan: string,
+  generatedAt: Date = new Date(),
+): boolean {
+  if (
+    !endDate ||
+    !isActiveSubscriptionStatus(status) ||
+    !isAnnualBillingPlan(billingPlan)
+  ) {
+    return false;
+  }
+  const asOf = reportDateKey(generatedAt);
+  const dueDate = reportDateKey(endDate);
+  return dueDate >= asOf && dueDate <= addCalendarYear(asOf);
 }
 
 function daysBetween(from: string, to: string): number {
@@ -63,6 +93,7 @@ function dueItem(source: SubscriptionHealthSource, asOf: string): SubscriptionDu
     daysRemaining: daysBetween(asOf, dueDate),
     dueDate,
     id: source.id,
+    kind: source.scheduledCancellation ? "scheduled_ending" : "renewal",
     orderId: source.orderId,
     productId: source.productId,
     productName: source.productName,
@@ -79,6 +110,7 @@ export function aggregateSubscriptionHealth(input: {
   const generatedAt = input.generatedAt ?? new Date();
   const asOf = reportDateKey(generatedAt);
   const to = addDays(asOf, input.horizon);
+  const annualTo = addCalendarYear(asOf);
   const active = input.subscriptions.filter((item) => isActiveSubscriptionStatus(item.status));
   const due = active
     .filter((item) => isSubscriptionDueWithinHorizon(item.endDate, item.status, input.horizon, generatedAt))
@@ -86,9 +118,25 @@ export function aggregateSubscriptionHealth(input: {
     .sort((a, b) => a.item.dueDate.localeCompare(b.item.dueDate) || a.item.id - b.item.id);
   const upcomingRenewals = due.filter(({ source }) => !source.scheduledCancellation).map(({ item }) => item);
   const scheduledEndings = due.filter(({ source }) => source.scheduledCancellation).map(({ item }) => item);
+  const annualOutlook = active
+    .filter((item) =>
+      isAnnualSubscriptionWithinOutlook(
+        item.endDate,
+        item.status,
+        item.billingPlan,
+        generatedAt,
+      ),
+    )
+    .map((item) => dueItem(item, asOf))
+    .sort((a, b) => a.dueDate.localeCompare(b.dueDate) || a.id - b.id);
+  const annualRenewals = annualOutlook.filter((item) => item.kind === "renewal");
+  const annualScheduledEndings = annualOutlook.filter((item) => item.kind === "scheduled_ending");
 
   const statusMap = new Map<string, number>();
-  input.subscriptions.forEach((item) => statusMap.set(item.status, (statusMap.get(item.status) ?? 0) + 1));
+  input.subscriptions.forEach((item) => {
+    const status = normalizeSubscriptionStatus(item.status);
+    statusMap.set(status, (statusMap.get(status) ?? 0) + 1);
+  });
   const billingMap = new Map<string, SubscriptionCountBreakdown>();
   const productMap = new Map<string, SubscriptionProductBreakdown>();
   active.forEach((item) => {
@@ -104,6 +152,12 @@ export function aggregateSubscriptionHealth(input: {
   return {
     active: active.length,
     activeSeats: active.reduce((sum, item) => sum + Math.max(1, item.seats), 0),
+    annualOutlook,
+    annualRenewalCount: annualRenewals.length,
+    annualRenewalValue: roundCurrency(annualRenewals.reduce((sum, item) => sum + item.value, 0)),
+    annualScheduledEndingCount: annualScheduledEndings.length,
+    annualScheduledEndingValue: roundCurrency(annualScheduledEndings.reduce((sum, item) => sum + item.value, 0)),
+    annualTo,
     asOf,
     billingBreakdown: [...billingMap.values()].sort((a, b) => b.value - a.value),
     horizon: input.horizon,

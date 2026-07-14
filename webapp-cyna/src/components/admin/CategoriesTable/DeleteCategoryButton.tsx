@@ -28,7 +28,16 @@ export default function DeleteCategoryButton({
     setError(null);
     startTransition(async () => {
       try {
-        await deleteCategory(categoryId);
+        const result = await deleteCategory(categoryId);
+        const blocked = result.blocked.find((item) => item.id === categoryId);
+        if (blocked) {
+          setError(t("categoryInUse", { count: blocked.productCount }));
+          return;
+        }
+        if (result.failures.length) {
+          setError(t("categoryError"));
+          return;
+        }
         setOpen(false);
         router.refresh();
       } catch {
@@ -45,7 +54,7 @@ export default function DeleteCategoryButton({
 
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+        <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
           <Dialog.Title className="text-base font-semibold">
             {t("title")}
           </Dialog.Title>

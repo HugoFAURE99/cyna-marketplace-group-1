@@ -32,7 +32,12 @@ export default async function CartPage({ params }: CartPageProps) {
   setRequestLocale(locale);
 
   const t = await getTranslations("cart");
-  const { items, subtotalCents } = await getCartView(locale);
+  const {
+    automaticPromotion,
+    items,
+    originalSubtotalCents,
+    subtotalCents,
+  } = await getCartView(locale);
 
   const supabase = await createServerClient();
   const {
@@ -83,7 +88,10 @@ export default async function CartPage({ params }: CartPageProps) {
             </div>
 
             <CheckoutSummary
+              automaticPromotion={automaticPromotion}
+              isGuest={!user}
               subtotalCents={subtotalCents}
+              originalSubtotalCents={originalSubtotalCents}
               hasMixedIntervals={hasMixedIntervals}
             />
 

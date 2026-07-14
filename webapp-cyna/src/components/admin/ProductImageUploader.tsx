@@ -82,7 +82,7 @@ export function ProductImageUploader({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-lg font-semibold">{t("images")}</h3>
         <span className="text-sm text-muted-foreground">
           {t("imagesCount", { current: totalCount, max: maxImages })}
@@ -91,7 +91,7 @@ export function ProductImageUploader({
 
       {/* Image grid */}
       {totalCount > 0 && (
-        <div className="grid grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {existingImages.map((img) => (
             <div key={`existing-${img.id_image}`} className="relative">
               <Image
@@ -151,7 +151,7 @@ export function ProductImageUploader({
         (remaining > 0 ? (
           <div
             {...getRootProps()}
-            className={`cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors ${
+            className={`cursor-pointer rounded-lg border-2 border-dashed p-5 text-center transition-colors sm:p-8 ${
               isDragActive
                 ? "border-blue-500 bg-blue-50"
                 : "border-gray-300 hover:border-gray-400"

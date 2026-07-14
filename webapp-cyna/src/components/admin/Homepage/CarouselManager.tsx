@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import { useState, useTransition, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -34,6 +34,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import ManagedLinkPicker, {
+  type ManagedLinkPickerTranslations,
+} from "@/components/admin/Homepage/ManagedLinkPicker";
 import type { CarouselSlide } from "@/app/[locale]/(admin)/admin/_actions/homepage.actions";
 import {
   createCarouselSlide,
@@ -42,6 +45,7 @@ import {
   toggleCarouselSlide,
   updateCarouselOrder,
 } from "@/app/[locale]/(admin)/admin/_actions/homepage.actions";
+import { parseManagedLink, type ManagedLinkOption } from "@/lib/navigation/managed-link";
 
 interface Translations {
   title: string;
@@ -182,16 +186,21 @@ function SortableSlideRow({
 
 export default function CarouselManager({
   slides,
+  linkOptions,
+  linkPickerTranslations,
   translations,
   onDirtyChange,
   onRegisterSave,
 }: {
   slides: CarouselSlide[];
+  linkOptions: ManagedLinkOption[];
+  linkPickerTranslations: ManagedLinkPickerTranslations & { invalid: string };
   translations: Translations;
   onDirtyChange?: (dirty: boolean) => void;
   onRegisterSave?: (fn: () => Promise<void>) => void;
 }) {
   const [editing, setEditing] = useState<EditingSlide | null>(null);
+  const [linkError, setLinkError] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<CarouselSlide | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isDeleting, startDeleteTransition] = useTransition();
@@ -291,6 +300,7 @@ export default function CarouselManager({
   // ─── Form handlers ───
 
   const startNew = () => {
+    setLinkError(null);
     setEditing({
       id: null, titre_fr: "", description_fr: "", titre_en: "", description_en: "",
       hasEnTitle: false, hasEnDescription: false, imageFile: null, imagePreview: null,
@@ -299,6 +309,7 @@ export default function CarouselManager({
   };
 
   const startEdit = (slide: CarouselSlide) => {
+    setLinkError(null);
     setEditing({
       id: slide.id_image, titre_fr: slide.titre_fr,
       description_fr: slide.description_fr ?? "", titre_en: slide.titre_en,
@@ -320,6 +331,11 @@ export default function CarouselManager({
 
   const handleSave = () => {
     if (!editing) return;
+    if (editing.lien_bouton.trim() && !parseManagedLink(editing.lien_bouton)) {
+      setLinkError(linkPickerTranslations.invalid);
+      return;
+    }
+    setLinkError(null);
     startTransition(async () => {
       const formData = new FormData();
       if (editing.imageFile) formData.set("image", editing.imageFile);
@@ -332,10 +348,12 @@ export default function CarouselManager({
       formData.set("texte_bouton_fr", editing.texte_bouton_fr);
       formData.set("texte_bouton_en", editing.hasEnButton ? editing.texte_bouton_en : "");
 
-      if (editing.id === null) {
-        await createCarouselSlide(formData);
-      } else {
-        await updateCarouselSlide(editing.id, formData);
+      const result = editing.id === null
+        ? await createCarouselSlide(formData)
+        : await updateCarouselSlide(editing.id, formData);
+      if (!result.ok) {
+        setLinkError(linkPickerTranslations.invalid);
+        return;
       }
       setEditing(null);
       router.refresh();
@@ -355,14 +373,6 @@ export default function CarouselManager({
   if (editing) {
     return (
       <div>
-        <button
-          type="button"
-          onClick={() => setEditing(null)}
-          className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          {t.cancel}
-        </button>
         <h2 className="mb-4 text-lg font-semibold">
           {editing.id === null ? t.newSlide : t.editSlide}
         </h2>
@@ -453,14 +463,24 @@ export default function CarouselManager({
 
           <fieldset className="space-y-3 rounded-lg border p-4">
             <legend className="px-2 text-sm font-semibold">{t.buttonLink}</legend>
-            <input type="text" value={editing.lien_bouton} onChange={(e) => setEditing((prev) => prev ? { ...prev, lien_bouton: e.target.value } : prev)} placeholder="https://..." className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
+            <ManagedLinkPicker
+              ariaLabel={t.buttonLink}
+              error={linkError}
+              onChange={(value) => {
+                setEditing((prev) => prev ? { ...prev, lien_bouton: value } : prev);
+                setLinkError(null);
+              }}
+              options={linkOptions}
+              translations={linkPickerTranslations}
+              value={editing.lien_bouton}
+            />
           </fieldset>
 
-          <div className="flex gap-2">
+          <div className="flex justify-end gap-3 border-t pt-6">
+            <Button variant="outline" size="sm" onClick={() => setEditing(null)} disabled={isPending}>{t.cancel}</Button>
             <Button size="sm" onClick={handleSave} disabled={isPending || (editing.id === null && !editing.imageFile)}>
               {isPending ? <><Spinner /> {t.saving}</> : t.save}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setEditing(null)} disabled={isPending}>{t.cancel}</Button>
           </div>
         </div>
       </div>
@@ -523,7 +543,7 @@ export default function CarouselManager({
       <Dialog.Root open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-          <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
             <Dialog.Title className="text-base font-semibold">{t.confirmDeleteTitle}</Dialog.Title>
             <Dialog.Description className="mt-2 text-sm text-muted-foreground">{t.confirmDeleteMessage}</Dialog.Description>
             <div className="mt-5 flex justify-end gap-2">
@@ -540,7 +560,7 @@ export default function CarouselManager({
       <Dialog.Root open={showUnsavedDialog} onOpenChange={(open) => { if (!open) cancelNavigation(); }}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 supports-backdrop-filter:backdrop-blur-xs" />
-          <Dialog.Popup className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border bg-popover p-6 text-popover-foreground shadow-lg">
+          <Dialog.Popup className="fixed left-1/2 top-1/2 z-50 max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-lg border bg-popover p-4 text-popover-foreground shadow-lg sm:p-6">
             <Dialog.Title className="text-base font-semibold">{t.unsavedTitle}</Dialog.Title>
             <Dialog.Description className="mt-2 text-sm text-muted-foreground">{t.unsavedMessage}</Dialog.Description>
             <div className="mt-5 flex justify-end gap-2">

@@ -1,10 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import { createAdminClient } from "@/lib/supabase/server";
-import { parseManagedLink } from "@/lib/navigation/managed-link";
+import {
+  parseManagedLink,
+  type ManagedLinkOption,
+} from "@/lib/navigation/managed-link";
+import type { Locale } from "@/lib/i18n/translations";
+import { buildManagedLinkOptions } from "@/lib/navigation/managed-link-options";
 
 // ─── Carousel ───
 
@@ -22,12 +28,54 @@ export type CarouselSlide = {
   texte_bouton_en: string;
 };
 
-function validateButtonLink(value: string): string {
+export type ManagedLinkMutationResult =
+  | { ok: true }
+  | { error: "invalid_link"; field?: "linkUrl"; ok: false };
+
+function validateButtonLink(value: string): string | null {
   const link = value.trim();
-  if (link && !parseManagedLink(link)) {
-    throw new Error("Le lien du bouton doit être un chemin CYNA, une ancre ou une URL HTTP(S) valide.");
+  if (!link) return "";
+  return parseManagedLink(link)?.href ?? null;
+}
+
+export async function getManagedLinkOptions(
+  locale: Locale,
+): Promise<ManagedLinkOption[]> {
+  const supabase = createAdminClient();
+  const t = await getTranslations({ locale, namespace: "admin.homepage.links" });
+  const [categoriesResult, productsResult] = await Promise.all([
+    supabase
+      .from("categorie")
+      .select("id_categorie, categorie_traduction(langue, cat_nom)"),
+    supabase
+      .from("produit")
+      .select("id_produit, produit_traduction(langue, nom_pro)")
+      .eq("statut_produit", true),
+  ]);
+
+  if (categoriesResult.error) {
+    throw new Error(`Erreur chargement destinations catégories : ${categoriesResult.error.message}`);
   }
-  return link;
+  if (productsResult.error) {
+    throw new Error(`Erreur chargement destinations produits : ${productsResult.error.message}`);
+  }
+
+  return buildManagedLinkOptions(
+    locale,
+    {
+      about: t("about"),
+      catalog: t("catalog"),
+      categoryFallback: (id) => t("categoryFallback", { id }),
+      faq: t("faq"),
+      home: t("home"),
+      legal: t("legal"),
+      productFallback: (id) => t("productFallback", { id }),
+      terms: t("terms"),
+      topProducts: t("topProducts"),
+    },
+    categoriesResult.data ?? [],
+    productsResult.data ?? [],
+  );
 }
 
 export async function getCarouselSlides(): Promise<CarouselSlide[]> {
@@ -139,6 +187,9 @@ export async function createCarouselSlide(formData: FormData) {
   const texteBoutonFr = (formData.get("texte_bouton_fr") as string) || "";
   const texteBoutonEn = (formData.get("texte_bouton_en") as string) || "";
 
+  if (lienBouton === null) {
+    return { error: "invalid_link", ok: false } as const;
+  }
   if (!imageFile || imageFile.size === 0) {
     throw new Error("Une image est requise.");
   }
@@ -176,6 +227,7 @@ export async function createCarouselSlide(formData: FormData) {
 
   revalidatePath("/[locale]/admin", "page");
   revalidatePath("/[locale]", "page");
+  return { ok: true } as const;
 }
 
 export async function updateCarouselSlide(id: number, formData: FormData) {
@@ -190,6 +242,9 @@ export async function updateCarouselSlide(id: number, formData: FormData) {
   const texteBoutonFr = (formData.get("texte_bouton_fr") as string) || "";
   const texteBoutonEn = (formData.get("texte_bouton_en") as string) || "";
 
+  if (lienBouton === null) {
+    return { error: "invalid_link", ok: false } as const;
+  }
   if (imageFile && imageFile.size > 0) {
     const { data: existing } = await supabase
       .from("image_carrousel")
@@ -241,6 +296,7 @@ export async function updateCarouselSlide(id: number, formData: FormData) {
 
   revalidatePath("/[locale]/admin", "page");
   revalidatePath("/[locale]", "page");
+  return { ok: true } as const;
 }
 
 export async function deleteCarouselSlide(id: number) {
@@ -319,8 +375,7 @@ export type IntroTexts = {
   body_en: string;
   linkLabel_fr: string;
   linkLabel_en: string;
-  linkUrl_fr: string;
-  linkUrl_en: string;
+  linkUrl: string;
 };
 
 const INTRO_PLACEMENTS = {
@@ -353,20 +408,27 @@ export async function getIntroTexts(): Promise<IntroTexts> {
     body_en: get(INTRO_PLACEMENTS.body, "en"),
     linkLabel_fr: get(INTRO_PLACEMENTS.linkLabel, "fr"),
     linkLabel_en: get(INTRO_PLACEMENTS.linkLabel, "en"),
-    linkUrl_fr: get(INTRO_PLACEMENTS.linkUrl, "fr"),
-    linkUrl_en: get(INTRO_PLACEMENTS.linkUrl, "en"),
+    // Destinations are locale-neutral. Existing FR values take precedence,
+    // with the former EN row retained as a compatibility fallback.
+    linkUrl:
+      get(INTRO_PLACEMENTS.linkUrl, "fr") ||
+      get(INTRO_PLACEMENTS.linkUrl, "en"),
   };
 }
 
 export async function updateIntroTexts(texts: IntroTexts, hasEn: boolean) {
   const supabase = createAdminClient();
+  const linkUrl = validateButtonLink(texts.linkUrl);
+  if (linkUrl === null) {
+    return { error: "invalid_link", field: "linkUrl", ok: false } as const;
+  }
 
   const entries: { placement: string; lang: "fr" | "en"; texte: string }[] = [
     { placement: INTRO_PLACEMENTS.eyebrow, lang: "fr", texte: texts.eyebrow_fr },
     { placement: INTRO_PLACEMENTS.title, lang: "fr", texte: texts.title_fr },
     { placement: INTRO_PLACEMENTS.body, lang: "fr", texte: texts.body_fr },
     { placement: INTRO_PLACEMENTS.linkLabel, lang: "fr", texte: texts.linkLabel_fr },
-    { placement: INTRO_PLACEMENTS.linkUrl, lang: "fr", texte: texts.linkUrl_fr },
+    { placement: INTRO_PLACEMENTS.linkUrl, lang: "fr", texte: linkUrl },
   ];
 
   if (hasEn) {
@@ -375,7 +437,6 @@ export async function updateIntroTexts(texts: IntroTexts, hasEn: boolean) {
       { placement: INTRO_PLACEMENTS.title, lang: "en", texte: texts.title_en },
       { placement: INTRO_PLACEMENTS.body, lang: "en", texte: texts.body_en },
       { placement: INTRO_PLACEMENTS.linkLabel, lang: "en", texte: texts.linkLabel_en },
-      { placement: INTRO_PLACEMENTS.linkUrl, lang: "en", texte: texts.linkUrl_en },
     );
   }
 
@@ -403,6 +464,14 @@ export async function updateIntroTexts(texts: IntroTexts, hasEn: boolean) {
     }
   }
 
+  // Internal links are localized by next-intl at render time, so a second
+  // translated destination would only allow the two locales to drift apart.
+  await supabase
+    .from("texte_general")
+    .delete()
+    .eq("emplacement_texte", INTRO_PLACEMENTS.linkUrl)
+    .eq("langue", "en");
+
   // If EN removed, delete EN rows
   if (!hasEn) {
     for (const placement of Object.values(INTRO_PLACEMENTS)) {
@@ -416,4 +485,5 @@ export async function updateIntroTexts(texts: IntroTexts, hasEn: boolean) {
 
   revalidatePath("/[locale]/admin", "page");
   revalidatePath("/[locale]", "page");
+  return { ok: true } as const;
 }

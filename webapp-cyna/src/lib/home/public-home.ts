@@ -10,6 +10,7 @@ import {
   type CatalogProductQueryRow,
 } from "@/lib/products/public-catalog";
 import { createPublicClient } from "@/lib/supabase/public";
+import { createAdminClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/database.types";
 import { resolveCarouselContent } from "@/lib/home/home-content";
 
@@ -110,7 +111,10 @@ export async function getHomeCarouselSlides(
 export async function getHomeIntroContent(
   locale: Locale,
 ): Promise<HomeIntroContent | null> {
-  const supabase = createPublicClient();
+  // This remains a server-only, explicitly projected public-content read.
+  // Using the server client also keeps newly inserted CMS rows visible if the
+  // deployed public-read policy has drifted from the repository policy.
+  const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("texte_general")
     .select("emplacement_texte, langue, texte")
@@ -131,12 +135,22 @@ export async function getHomeIntroContent(
   const resolve = (placement: string) =>
     pickTranslation(rowsByPlacement.get(placement), locale)?.texte.trim() ||
     undefined;
+  const resolveDestination = (placement: string) => {
+    const rows = rowsByPlacement.get(placement) ?? [];
+    return (
+      rows.find((row) => row.langue === "fr")?.texte.trim() ||
+      rows.find((row) => row.langue === "en")?.texte.trim() ||
+      undefined
+    );
+  };
 
   const content = {
     body: resolve(HOME_INTRO_TEXT_KEYS.body),
     eyebrow: resolve(HOME_INTRO_TEXT_KEYS.eyebrow),
     linkLabel: resolve(HOME_INTRO_TEXT_KEYS.linkLabel),
-    linkHref: resolve(HOME_INTRO_TEXT_KEYS.linkHref),
+    // CTA destinations are shared; ManagedCta adds the active locale to
+    // internal paths while anchors and external URLs remain unchanged.
+    linkHref: resolveDestination(HOME_INTRO_TEXT_KEYS.linkHref),
     title: resolve(HOME_INTRO_TEXT_KEYS.title),
   };
 

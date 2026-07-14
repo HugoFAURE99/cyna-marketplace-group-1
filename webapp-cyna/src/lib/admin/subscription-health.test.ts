@@ -82,4 +82,35 @@ describe("subscription health aggregation", () => {
     expect(data.billingBreakdown).toEqual([]);
     expect(data.productBreakdown).toEqual([]);
   });
+
+  it("includes annual renewals and scheduled endings through the same calendar date next year", () => {
+    const data = aggregateSubscriptionHealth({
+      generatedAt: new Date("2026-07-14T10:00:00Z"),
+      horizon: 30,
+      subscriptions: [
+        subscription({ billingPlan: "annuel", endDate: "2027-07-14T10:00:00Z", id: 10 }),
+        subscription({ billingPlan: "yearly", endDate: "2027-01-10T10:00:00Z", id: 11, scheduledCancellation: true }),
+        subscription({ billingPlan: "annuel", endDate: "2027-07-15T10:00:00Z", id: 12 }),
+        subscription({ billingPlan: "mensuel", endDate: "2026-08-01T10:00:00Z", id: 13 }),
+      ],
+    });
+    expect(data.annualTo).toBe("2027-07-14");
+    expect(data.annualOutlook.map((item) => item.id)).toEqual([11, 10]);
+    expect(data.annualRenewalCount).toBe(1);
+    expect(data.annualScheduledEndingCount).toBe(1);
+    expect(data.annualOutlook[0].kind).toBe("scheduled_ending");
+  });
+
+  it("clamps a leap-day annual boundary to February 28", () => {
+    const data = aggregateSubscriptionHealth({
+      generatedAt: new Date("2024-02-29T12:00:00Z"),
+      horizon: 7,
+      subscriptions: [
+        subscription({ billingPlan: "annual", endDate: "2025-02-28T10:00:00Z" }),
+        subscription({ billingPlan: "annual", endDate: "2025-03-01T10:00:00Z", id: 2 }),
+      ],
+    });
+    expect(data.annualTo).toBe("2025-02-28");
+    expect(data.annualOutlook.map((item) => item.id)).toEqual([1]);
+  });
 });

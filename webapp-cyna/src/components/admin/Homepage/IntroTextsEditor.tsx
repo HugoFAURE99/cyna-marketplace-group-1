@@ -8,6 +8,10 @@ import Spinner from "@/components/ui/spinner";
 import type { IntroTexts } from "@/app/[locale]/(admin)/admin/_actions/homepage.actions";
 import { updateIntroTexts } from "@/app/[locale]/(admin)/admin/_actions/homepage.actions";
 import { useNotification } from "@/components/ui/notification-provider";
+import ManagedLinkPicker, {
+  type ManagedLinkPickerTranslations,
+} from "@/components/admin/Homepage/ManagedLinkPicker";
+import { parseManagedLink, type ManagedLinkOption } from "@/lib/navigation/managed-link";
 
 interface Translations {
   title: string;
@@ -23,13 +27,17 @@ interface Translations {
   saved: string;
 }
 
-type FieldKey = "eyebrow" | "title" | "body" | "linkLabel" | "linkUrl";
+type FieldKey = "eyebrow" | "title" | "body" | "linkLabel";
 
 export default function IntroTextsEditor({
   introTexts,
+  linkOptions,
+  linkPickerTranslations,
   translations,
 }: {
   introTexts: IntroTexts;
+  linkOptions: ManagedLinkOption[];
+  linkPickerTranslations: ManagedLinkPickerTranslations & { invalid: string };
   translations: Translations;
 }) {
   const [form, setForm] = useState<IntroTexts>(introTexts);
@@ -38,9 +46,9 @@ export default function IntroTextsEditor({
     title: !!introTexts.title_en,
     body: !!introTexts.body_en,
     linkLabel: !!introTexts.linkLabel_en,
-    linkUrl: !!introTexts.linkUrl_en,
   });
   const [isPending, startTransition] = useTransition();
+  const [linkError, setLinkError] = useState(false);
   const { notify } = useNotification();
   const router = useRouter();
   const t = translations;
@@ -55,18 +63,26 @@ export default function IntroTextsEditor({
         title: !!introTexts.title_en,
         body: !!introTexts.body_en,
         linkLabel: !!introTexts.linkLabel_en,
-        linkUrl: !!introTexts.linkUrl_en,
       });
 
   const handleSave = () => {
+    if (form.linkUrl.trim() && !parseManagedLink(form.linkUrl)) {
+      setLinkError(true);
+      return;
+    }
+    setLinkError(false);
     startTransition(async () => {
       const cleaned = { ...form };
-      for (const key of ["eyebrow", "title", "body", "linkLabel", "linkUrl"] as FieldKey[]) {
+      for (const key of ["eyebrow", "title", "body", "linkLabel"] as FieldKey[]) {
         if (!enFields[key]) {
           cleaned[`${key}_en`] = "";
         }
       }
-      await updateIntroTexts(cleaned, hasEn);
+      const result = await updateIntroTexts(cleaned, hasEn);
+      if (!result.ok) {
+        setLinkError(result.field === "linkUrl");
+        return;
+      }
       router.refresh();
       notify(t.saved);
     });
@@ -86,7 +102,6 @@ export default function IntroTextsEditor({
     { key: "title", label: t.introTitle, multiline: false },
     { key: "body", label: t.body, multiline: true },
     { key: "linkLabel", label: t.linkLabel, multiline: false },
-    { key: "linkUrl", label: t.linkUrl, multiline: false },
   ];
 
   return (
@@ -173,6 +188,21 @@ export default function IntroTextsEditor({
             )}
           </fieldset>
         ))}
+
+        <fieldset className="space-y-3 rounded-lg border p-4">
+          <legend className="px-2 text-sm font-semibold">{t.linkUrl}</legend>
+          <ManagedLinkPicker
+            ariaLabel={t.linkUrl}
+            error={linkError ? linkPickerTranslations.invalid : null}
+            onChange={(value) => {
+              setForm((prev) => ({ ...prev, linkUrl: value }));
+              setLinkError(false);
+            }}
+            options={linkOptions}
+            translations={linkPickerTranslations}
+            value={form.linkUrl}
+          />
+        </fieldset>
       </div>
     </div>
   );
