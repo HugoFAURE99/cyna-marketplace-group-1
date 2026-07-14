@@ -322,7 +322,7 @@ function SubscriptionStatusTable({ items, noData }: { items: { count: number; la
 }
 
 function ReportChrome({ generated, pageLabel }: { generated: string; pageLabel: string }) {
-  return <><View fixed style={styles.header}><Text style={styles.brand} render={() => "CYNA"} /><Text style={styles.headerMeta} render={() => generated} /></View><View fixed style={styles.footer}><Text render={() => `CYNA BackOffice · ${generated}`} /><Text render={({ pageNumber, totalPages }) => `${pageLabel} ${pageNumber} / ${totalPages}`} /></View></>;
+  return <><View fixed style={styles.header}><Text style={styles.brand} render={() => "CYNA"} /><Text style={styles.headerMeta} render={() => generated} /></View><View fixed style={styles.footer}><Text render={() => `CYNA Back-Office · ${generated}`} /><Text render={({ pageNumber, totalPages }) => `${pageLabel} ${pageNumber} / ${totalPages}`} /></View></>;
 }
 
 function ReportTable({ compact = false, headers, noData, rows }: { compact?: boolean; headers: [string, string, string]; noData: string; rows: { id: string; metric: string; name: string; quantity: string; revenue: string }[] }) {

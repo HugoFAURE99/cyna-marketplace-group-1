@@ -26,8 +26,8 @@
     "searchClose": "Close search"
   },
   "menu": {
-    "backOffice": "Back office",
-    "enteringBackOffice": "Backoffice",
+    "backOffice": "Back-Office",
+    "enteringBackOffice": "Back-Office",
     "menu": "Menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
@@ -74,7 +74,8 @@
     "contact": "Contact",
     "termsOfUse": "Terms of Use",
     "legalNotices": "Legal Notices",
-    "copyright": "© {year} CYNA. All rights reserved."
+    "copyright": "© {year} CYNA. All rights reserved.",
+    "websiteBy": "Website by G1 dev"
   },
   "home": {
     "categoriesEyebrow": "Categories",
@@ -300,7 +301,7 @@
       "viewCyna": "CYNA Marketplace",
       "switchingToCyna": "Marketplace",
       "logout": "Log out",
-      "backoffice": "Back office",
+      "backoffice": "Back-Office",
       "homepage": "Homepage",
       "products": "Products",
       "categories": "Categories",
@@ -708,7 +709,7 @@
     },
     "saveError": "Something went wrong. Please try again.",
     "dashboard": {
-      "title": "Back office",
+      "title": "Back-Office",
       "subtitle": "Manage products"
     },
     "homepage": {
@@ -1206,7 +1207,7 @@
     "close": "Close",
     "mfa": {
       "title": "Two-factor authentication",
-      "requiredDescription": "Two-factor authentication is required for BackOffice access.",
+      "requiredDescription": "Two-factor authentication is required for Back-Office access.",
       "enabledDescription": "Your account requests an authenticator code after every new login.",
       "disabledDescription": "Add an authenticator app as an optional second sign-in step.",
       "enabled": "Enabled",
@@ -1480,9 +1481,11 @@
   },
   "a11y": {
     "title": "Accessibility",
-    "colorBlindness": "Color blindness",
-    "increaseFont": "Increase font size",
-    "dyslexicFont": "Dyslexic font",
+    "openMenu": "Open accessibility options",
+    "closeMenu": "Close accessibility options",
+    "colorBlindness": "Color-blind mode",
+    "increaseFont": "Larger text",
+    "dyslexicFont": "Dyslexia-friendly font",
     "highlightLinks": "Highlight links"
   }
 }

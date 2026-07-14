@@ -6,12 +6,10 @@ import { CircleUserRound, LogIn } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import CartButton from "@/components/layout/public-header/CartButton";
 import CategoryMenu from "@/components/layout/public-header/CategoryMenu";
-import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
 import MobileSearch from "@/components/layout/public-header/MobileSearch";
 import PublicMenuSheet from "@/components/layout/public-header/PublicMenuSheet";
 import SearchAutocomplete from "@/components/layout/public-header/SearchAutocomplete";
 import { getCartCount } from "@/lib/cart/cart";
-import { A11yProvider } from "@/components/layout/public-header/A11yMenu";
 import { getCatalogCategories } from "@/lib/products/public-catalog";
 import { getLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
@@ -46,7 +44,6 @@ export default async function PublicHeader() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200 bg-white shadow-sm">
-      <A11yProvider />
       {/* logo | search | actions. Search is centered in the flex-1 track between
           logo and actions, so its gap to each side stays even despite their
           different widths. */}
@@ -84,14 +81,21 @@ export default async function PublicHeader() {
           {/* État de connexion (visible sur écrans ≥ sm) */}
           {user ? (
             <Link
-              className="hidden h-11 max-w-[200px] items-center gap-1.5 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-900 shadow-xs transition hover:border-purple-200 hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 lg:inline-flex"
+              className="hidden h-11 max-w-[260px] items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 shadow-xs transition hover:border-purple-200 hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 lg:inline-flex"
               href="/user-dashboard/infos"
             >
               <CircleUserRound
                 aria-hidden="true"
                 className="size-5 shrink-0 text-purple-700"
               />
-              <span className="truncate">{displayName}</span>
+              <span className="flex min-w-0 items-center gap-1">
+                <span className="truncate">{displayName}</span>
+                {isAdmin && (
+                  <span className="relative top-0.5 shrink-0 bg-gradient-to-r from-purple-600 to-fuchsia-500 bg-clip-text text-[9px] font-bold uppercase leading-none tracking-[0.04em] text-transparent">
+                    Admin
+                  </span>
+                )}
+              </span>
             </Link>
           ) : (
             <Link
@@ -104,7 +108,6 @@ export default async function PublicHeader() {
           )}
 
           <MobileSearch />
-          <div className="hidden md:block"><LanguageSwitcher /></div>
           <CartButton count={cartCount} />
 
           <PublicMenuSheet categories={categories} isAdmin={isAdmin} isLoggedIn={!!user} />

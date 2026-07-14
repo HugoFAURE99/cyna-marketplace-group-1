@@ -26,8 +26,8 @@
     "searchClose": "Fermer la recherche"
   },
   "menu": {
-    "backOffice": "Back-office",
-    "enteringBackOffice": "Backoffice",
+    "backOffice": "Back-Office",
+    "enteringBackOffice": "Back-Office",
     "menu": "Menu",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
@@ -74,7 +74,8 @@
     "contact": "Contact",
     "termsOfUse": "Conditions d'utilisation",
     "legalNotices": "Mentions légales",
-    "copyright": "© {year} CYNA. Tous droits réservés."
+    "copyright": "© {year} CYNA. Tous droits réservés.",
+    "websiteBy": "Site réalisé par G1 dev"
   },
   "home": {
     "categoriesEyebrow": "Catégories",
@@ -300,7 +301,7 @@
       "viewCyna": "CYNA Marketplace",
       "switchingToCyna": "Marketplace",
       "logout": "Se déconnecter",
-      "backoffice": "Back-office",
+      "backoffice": "Back-Office",
       "homepage": "Page d'accueil",
       "products": "Produits",
       "categories": "Catégories",
@@ -708,7 +709,7 @@
     },
     "saveError": "Une erreur est survenue. Réessaie.",
     "dashboard": {
-      "title": "Back-office",
+      "title": "Back-Office",
       "subtitle": "Gérer les produits"
     },
     "homepage": {
@@ -1207,7 +1208,7 @@
     "close": "Fermer",
     "mfa": {
       "title": "Authentification à deux facteurs",
-      "requiredDescription": "L’authentification à deux facteurs est obligatoire pour accéder au BackOffice.",
+      "requiredDescription": "L’authentification à deux facteurs est obligatoire pour accéder au Back-Office.",
       "enabledDescription": "Votre compte demande un code d’authentification après chaque nouvelle connexion.",
       "disabledDescription": "Ajoutez une application d’authentification comme seconde étape de connexion facultative.",
       "enabled": "Activée",
@@ -1481,9 +1482,11 @@
   },
   "a11y": {
     "title": "Accessibilité",
-    "colorBlindness": "Daltonisme",
-    "increaseFont": "Augmenter Police",
-    "dyslexicFont": "Police Dyslexie",
-    "highlightLinks": "Liens Évidents"
+    "openMenu": "Ouvrir les options d’accessibilité",
+    "closeMenu": "Fermer les options d’accessibilité",
+    "colorBlindness": "Mode daltonisme",
+    "increaseFont": "Texte agrandi",
+    "dyslexicFont": "Police adaptée à la dyslexie",
+    "highlightLinks": "Mettre les liens en évidence"
   }
 }

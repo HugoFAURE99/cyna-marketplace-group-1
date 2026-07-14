@@ -66,7 +66,7 @@ export function MfaPanel({ mode, next }: { mode: "challenge" | "required-admin-e
 
     const { data: enrollment, error: enrollmentError } = await supabase.auth.mfa.enroll({
       factorType: "totp",
-      friendlyName: "CYNA BackOffice",
+      friendlyName: "CYNA Back-Office",
       issuer: "CYNA",
     });
     if (enrollmentError) {

@@ -6,10 +6,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import "../globals.css";
 import { cn } from "@/lib/utils";
 import { routing } from "@/i18n/routing";
-import { A11yInitScript } from "@/components/layout/public-header/A11yMenu";
 import type { Locale } from "@/lib/i18n/translations";
 import { NotificationProvider } from "@/components/ui/notification-provider";
 import { SiteTransitionProvider } from "@/components/layout/SiteTransitionProvider";
+import { A11yProvider } from "@/components/layout/public-header/A11yMenu";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -75,10 +75,8 @@ export default async function LocaleLayout({
         inter.variable,
       )}
     >
-      <head>
-        <A11yInitScript />
-      </head>
       <body className="antialiased">
+        <A11yProvider />
         <NextIntlClientProvider>
           <SiteTransitionProvider>
             <NotificationProvider>{children}</NotificationProvider>

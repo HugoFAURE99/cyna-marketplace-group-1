@@ -4,6 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/admin/AdminSidebar/AdminSidebar";
 import AdminThemeBody from "@/components/admin/AdminThemeBody";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
+import A11yMenu from "@/components/layout/public-header/A11yMenu";
 import { SiteTransitionReady } from "@/components/layout/SiteTransitionProvider";
 import { Link } from "@/i18n/navigation";
 import { createServerClient } from "@/lib/supabase/server-client";
@@ -39,6 +40,7 @@ export default async function AdminLayout({
           <div className={styles.topbarInner}>
             <SidebarTrigger />
             <div className={styles.topbarActions}>
+              <A11yMenu placement="bottom" />
               <LanguageSwitcher showLocaleCode />
               {user && (
                 <Link
