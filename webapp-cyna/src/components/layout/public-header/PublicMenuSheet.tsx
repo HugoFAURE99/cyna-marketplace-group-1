@@ -9,6 +9,7 @@ import { logout } from "@/app/(auth)/_action/auth.action";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
 import { Sheet, SheetClose, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Link } from "@/i18n/navigation";
+import A11yMenu from "@/components/layout/public-header/A11yMenu";
 
 const informationLinks = [
   { href: "/faq", icon: LifeBuoy, labelKey: "faq" },
@@ -49,7 +50,12 @@ export default function PublicMenuSheet({ categories, isLoggedIn = false }: { ca
         <nav aria-label={t("information")} className="mt-7"><p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">{t("information")}</p><ul className="space-y-1">{informationLinks.map((item) => <li key={item.href}><Link className="flex min-h-11 items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-purple-50 hover:text-purple-700" href={item.href} onClick={close}><item.icon aria-hidden="true" className="size-4" />{t(item.labelKey)}</Link></li>)}</ul></nav>
         <div className="mt-7 rounded-md border border-slate-200 md:hidden"><LanguageSwitcher fullWidth label={t("language")} /></div>
       </div>
-      <div className="border-t border-slate-100 px-5 py-4"><Link aria-label={tHeader("homeAriaLabel")} href="/" onClick={close}><Image alt="CYNA" className="h-auto w-[100px]" height={27} src="/brand/cyna-logo-v2-header.svg" width={100} /></Link></div>
+      <div className="border-t border-slate-100 px-5 py-4 flex items-center justify-between">
+        <Link aria-label={tHeader("homeAriaLabel")} href="/" onClick={close}>
+          <Image alt="CYNA" className="h-auto w-[100px]" height={27} src="/brand/cyna-logo-v2-header.svg" width={100} />
+        </Link>
+        <A11yMenu />
+      </div>
     </SheetContent>
   </Sheet>;
 }

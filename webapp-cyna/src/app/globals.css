@@ -1,3 +1,4 @@
+@import url('https://fonts.cdnfonts.com/css/opendyslexic');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -143,6 +144,32 @@
     @apply font-sans;
     scroll-behavior: smooth;
   }
+}
+
+html.a11y-daltonisme {
+  filter: grayscale(100%) contrast(120%);
+}
+
+html.a11y-large-font {
+  font-size: 120%;
+}
+
+html.a11y-dyslexic-font * {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+
+html.a11y-highlight-links a,
+html.a11y-highlight-links button,
+html.a11y-highlight-links summary {
+  outline: 3px solid #8b5cf6 !important; /* purple-500 */
+  outline-offset: 2px !important;
+  text-decoration: underline !important;
+}
+
+html.a11y-highlight-links summary svg {
+  outline: 3px solid #8b5cf6 !important; /* purple-500 */
+  outline-offset: 2px !important;
+  border-radius: 4px;
 }
 
 @keyframes cyna-notification-in {

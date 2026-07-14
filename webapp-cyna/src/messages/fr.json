@@ -1203,5 +1203,12 @@
       "uncollectible": "Irrécouvrable",
       "unknown": "Inconnue"
     }
+  },
+  "a11y": {
+    "title": "Accessibilité",
+    "colorBlindness": "Daltonisme",
+    "increaseFont": "Augmenter Police",
+    "dyslexicFont": "Police Dyslexie",
+    "highlightLinks": "Liens Évidents"
   }
 }
