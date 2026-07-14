@@ -14,7 +14,9 @@ export default function AdminLayout({
       <AdminSidebar />
       <main className={styles.main}>
         <div className={styles.topbar}>
-          <SidebarTrigger />
+          <div className={styles.topbarInner}>
+            <SidebarTrigger />
+          </div>
         </div>
         <div className={styles.content}>{children}</div>
       </main>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Info, LayoutGrid, LifeBuoy, LogIn, LogOut, Menu, Scale, UserPlus, UserRound, X } from "lucide-react";
+import { FileText, Info, LayoutGrid, LifeBuoy, LogIn, LogOut, Menu, Scale, Settings, UserPlus, UserRound, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
@@ -17,7 +17,7 @@ const informationLinks = [
   { href: "/about", icon: Info, labelKey: "aboutCyna" },
 ] as const;
 
-export default function PublicMenuSheet({ categories, isLoggedIn = false }: { categories: { id_categorie: number; cat_nom: string }[]; isLoggedIn?: boolean }) {
+export default function PublicMenuSheet({ categories, isAdmin = false, isLoggedIn = false }: { categories: { id_categorie: number; cat_nom: string }[]; isAdmin?: boolean; isLoggedIn?: boolean }) {
   const t = useTranslations("menu");
   const tHeader = useTranslations("header");
   const [open, setOpen] = useState(false);
@@ -32,6 +32,7 @@ export default function PublicMenuSheet({ categories, isLoggedIn = false }: { ca
           <div className="min-w-0 space-y-2">
             {isLoggedIn ? <>
               <Link className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-3 text-sm font-semibold text-white hover:bg-purple-800" href="/user-dashboard/infos" onClick={close}><UserRound aria-hidden="true" className="size-4" />{t("myAccount")}</Link>
+              {isAdmin && <Link className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-purple-700 px-3 text-sm font-semibold text-purple-700 hover:bg-purple-50" href="/mfa-verify?next=%2Fadmin" onClick={close}><Settings aria-hidden="true" className="size-4" />{t("backOffice")}</Link>}
               <form action={logout}><button className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-purple-200 px-3 text-sm font-semibold text-purple-700 transition hover:bg-purple-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-100" onClick={close} type="submit"><LogOut aria-hidden="true" className="size-4" />{t("logOut")}</button></form>
             </> : <>
               <Link className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-purple-700 px-3 text-sm font-semibold text-white hover:bg-purple-800" href="/login" onClick={close}><LogIn aria-hidden="true" className="size-4" />{t("logIn")}</Link>

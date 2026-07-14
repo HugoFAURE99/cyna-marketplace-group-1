@@ -5,7 +5,6 @@ import HomeCarousel from "@/components/home/HomeCarousel";
 import HomeIntro from "@/components/home/HomeIntro";
 import ProductGrid from "@/components/home/ProductGrid";
 import {
-  getHomeCarouselButtonHref,
   getHomeCarouselSlides,
   getHomeCategories,
   getHomeIntroContent,
@@ -25,10 +24,9 @@ export default async function Home({
   setRequestLocale(locale);
 
   // Load every home section in parallel.
-  const [slides, carouselButtonHref, introContent, products, categories] =
+  const [slides, introContent, products, categories] =
     await Promise.all([
       getHomeCarouselSlides(locale),
-      getHomeCarouselButtonHref(locale),
       getHomeIntroContent(locale),
       getHomeTopProducts(locale),
       getHomeCategories(locale),
@@ -36,7 +34,7 @@ export default async function Home({
 
   return (
     <main className="flex-1">
-      <HomeCarousel slides={slides} buttonHref={carouselButtonHref} />
+      <HomeCarousel slides={slides} />
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-16 px-4 py-12 sm:px-6 lg:px-8">
         <HomeIntro content={introContent} />
         <ProductGrid products={products} />

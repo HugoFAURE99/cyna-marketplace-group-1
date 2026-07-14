@@ -2,14 +2,12 @@
 
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   Eye,
   XCircle,
   RefreshCw,
   ArrowLeft,
-  ChevronDown,
-  Loader2,
 } from "lucide-react";
 import {
   Table,
@@ -22,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@base-ui/react/dialog";
 import Spinner from "@/components/ui/spinner";
+import { isSubscriptionDueWithinHorizon } from "@/lib/admin/subscription-health";
 import {
   cancelSubscription,
   reactivateSubscription,
@@ -58,7 +57,6 @@ interface Translations {
   cancelling: string;
   bulkCancel: string;
   bulkCancelTitle: string;
-  bulkCancelMessage: string;
   selected: string;
   selectAll: string;
   back: string;
@@ -77,16 +75,6 @@ interface Translations {
 }
 
 const PAGE_SIZE = 10;
-
-function isExpiringThisMonth(dateFin: string | null): boolean {
-  if (!dateFin) return false;
-  const end = new Date(dateFin);
-  const now = new Date();
-  return (
-    end.getFullYear() === now.getFullYear() &&
-    end.getMonth() === now.getMonth()
-  );
-}
 
 function statusColor(statut: string): string {
   const s = statut.toLowerCase();
@@ -136,6 +124,8 @@ export default function SubscriptionsTableClient({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const tPagination = useTranslations("admin.pagination");
+  const tSubscriptions = useTranslations("admin.subscriptions");
+  const locale = useLocale();
 
   // Load initial detail if provided via URL
   useState(() => {
@@ -165,7 +155,9 @@ export default function SubscriptionsTableClient({
     let result = subscriptions;
 
     if (tab === "expiring") {
-      result = result.filter((s) => isExpiringThisMonth(s.date_fin));
+      result = result
+        .filter((s) => isSubscriptionDueWithinHorizon(s.date_fin, s.statut_abonnement, 30))
+        .sort((a, b) => (a.date_fin ?? "").localeCompare(b.date_fin ?? ""));
     }
 
     if (search) {
@@ -277,15 +269,15 @@ export default function SubscriptionsTableClient({
         </h2>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <InfoCard label={t.client} value={detail.client_name ? `${detail.client_name} (${detail.client_email})` : detail.client_email} />
+          <InfoCard label={t.client}><div className="text-sm"><p className="font-medium">{detail.client_name}</p><a className="break-all text-primary underline underline-offset-4" href={`mailto:${detail.client_email}`}>{detail.client_email}</a></div></InfoCard>
           <InfoCard label={t.product} value={detail.produit_nom} />
           <InfoCard label={t.plan} value={translateBilling(detail.type_facturation, t)} />
           <InfoCard label={t.price} value={`${(detail.prix / 100).toFixed(2)} €`} />
-          <InfoCard label={t.startDate} value={new Date(detail.date_debut).toLocaleDateString("fr-FR")} />
+          <InfoCard label={t.startDate} value={new Date(detail.date_debut).toLocaleDateString(locale)} />
           <InfoCard
             label={t.endDate}
-            value={detail.date_fin ? new Date(detail.date_fin).toLocaleDateString("fr-FR") : t.noEndDate}
-            highlight={detail.date_fin ? isExpiringThisMonth(detail.date_fin) : false}
+            value={detail.date_fin ? new Date(detail.date_fin).toLocaleDateString(locale) : t.noEndDate}
+            highlight={isSubscriptionDueWithinHorizon(detail.date_fin, detail.statut_abonnement, 30)}
           />
           <InfoCard label={t.status}>
             <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColor(detail.statut_abonnement)}`}>
@@ -302,7 +294,7 @@ export default function SubscriptionsTableClient({
             <h3 className="mb-2 text-sm font-semibold">{t.linkedOrder}</h3>
             <div className="flex items-center gap-4 text-sm">
               <span>#{detail.commande.id_commande}</span>
-              <span>{new Date(detail.commande.date_commande).toLocaleDateString("fr-FR")}</span>
+              <span>{new Date(detail.commande.date_commande).toLocaleDateString(locale)}</span>
               <span className="font-medium">{detail.commande.montant_total.toFixed(2)} €</span>
               <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColor(detail.commande.statut_commande)}`}>
                 {detail.commande.statut_commande}
@@ -449,7 +441,7 @@ export default function SubscriptionsTableClient({
             </TableRow>
           ) : (
             paginated.map((sub, index) => {
-              const expiring = isExpiringThisMonth(sub.date_fin);
+              const expiring = isSubscriptionDueWithinHorizon(sub.date_fin, sub.statut_abonnement, 30);
               return (
                 <TableRow
                   key={sub.id_abonnement}
@@ -470,7 +462,7 @@ export default function SubscriptionsTableClient({
                       {sub.client_name && (
                         <span className="text-sm font-medium">{sub.client_name}</span>
                       )}
-                      <span className="text-xs text-muted-foreground">{sub.client_email}</span>
+                      <a className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline" href={`mailto:${sub.client_email}`}>{sub.client_email}</a>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm">{sub.produit_nom}</TableCell>
@@ -479,11 +471,11 @@ export default function SubscriptionsTableClient({
                   </TableCell>
                   <TableCell className="text-sm font-medium">{(sub.prix / 100).toFixed(2)} €</TableCell>
                   <TableCell className="text-sm">
-                    {new Date(sub.date_debut).toLocaleDateString("fr-FR")}
+                    {new Date(sub.date_debut).toLocaleDateString(locale)}
                   </TableCell>
                   <TableCell className="text-sm">
                     {sub.date_fin
-                      ? new Date(sub.date_fin).toLocaleDateString("fr-FR")
+                      ? new Date(sub.date_fin).toLocaleDateString(locale)
                       : <span className="text-muted-foreground">—</span>}
                   </TableCell>
                   <TableCell>
@@ -604,7 +596,7 @@ export default function SubscriptionsTableClient({
               {t.bulkCancelTitle}
             </Dialog.Title>
             <Dialog.Description className="mt-2 text-sm text-muted-foreground">
-              {t.bulkCancelMessage.replace("{count}", String(selectedIds.size))}
+              {tSubscriptions("bulkCancelMessage", { count: selectedIds.size })}
             </Dialog.Description>
             <div className="mt-5 flex justify-end gap-2">
               <Dialog.Close render={<Button variant="outline" size="sm" />}>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
@@ -93,10 +94,13 @@ export function ProductImageUploader({
         <div className="grid grid-cols-5 gap-3">
           {existingImages.map((img) => (
             <div key={`existing-${img.id_image}`} className="relative">
-              <img
+              <Image
                 src={img.lien_image_produit}
                 alt=""
                 className="h-24 w-full rounded-lg border object-cover shadow-sm"
+                height={96}
+                unoptimized
+                width={160}
               />
               {!readOnly && (
                 <Button
@@ -113,10 +117,13 @@ export function ProductImageUploader({
           ))}
           {newPreviews.map((url, index) => (
             <div key={`new-${index}`} className="relative">
-              <img
+              <Image
                 src={url}
                 alt=""
                 className="h-24 w-full rounded-lg border object-cover shadow-sm"
+                height={96}
+                unoptimized
+                width={160}
               />
               {!readOnly && (
                 <Button

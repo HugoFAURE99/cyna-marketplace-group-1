@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
+import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -239,10 +240,13 @@ export default function CategoriesTableClient({
               </TableCell>
               <TableCell>
                 {category.lien_image_cat ? (
-                  <img
+                  <Image
                     src={category.lien_image_cat}
                     alt=""
                     className="h-10 w-10 rounded object-cover"
+                    height={40}
+                    unoptimized
+                    width={40}
                   />
                 ) : (
                   <span className="text-muted-foreground">{"—"}</span>

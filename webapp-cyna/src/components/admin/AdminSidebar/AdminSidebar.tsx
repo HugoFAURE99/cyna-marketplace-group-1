@@ -15,6 +15,8 @@ export async function AdminSidebar() {
     support: t("support"),
     promotions: t("promotions"),
     sales: t("sales"),
+    viewCyna: t("viewCyna"),
+    logout: t("logout"),
   };
 
   return <AdminSidebarClient labels={labels} />;

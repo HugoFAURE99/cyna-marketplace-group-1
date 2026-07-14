@@ -4,13 +4,15 @@ import { NextResponse, type NextRequest } from "next/server";
 
 
 import { routing } from "@/i18n/routing";
+import { isActiveAdmin } from "@/lib/auth/roles";
+import { SESSION_ACTIVITY_COOKIE } from "@/lib/auth/session-activity-constants";
 
 const handleI18nRouting = createMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
   // Keep the locale redirect/rewrite response: Supabase cookies and refresh
   // headers must be added to this same object or the rewrite can be lost.
-  const response = handleI18nRouting(request);
+  let response = handleI18nRouting(request);
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -41,28 +43,68 @@ export async function proxy(request: NextRequest) {
   // VÉRIFICATION 2FA ET RÔLE POUR LES ADMINS
   // ==========================================
   const pathname = request.nextUrl.pathname;
+  const locale = pathname.startsWith("/en") ? "en" : "fr";
+  const isAuthRoute = /^\/(?:fr|en)\/(?:login|register|reset-password|mfa-verify)(?:\/|$)/.test(pathname);
+  const { data: profile } = user
+    ? await supabase
+        .from("utilisateur")
+        .select("role, is_actif")
+        .eq("id_compte", user.id)
+        .maybeSingle()
+    : { data: null };
+
+  if (user && !profile?.is_actif) {
+    await supabase.auth.signOut({ scope: "local" });
+    response.cookies.delete(SESSION_ACTIVITY_COOKIE);
+    if (!isAuthRoute) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = `/${locale}/login`;
+      loginUrl.search = "?error=errorInactive";
+      return NextResponse.redirect(loginUrl);
+    }
+    return response;
+  }
+
+  if (user && !request.cookies.has(SESSION_ACTIVITY_COOKIE) && !isAuthRoute) {
+    const loginUrl = request.nextUrl.clone();
+    loginUrl.pathname = `/${locale}/login`;
+    loginUrl.search = "?message=sessionExpired";
+    response = NextResponse.redirect(loginUrl);
+    await supabase.auth.signOut({ scope: "local" });
+    response.cookies.delete(SESSION_ACTIVITY_COOKIE);
+    return response;
+  }
+
+  const { data: assurance } = user
+    ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    : { data: null };
+
+  if (
+    user &&
+    !isAuthRoute &&
+    assurance?.currentLevel !== "aal2" &&
+    assurance?.nextLevel === "aal2"
+  ) {
+    const mfaUrl = request.nextUrl.clone();
+    mfaUrl.pathname = `/${locale}/mfa-verify`;
+    mfaUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
+    return NextResponse.redirect(mfaUrl);
+  }
 
   // Cette regex détecte les routes comme /admin, /fr/admin, /en/admin
-  const isAdminRoute = pathname.match(/^\/(fr|en)?\/admin/);
+  const isAdminRoute = /^\/(?:fr|en)\/admin(?:\/|$)/.test(pathname);
 
   if (isAdminRoute) {
-    const locale = pathname.startsWith('/en') ? 'en' : 'fr';
-
     // 1. Bloquer les utilisateurs non connectés
     if (!user) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = `/${locale}/login`;
+      loginUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
       return NextResponse.redirect(loginUrl);
     }
 
     // 2. Vérifier si l'utilisateur possède bien le rôle "Admin"
-    const { data: profile } = await supabase
-      .from("utilisateur")
-      .select("role")
-      .eq("id_compte", user.id)
-      .single();
-
-    if (profile?.role !== "admin" && profile?.role !== "Admin") {
+    if (!isActiveAdmin(profile)) {
       // S'il est enregistré comme "client", on le renvoie vers son tableau de bord
       const homeUrl = request.nextUrl.clone();
       homeUrl.pathname = `/${locale}/user-dashboard`;
@@ -70,13 +112,11 @@ export async function proxy(request: NextRequest) {
     }
 
     // 3. Vérifier le niveau d'authentification (aal2 = mot de passe + 2FA)
-    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-
-    if (aalData?.currentLevel !== "aal2") {
+    if (assurance?.currentLevel !== "aal2") {
       // S'il n'a pas validé sa 2FA, on le redirige vers la page de vérification
       const mfaUrl = request.nextUrl.clone();
       mfaUrl.pathname = `/${locale}/mfa-verify`;
-      mfaUrl.searchParams.set("next", pathname); // Pour le ramener au bon endroit après
+      mfaUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
       return NextResponse.redirect(mfaUrl);
     }
   }

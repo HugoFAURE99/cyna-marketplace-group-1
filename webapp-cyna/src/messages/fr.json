@@ -13,6 +13,7 @@
     "close": "Fermer la notification"
   },
   "header": {
+    "backOffice": "Back-office",
     "homeAriaLabel": "Accueil CYNA",
     "searchPlaceholder": "Rechercher des produits",
     "searchButton": "Rechercher",
@@ -26,6 +27,7 @@
     "searchClose": "Fermer la recherche"
   },
   "menu": {
+    "backOffice": "Back-office",
     "menu": "Menu",
     "openMenu": "Ouvrir le menu",
     "closeMenu": "Fermer le menu",
@@ -192,7 +194,6 @@
       "loading": "Connexion...",
       "noAccount": "Vous n'avez pas de compte ?",
       "createAccount": "Créer un compte",
-      "rememberMe": "Se souvenir de moi",
       "registerSuccess": "Compte créé avec succès ! Veuillez vous connecter.",
       "errorInvalidCredentials": "Email ou mot de passe incorrect.",
       "checkEmail": "Inscription réussie ! Veuillez vérifier votre boîte de réception pour confirmer votre e-mail.",
@@ -200,7 +201,9 @@
       "invalidLink": "Ce lien est invalide ou a expiré. Veuillez réessayer.",
       "errorMissingFields": "Tous les champs sont requis.",
       "errorUnconfirmed": "Confirmez votre adresse e-mail avant de vous connecter.",
-      "errorUnavailable": "La connexion est temporairement indisponible. Veuillez réessayer."
+      "errorUnavailable": "La connexion est temporairement indisponible. Veuillez réessayer.",
+      "errorInactive": "Ce compte est inactif. Contactez le support si vous pensez qu’il s’agit d’une erreur.",
+      "sessionExpired": "Vous avez été déconnecté après 30 minutes d’inactivité."
     },
     "register": {
       "title": "Créer un compte",
@@ -247,20 +250,33 @@
     }
   },
   "mfa": {
-    "loading": "Loading security settings...",
-    "errorFetchParams": "Unable to fetch security settings.",
-    "errorGenQr": "Error generating QR Code.",
-    "errorChallenge": "Unable to start verification.",
-    "errorCode": "Incorrect code. Please try again.",
-    "titleVerify": "Security Verification",
-    "titleSetup": "2FA Setup",
-    "descVerify": "Enter the 6-digit code from your authenticator app.",
-    "descSetup": "Scan this QR Code with Google Authenticator or Authy.",
-    "authCodeLabel": "Authentication Code",
-    "submitButton": "Validate and continue"
+    "loading": "Chargement des paramètres de sécurité...",
+    "errorFetchParams": "Impossible de récupérer les paramètres de sécurité.",
+    "errorGenQr": "Impossible de générer le QR code.",
+    "errorChallenge": "Impossible de lancer la vérification.",
+    "errorCode": "Code incorrect. Veuillez réessayer.",
+    "errorNoFactor": "Aucun authentificateur vérifié n’a été trouvé. Reconnectez-vous ou demandez de l’aide.",
+    "titleVerify": "Vérification de sécurité",
+    "titleSetup": "Configuration de la double authentification",
+    "descVerify": "Saisissez le code à 6 chiffres de votre application d'authentification.",
+    "descSetup": "Scannez ce QR code avec votre application d'authentification, puis saisissez le code affiché.",
+    "authCodeLabel": "Code d'authentification",
+    "submitButton": "Valider et continuer",
+    "retry": "Réessayer",
+    "qrAlt": "QR code de configuration de la double authentification",
+    "manualSecret": "Clé de configuration manuelle",
+    "lostAuthenticator": "Je n’ai plus accès à mon authentificateur",
+    "recoveryCreated": "La demande de récupération n°{id} a été créée. Le support vérifiera votre identité avant de réinitialiser la 2FA.",
+    "recoveryErrors": {
+      "authentication_required": "Reconnectez-vous avant de demander une récupération.",
+      "duplicate": "Une demande de récupération MFA est déjà ouverte pour ce compte.",
+      "unavailable": "La demande de récupération n’a pas pu être créée. Réessayez."
+    }
   },
   "admin": {
     "nav": {
+      "viewCyna": "Voir CYNA",
+      "logout": "Se déconnecter",
       "backoffice": "Back-office",
       "homepage": "Page d'accueil",
       "products": "Produits",
@@ -311,6 +327,42 @@
       "invoice": "Facture"
     },
     "sales": {
+      "analyticsViews": "Vues d'analyse des ventes",
+      "tabs": {
+        "orders": "Commandes",
+        "subscriptions": "Abonnements"
+      },
+      "subtitle": "Du {from} au {to}, selon le fuseau Europe/Paris",
+      "last30days": "30 derniers jours",
+      "last90days": "90 derniers jours",
+      "yearToDate": "Depuis le début de l'année",
+      "custom": "Période personnalisée",
+      "from": "Du",
+      "to": "Au",
+      "apply": "Appliquer",
+      "exportPdf": "Exporter en PDF",
+      "rangeError": "Cette période est invalide ou dépasse 366 jours.",
+      "loading": "Actualisation des statistiques...",
+      "kpis": "Indicateurs commerciaux",
+      "grossRevenue": "Chiffre d'affaires brut",
+      "orderCount": "Commandes finalisées",
+      "averageOrderValue": "Panier moyen",
+      "uniqueCustomers": "Clients uniques",
+      "activeSubscriptions": "Abonnements actifs",
+      "scheduledCancellations": "Résiliations programmées",
+      "versusPrevious": "Comparaison avec la période précédente",
+      "trendTitle": "Évolution du chiffre d'affaires et des commandes",
+      "revenue": "Chiffre d'affaires",
+      "orders": "Commandes",
+      "categoryDistribution": "Répartition par catégorie",
+      "topProducts": "Meilleurs produits",
+      "billingMix": "Mix de facturation",
+      "units": "{count, plural, one {# unité} other {# unités}}",
+      "productRanking": "Classement des produits",
+      "categoryRanking": "Classement des catégories",
+      "product": "Produit",
+      "category": "Catégorie",
+      "quantity": "Quantité",
       "title": "Tableau de bord des ventes",
       "last7days": "7 derniers jours",
       "last5weeks": "5 dernières semaines",
@@ -320,7 +372,35 @@
       "salesByCategory": "Répartition des ventes par catégorie",
       "total": "Total (€)",
       "noData": "Aucune donnée de vente pour cette période.",
-      "period": "Période"
+      "period": "Période",
+      "subscriptions": {
+        "title": "Santé des abonnements",
+        "window": "Échéances du {from} au {to}, selon le fuseau Europe/Paris",
+        "horizon": "Horizon prévisionnel",
+        "days": "{count, plural, one {# jour} other {# jours}}",
+        "active": "Abonnements actifs",
+        "activeSeats": "Postes actifs",
+        "renewals": "Renouvellements à venir",
+        "renewalValue": "Valeur de renouvellement attendue",
+        "endings": "Fins programmées",
+        "endingValue": "Valeur des fins",
+        "renewalTable": "Renouvellements à venir",
+        "endingTable": "Fins programmées",
+        "products": "Répartition par produit",
+        "billing": "Répartition des plans",
+        "statuses": "Répartition des statuts",
+        "customer": "Client",
+        "product": "Produit",
+        "plan": "Plan de facturation",
+        "seats": "Postes",
+        "value": "Montant",
+        "date": "Échéance",
+        "remaining": "Restant",
+        "daysRemaining": "{count, plural, =0 {Aujourd'hui} one {# jour} other {# jours}}",
+        "unknownCustomer": "Client inconnu",
+        "empty": "Aucun abonnement ne correspond à cette vue.",
+        "subscriptionsCount": "{count, plural, one {# abonnement} other {# abonnements}}"
+      }
     },
     "promotions": {
       "title": "Promotions",
@@ -401,7 +481,7 @@
     "subscriptions": {
       "title": "Abonnements",
       "tabAll": "Tous les abonnements",
-      "tabExpiring": "Expirent ce mois",
+      "tabExpiring": "Échéance sous 30 jours",
       "search": "Rechercher par client, produit ou ID...",
       "allStatuses": "Tous les statuts",
       "allBillingTypes": "Tous les plans",
@@ -425,7 +505,7 @@
       "cancelling": "Résiliation...",
       "bulkCancel": "Résilier la sélection",
       "bulkCancelTitle": "Résiliation groupée",
-      "bulkCancelMessage": "Voulez-vous vraiment résilier {count} abonnement(s) ? Cette action est irréversible.",
+      "bulkCancelMessage": "{count, plural, one {Voulez-vous vraiment résilier # abonnement ? Cette action est irréversible.} other {Voulez-vous vraiment résilier # abonnements ? Cette action est irréversible.}}",
       "selected": "sélectionné(s)",
       "selectAll": "Tout sélectionner",
       "back": "Retour",
@@ -492,7 +572,10 @@
       "categorySubscription": "Abonnement",
       "categoryAccount": "Compte",
       "categoryTechnical": "Technique",
+      "categoryAdminAccess": "Demande d'accès administrateur",
+      "categoryMfaReset": "Récupération de l’authentification à deux facteurs",
       "categoryOther": "Autre",
+      "reviewAccount": "Examiner le compte",
       "statusOpen": "Nouveau",
       "statusUrgent": "Urgent",
       "statusToProcess": "À traiter",
@@ -534,7 +617,15 @@
       "subEnd": "Fin",
       "subStatus": "Statut",
       "loading": "Chargement...",
-      "viewOrder": "Voir"
+      "viewOrder": "Voir",
+      "mfa": "Authentification à deux facteurs",
+      "mfaEnabled": "Activée",
+      "mfaDisabled": "Désactivée",
+      "resetMfa": "Réinitialiser la 2FA",
+      "resetMfaConfirm": "Confirmez que l’identité du client a été vérifiée hors ligne avant de supprimer tous ses authentificateurs.",
+      "resetMfaSuccess": "La 2FA a été réinitialisée et les sessions de l’utilisateur ont été invalidées.",
+      "resetMfaError": "La 2FA n’a pas pu être réinitialisée.",
+      "resetMfaTicketRequired": "Un ticket de récupération ouvert correspondant est obligatoire."
     },
     "actions": {
       "view": "Voir",
@@ -652,6 +743,8 @@
       }
     },
     "productForm": {
+      "englishTranslation": "Traduction anglaise",
+      "removeTranslation": "Supprimer la traduction",
       "nameGroup": "Nom",
       "descriptionGroup": "Description",
       "specsGroup": "Caractéristiques techniques",
@@ -681,9 +774,41 @@
       "imagesHint": "JPG, PNG ou WebP (max 2 Mo par image, max 10 images)",
       "imagesCount": "{current}/{max} images",
       "imagesMax": "Nombre maximum d'images atteint",
-      "noImages": "Aucune image"
+      "noImages": "Aucune image",
+      "characteristics": {
+        "title": "Caractéristiques techniques",
+        "description": "Sélectionnez les caractéristiques traduites réutilisables et définissez leur ordre d’affichage.",
+        "empty": "Aucune caractéristique technique sélectionnée.",
+        "search": "Rechercher une caractéristique",
+        "create": "Créer une caractéristique",
+        "createTitle": "Créer une caractéristique technique",
+        "editTitle": "Modifier la caractéristique technique",
+        "globalWarning": "Cette modification affecte tous les produits utilisant cette caractéristique.",
+        "labelFr": "Libellé français",
+        "labelEn": "Libellé anglais",
+        "missingFr": "Traduction française manquante",
+        "missingEn": "Traduction anglaise manquante",
+        "incomplete": "Traduction incomplète",
+        "moveUp": "Monter",
+        "moveDown": "Descendre",
+        "edit": "Modifier",
+        "remove": "Retirer du produit",
+        "close": "Fermer",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "saving": "Enregistrement...",
+        "errors": {
+          "duplicate": "Ce libellé existe déjà dans l’une des langues.",
+          "invalid": "Les deux libellés traduits sont obligatoires.",
+          "not_found": "Cette caractéristique n’existe plus.",
+          "migration_required": "La mise à jour de la base pour les caractéristiques techniques n’est pas encore installée. Appliquez les dernières migrations Supabase, puis réessayez.",
+          "database": "La caractéristique n’a pas pu être enregistrée."
+        }
+      }
     },
     "categoryForm": {
+      "englishTranslation": "Traduction anglaise",
+      "removeTranslation": "Supprimer la traduction",
       "editTitle": "Modifier la catégorie",
       "createTitle": "Créer une catégorie",
       "nameGroup": "Nom",
@@ -773,6 +898,7 @@
     }
   },
   "validation": {
+    "nameEnRequired": "Le nom anglais est obligatoire lorsque la traduction EN est activée",
     "nameFrRequired": "Le nom en français est obligatoire",
     "descriptionFrRequired": "La description en français est obligatoire",
     "pricePositive": "Le prix doit être supérieur à 0",
@@ -832,6 +958,8 @@
     "emailPlaceholder": "vous@entreprise.com",
     "category": "Catégorie",
     "categories": {
+      "admin_access": "Accès administrateur",
+      "mfa_reset": "Récupération de l'authentificateur",
       "billing": "Facturation",
       "order": "Commande",
       "subscription": "Abonnement",
@@ -937,6 +1065,8 @@
     "notFoundTitle": "Ticket introuvable",
     "notFoundBody": "Ce ticket n'existe pas ou n'appartient pas à votre compte.",
     "categories": {
+      "admin_access": "Accès administrateur",
+      "mfa_reset": "Récupération de l'authentificateur",
       "billing": "Facturation",
       "order": "Commande",
       "subscription": "Abonnement",
@@ -960,12 +1090,42 @@
     "invoices": "Factures"
   },
   "account": {
+    "adminAccessTitle": "Demander un accès administrateur",
+    "adminAccessDescription": "Ouvrez une demande dédiée. L'équipe vérifiera manuellement votre besoin et votre compte avant toute modification de rôle.",
+    "adminAccessExisting": "Une demande d'accès administrateur est déjà en cours de traitement.",
+    "adminAccessSubject": "Demande d'accès administrateur",
+    "adminAccessRequest": "Faire une demande",
+    "adminAccessView": "Consulter le ticket",
     "title": "Informations de compte",
     "editProfile": "Modifier le profil",
     "email": "E-mail",
     "creationDate": "Membre depuis",
     "passwordUpdated": "Votre mot de passe a bien été mis à jour.",
-    "close": "Fermer"
+    "close": "Fermer",
+    "mfa": {
+      "title": "Authentification à deux facteurs",
+      "requiredDescription": "L’authentification à deux facteurs est obligatoire pour accéder au BackOffice.",
+      "enabledDescription": "Votre compte demande un code d’authentification après chaque nouvelle connexion.",
+      "disabledDescription": "Ajoutez une application d’authentification comme seconde étape de connexion facultative.",
+      "enabled": "Activée",
+      "disabled": "Désactivée",
+      "enable": "Activer la 2FA",
+      "disable": "Désactiver la 2FA",
+      "disableConfirm": "Désactiver l’authentification à deux facteurs pour ce compte ?",
+      "loading": "Veuillez patienter...",
+      "setupInstructions": "Scannez le QR code avec votre application d’authentification, puis saisissez son code à six chiffres.",
+      "manualSecret": "Clé de configuration manuelle",
+      "code": "Code d’authentification à six chiffres",
+      "verify": "Vérifier et activer",
+      "qrAlt": "QR code de configuration de l’authentification à deux facteurs",
+      "errors": {
+        "load": "Les paramètres de sécurité n’ont pas pu être chargés.",
+        "enroll": "La configuration de l’authentification à deux facteurs n’a pas pu démarrer.",
+        "verify": "La vérification n’a pas pu démarrer.",
+        "code": "Ce code est incorrect. Réessayez.",
+        "disable": "La 2FA n’a pas pu être désactivée. Reconnectez-vous et vérifiez d’abord votre code."
+      }
+    }
   },
   "orders": {
     "title": "Vos commandes",

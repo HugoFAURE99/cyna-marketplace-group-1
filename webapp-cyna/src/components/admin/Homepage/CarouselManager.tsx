@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useState, useTransition, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { ArrowLeft, Plus, X } from "lucide-react";
@@ -143,7 +145,7 @@ function SortableSlideRow({
         </button>
       </TableCell>
       <TableCell>
-        <img src={slide.lien_image_caroussel} alt="" className="h-14 w-24 rounded object-cover" />
+        <Image src={slide.lien_image_caroussel} alt="" className="h-14 w-24 rounded object-cover" height={56} unoptimized width={96} />
       </TableCell>
       <TableCell className="max-w-48 truncate text-sm">{slide.titre_fr || "—"}</TableCell>
       <TableCell>
@@ -203,7 +205,9 @@ export default function CarouselManager({
   const [isOrderSaving, startOrderTransition] = useTransition();
 
   const orderedSlidesRef = useRef(orderedSlides);
-  orderedSlidesRef.current = orderedSlides;
+  useEffect(() => {
+    orderedSlidesRef.current = orderedSlides;
+  }, [orderedSlides]);
 
   const { showUnsavedDialog, confirmNavigation, cancelNavigation } =
     useUnsavedChanges(isDirty);
@@ -370,7 +374,7 @@ export default function CarouselManager({
               onClick={() => fileInputRef.current?.click()}
             >
               {editing.imagePreview ? (
-                <img src={editing.imagePreview} alt="" className="h-full w-full rounded-lg object-cover" />
+                <Image src={editing.imagePreview} alt="" className="h-full w-full rounded-lg object-cover" height={192} unoptimized width={512} />
               ) : (
                 <div className="text-center text-muted-foreground">
                   <p className="text-sm">{t.dragOrClick}</p>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
-import { useRouter, usePathname } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Eye, Trash2 } from "lucide-react";
 import {
@@ -75,7 +75,6 @@ export default function PromotionsTableClient({
   const [cannotDelete, setCannotDelete] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const pathname = usePathname();
   const tPagination = useTranslations("admin.pagination");
 
   const filtered = useMemo(() => {

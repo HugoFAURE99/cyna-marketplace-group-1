@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useCallback, useEffect, useMemo, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
 import Fuse from "fuse.js";
 import {
@@ -122,10 +123,13 @@ function SortableCard({
       </button>
       <div className="flex aspect-[3/2] items-center justify-center bg-muted/30">
         {product.image ? (
-          <img
+          <Image
             src={product.image}
             alt={product.nom_pro}
             className="h-full w-full object-cover"
+            height={240}
+            unoptimized
+            width={360}
           />
         ) : (
           <svg
@@ -278,10 +282,13 @@ function ProductPickerModal({
                         <TableCell>
                           <div className="flex items-center gap-2">
                             {product.image ? (
-                              <img
+                              <Image
                                 src={product.image}
                                 alt=""
                                 className="h-8 w-8 rounded object-cover"
+                                height={32}
+                                unoptimized
+                                width={32}
                               />
                             ) : (
                               <span className="flex h-8 w-8 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
@@ -354,7 +361,9 @@ export default function FeaturedProductsManager({
   const t = translations;
 
   const itemsRef = useRef(items);
-  itemsRef.current = items;
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   const { showUnsavedDialog, confirmNavigation, cancelNavigation } =
     useUnsavedChanges(isDirty);

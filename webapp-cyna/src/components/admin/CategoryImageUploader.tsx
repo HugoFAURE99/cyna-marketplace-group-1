@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
@@ -51,10 +52,13 @@ export function CategoryImageUploader({
 
       {previewUrl ? (
         <div className="relative inline-block">
-          <img
+          <Image
             src={previewUrl}
             alt=""
             className="max-w-xs rounded-lg border shadow-md"
+            height={240}
+            unoptimized
+            width={320}
           />
           <Button
             type="button"

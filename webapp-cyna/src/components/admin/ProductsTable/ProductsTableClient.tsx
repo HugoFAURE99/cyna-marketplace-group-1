@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useState, useMemo, useTransition, useRef, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
@@ -456,10 +458,13 @@ export default function ProductsTableClient({
               </TableCell>
               <TableCell>
                 {product.image ? (
-                  <img
+                  <Image
                     src={product.image}
                     alt=""
                     className="h-10 w-10 rounded object-cover"
+                    height={40}
+                    unoptimized
+                    width={40}
                   />
                 ) : (
                   <span className="text-muted-foreground">—</span>

@@ -1,6 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/server";
+import type { Enums } from "@/types/database.types";
 
 export type TicketRow = {
   id_support: string;
@@ -43,7 +44,7 @@ export async function getTickets(): Promise<TicketRow[]> {
 
   const compteIds = [
     ...new Set(
-      tickets.map((t: any) => t.id_compte).filter(Boolean) as string[]
+      tickets.map((ticket) => ticket.id_compte).filter((id): id is string => Boolean(id))
     ),
   ];
 
@@ -59,7 +60,7 @@ export async function getTickets(): Promise<TicketRow[]> {
     }
   }
 
-  const ticketIds = tickets.map((t: any) => t.id_support);
+  const ticketIds = tickets.map((ticket) => ticket.id_support);
   const messageCounts = new Map<string, number>();
 
   if (ticketIds.length > 0) {
@@ -74,7 +75,7 @@ export async function getTickets(): Promise<TicketRow[]> {
     }
   }
 
-  return tickets.map((t: any) => ({
+  return tickets.map((t) => ({
     id_support: t.id_support,
     sujet: t.sujet,
     categorie: t.categorie,
@@ -105,7 +106,7 @@ export async function getTicketDetail(
 
   if (error || !ticket) return null;
 
-  const t = ticket as any;
+  const t = ticket;
 
   let client_name: string | null = null;
   if (t.id_compte) {
@@ -138,7 +139,7 @@ export async function getTicketDetail(
     origine_chatbot: t.origine_chatbot,
     client_name,
     message_count: messages?.length || 0,
-    messages: (messages ?? []).map((m: any) => ({
+    messages: (messages ?? []).map((m) => ({
       id_message: m.id_message,
       contenu: m.contenu,
       sender: m.sender,
@@ -150,7 +151,7 @@ export async function getTicketDetail(
 
 export async function updateTicketStatus(
   id: string,
-  status: string
+  status: Enums<"support_ticket_status">
 ): Promise<void> {
   const supabase = await createAdminClient();
 
@@ -159,7 +160,7 @@ export async function updateTicketStatus(
   await supabase
     .from("ticket_support")
     .update({
-      status: status as any,
+      status,
       updated_at: now,
       ...(status === "closed" ? { date_fermeture: now } : {}),
     })
@@ -168,7 +169,7 @@ export async function updateTicketStatus(
 
 export async function bulkUpdateTicketStatus(
   ids: string[],
-  status: string
+  status: Enums<"support_ticket_status">
 ): Promise<void> {
   for (const id of ids) {
     await updateTicketStatus(id, status);

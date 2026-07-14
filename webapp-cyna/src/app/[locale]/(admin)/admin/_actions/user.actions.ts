@@ -1,6 +1,7 @@
 "use server";
 
 import { createAdminClient } from "@/lib/supabase/server";
+import { requireActiveAal2Admin } from "@/lib/auth/admin-guard";
 
 export async function getUsers() {
   const supabase = await createAdminClient();
@@ -14,6 +15,7 @@ export async function getUsers() {
 }
 
 export async function toggleUserStatus(id: string, isActive: boolean) {
+  await requireActiveAal2Admin();
   const supabase = await createAdminClient();
   const { error } = await supabase
     .from("utilisateur")
@@ -24,6 +26,8 @@ export async function toggleUserStatus(id: string, isActive: boolean) {
 }
 
 export async function updateUserRole(id: string, role: string) {
+  await requireActiveAal2Admin();
+  if (role !== "admin" && role !== "client") throw new Error("INVALID_ROLE");
   const supabase = await createAdminClient();
   const { error } = await supabase
     .from("utilisateur")
@@ -58,6 +62,12 @@ export type UserDetail = {
     date_fin: string | null;
     statut_abonnement: string;
   }[];
+  mfa_enabled: boolean;
+};
+
+type UserSubscriptionQuery = UserDetail["abonnements"][number] & {
+  commande: UserDetail["commandes"][number] | null;
+  id_commande: number;
 };
 
 export async function getUserDetail(id: string): Promise<UserDetail | null> {
@@ -86,30 +96,83 @@ export async function getUserDetail(id: string): Promise<UserDetail | null> {
       .order("date_debut", { ascending: false }),
   ]);
 
-  const commandes = (abonnements ?? [])
-    .map((a: any) => a.commande)
-    .filter(Boolean)
+  const subscriptionRows = (abonnements ?? []) as unknown as UserSubscriptionQuery[];
+  const commandes = subscriptionRows
+    .map((subscription) => subscription.commande)
+    .filter((order): order is UserDetail["commandes"][number] => Boolean(order))
     .filter(
-      (c: any, i: number, arr: any[]) =>
-        arr.findIndex((x: any) => x.id_commande === c.id_commande) === i,
+      (order, index, orders) =>
+        orders.findIndex((candidate) => candidate.id_commande === order.id_commande) === index,
     );
+
+  const { data: factorData } = await supabase.auth.admin.mfa.listFactors({ userId: id });
 
   return {
     ...user,
     adresses: adresses ?? [],
     commandes,
-    abonnements: (abonnements ?? []).map(
-      ({ id_abonnement, date_debut, date_fin, statut_abonnement }: any) => ({
+    abonnements: subscriptionRows.map(
+      ({ id_abonnement, date_debut, date_fin, statut_abonnement }) => ({
         id_abonnement,
         date_debut,
         date_fin,
         statut_abonnement,
       }),
     ),
+    mfa_enabled: factorData?.factors.some((factor) => factor.status === "verified") ?? false,
   };
 }
 
+export type ResetUserMfaResult =
+  | { ok: true; removed: number }
+  | { ok: false; error: "self_reset" | "ticket_required" | "no_factor" | "unavailable" };
+
+export async function resetUserMfa(targetId: string, ticketId: string): Promise<ResetUserMfaResult> {
+  const { user: actor } = await requireActiveAal2Admin();
+  if (actor.id === targetId) return { ok: false, error: "self_reset" };
+  const supabase = createAdminClient();
+  const { data: ticket } = await supabase
+    .from("ticket_support")
+    .select("id_support")
+    .eq("id_support", ticketId)
+    .eq("id_compte", targetId)
+    .eq("categorie", "mfa_reset")
+    .not("status", "in", "(resolved,closed)")
+    .maybeSingle();
+  if (!ticket) return { ok: false, error: "ticket_required" };
+
+  const { data: audit, error: auditError } = await supabase
+    .from("mfa_reset_audit")
+    .insert({ actor_id: actor.id, target_id: targetId, ticket_id: ticketId, status: "pending" })
+    .select("id_audit")
+    .single();
+  if (auditError || !audit) return { ok: false, error: "unavailable" };
+
+  const factors = await supabase.auth.admin.mfa.listFactors({ userId: targetId });
+  const totpFactors = factors.data?.factors.filter((factor) => factor.factor_type === "totp") ?? [];
+  if (factors.error || totpFactors.length === 0) {
+    await supabase.from("mfa_reset_audit").update({ status: "failed", error_code: factors.error ? "list_failed" : "no_factor", completed_at: new Date().toISOString() }).eq("id_audit", audit.id_audit);
+    return { ok: false, error: factors.error ? "unavailable" : "no_factor" };
+  }
+
+  for (const factor of totpFactors) {
+    const deletion = await supabase.auth.admin.mfa.deleteFactor({ id: factor.id, userId: targetId });
+    if (deletion.error) {
+      await supabase.from("mfa_reset_audit").update({ status: "failed", factor_count: totpFactors.length, error_code: "delete_failed", completed_at: new Date().toISOString() }).eq("id_audit", audit.id_audit);
+      return { ok: false, error: "unavailable" };
+    }
+  }
+
+  const completedAt = new Date().toISOString();
+  await Promise.all([
+    supabase.from("mfa_reset_audit").update({ status: "completed", factor_count: totpFactors.length, completed_at: completedAt }).eq("id_audit", audit.id_audit),
+    supabase.from("ticket_support").update({ status: "resolved", date_fermeture: completedAt }).eq("id_support", ticketId),
+  ]);
+  return { ok: true, removed: totpFactors.length };
+}
+
 export async function deleteUser(id: string) {
+  await requireActiveAal2Admin();
   const supabase = await createAdminClient();
   const { error } = await supabase
     .from("utilisateur")

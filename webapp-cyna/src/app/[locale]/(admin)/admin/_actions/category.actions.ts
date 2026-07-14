@@ -7,10 +7,12 @@ import { routing } from "@/i18n/routing";
 import type { TablesInsert } from "@/types/database.types";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
+import { planEnglishTranslation } from "@/lib/admin/translation-mutation";
 
 const DEFAULT_LOCALE = routing.defaultLocale;
 
 type CategoryFormData = {
+  has_en_translation: boolean;
   cat_nom_fr: string;
   cat_description_fr?: string;
   cat_nom_en?: string;
@@ -30,14 +32,13 @@ function buildTranslationRows(
     },
   ];
 
-  if (formData.cat_nom_en && formData.cat_nom_en.trim().length > 0) {
-    rows.push({
+  const english = planEnglishTranslation(formData.has_en_translation, formData.cat_nom_en, {
       id_categorie,
-      langue: "en",
-      cat_nom: formData.cat_nom_en,
+      langue: "en" as const,
+      cat_nom: formData.cat_nom_en ?? "",
       cat_description: formData.cat_description_en || null,
-    });
-  }
+  });
+  if (english.mode === "upsert") rows.push(english.value);
 
   return rows;
 }
@@ -168,16 +169,17 @@ export async function updateCategory(
     throw new Error(`Erreur mise à jour traduction fr : ${frError.message}`);
   }
 
-  if (formData.cat_nom_en && formData.cat_nom_en.trim().length > 0) {
+  const english = planEnglishTranslation(formData.has_en_translation, formData.cat_nom_en, {
+    id_categorie: id,
+    langue: "en" as const,
+    cat_nom: formData.cat_nom_en ?? "",
+    cat_description: formData.cat_description_en || null,
+  });
+  if (english.mode === "upsert") {
     const { error: enError } = await supabase
       .from("categorie_traduction")
       .upsert(
-        {
-          id_categorie: id,
-          langue: "en",
-          cat_nom: formData.cat_nom_en,
-          cat_description: formData.cat_description_en || null,
-        },
+        english.value,
         { onConflict: "id_categorie,langue" },
       );
 
@@ -185,11 +187,14 @@ export async function updateCategory(
       throw new Error(`Erreur mise à jour traduction en : ${enError.message}`);
     }
   } else {
-    await supabase
+    const { error: deleteEnError } = await supabase
       .from("categorie_traduction")
       .delete()
       .eq("id_categorie", id)
       .eq("langue", "en");
+    if (deleteEnError) {
+      throw new Error(`Erreur suppression traduction en : ${deleteEnError.message}`);
+    }
   }
 
   // 2. Upload d'image si fourni
@@ -328,7 +333,7 @@ async function uploadCategoryImage(
     const filename = `${uuidv4()}.webp`;
 
     const supabase = createAdminClient();
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from("category-images")
       .upload(`${categoryId}/${filename}`, webpBuffer, {
         contentType: "image/webp",

@@ -3,7 +3,7 @@
 import { useState, useMemo, useTransition, useEffect } from "react";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, Eye, ExternalLink } from "lucide-react";
+import { ArrowLeft, Eye, ExternalLink, ShieldOff } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
   Table,
@@ -21,6 +21,7 @@ import {
   updateUserRole,
   deleteUser,
   getUserDetail,
+  resetUserMfa,
   type UserDetail,
 } from "@/app/[locale]/(admin)/admin/_actions/user.actions";
 
@@ -68,6 +69,14 @@ interface Translations {
   subStatus: string;
   loading: string;
   viewOrder: string;
+  mfa: string;
+  mfaEnabled: string;
+  mfaDisabled: string;
+  resetMfa: string;
+  resetMfaConfirm: string;
+  resetMfaSuccess: string;
+  resetMfaError: string;
+  resetMfaTicketRequired: string;
 }
 
 const PAGE_SIZE = 10;
@@ -94,32 +103,36 @@ export default function UsersTableClient({
   users,
   translations: t,
   initialDetailId,
+  initialMfaTicketId,
 }: {
   users: User[];
   translations: Translations;
   initialDetailId?: string;
+  initialMfaTicketId?: string;
 }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [isPending, startTransition] = useTransition();
   const [detail, setDetail] = useState<UserDetail | null>(null);
-  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(Boolean(initialDetailId));
+  const [mfaResetMessage, setMfaResetMessage] = useState("");
   const router = useRouter();
   const pathname = usePathname();
   const tPagination = useTranslations("admin.pagination");
 
   useEffect(() => {
-    if (initialDetailId) {
-      setIsLoadingDetail(true);
-      getUserDetail(initialDetailId).then((data) => {
-        setDetail(data);
-        setIsLoadingDetail(false);
-      });
-    } else {
-      setDetail(null);
-      setIsLoadingDetail(false);
-    }
+    let cancelled = false;
+    Promise.resolve().then(async () => {
+      if (!initialDetailId) {
+        if (!cancelled) { setDetail(null); setIsLoadingDetail(false); }
+        return;
+      }
+      if (!cancelled) setIsLoadingDetail(true);
+      const data = await getUserDetail(initialDetailId);
+      if (!cancelled) { setDetail(data); setIsLoadingDetail(false); }
+    });
+    return () => { cancelled = true; };
   }, [initialDetailId]);
 
   const filtered = useMemo(() => {
@@ -162,6 +175,19 @@ export default function UsersTableClient({
     setIsLoadingDetail(false);
   };
 
+  const handleMfaReset = () => {
+    if (!detail || !initialMfaTicketId || !window.confirm(t.resetMfaConfirm)) return;
+    startTransition(async () => {
+      const result = await resetUserMfa(detail.id_compte, initialMfaTicketId);
+      if (result.ok) {
+        setDetail({ ...detail, mfa_enabled: false });
+        setMfaResetMessage(t.resetMfaSuccess);
+      } else {
+        setMfaResetMessage(result.error === "ticket_required" ? t.resetMfaTicketRequired : t.resetMfaError);
+      }
+    });
+  };
+
   // ─── Detail view ───
   if (detail) {
     return (
@@ -200,7 +226,19 @@ export default function UsersTableClient({
               {detail.is_actif ? t.active : t.inactive}
             </span>
           </div>
+          <div className="flex justify-between">
+            <span className="text-sm text-muted-foreground">{t.mfa}</span>
+            <span className="text-sm font-medium">{detail.mfa_enabled ? t.mfaEnabled : t.mfaDisabled}</span>
+          </div>
         </div>
+
+        {detail.mfa_enabled && initialMfaTicketId && (
+          <div className="mb-6 max-w-lg rounded-lg border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm text-amber-900">{t.resetMfaConfirm}</p>
+            <Button className="mt-3 gap-2" disabled={isPending} onClick={handleMfaReset} type="button" variant="destructive"><ShieldOff className="size-4" />{t.resetMfa}</Button>
+            {mfaResetMessage && <p className="mt-3 text-sm font-medium text-amber-950" role="status">{mfaResetMessage}</p>}
+          </div>
+        )}
 
         {/* Addresses */}
         <h3 className="mb-3 text-lg font-semibold">{t.addresses}</h3>
@@ -235,7 +273,7 @@ export default function UsersTableClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {detail.commandes.map((c: any, index: number) => (
+              {detail.commandes.map((c, index) => (
                 <TableRow
                   key={c.id_commande}
                   className={index % 2 === 1 ? "bg-muted/20" : ""}
@@ -281,7 +319,7 @@ export default function UsersTableClient({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {detail.abonnements.map((a: any, index: number) => (
+              {detail.abonnements.map((a, index) => (
                 <TableRow
                   key={a.id_abonnement}
                   className={index % 2 === 1 ? "bg-muted/20" : ""}

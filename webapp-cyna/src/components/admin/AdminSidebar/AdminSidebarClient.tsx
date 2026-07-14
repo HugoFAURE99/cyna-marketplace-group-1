@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Package, Layers, Users, BarChart3, ShoppingCart, Percent, RefreshCw, LifeBuoy } from "lucide-react";
+import { Home, Package, Layers, Users, BarChart3, ShoppingCart, Percent, RefreshCw, LifeBuoy, ExternalLink, LogOut } from "lucide-react";
+import { logout } from "@/app/(auth)/_action/auth.action";
 
 import {
   Sidebar,
@@ -14,6 +15,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Link } from "@/i18n/navigation";
 import LanguageSwitcher from "@/components/layout/LanguageSwitcher/LanguageSwitcher";
@@ -41,6 +43,8 @@ interface Labels {
   support: string;
   promotions: string;
   sales: string;
+  viewCyna: string;
+  logout: string;
 }
 
 export default function AdminSidebarClient({ labels }: { labels: Labels }) {
@@ -55,7 +59,7 @@ export default function AdminSidebarClient({ labels }: { labels: Labels }) {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-4">
+      <SidebarHeader className="h-16 min-h-16 shrink-0 justify-center border-b border-sidebar-border px-3 py-0">
         <Link href="/admin" className="flex items-center gap-2">
           <Image
             src="/brand/cyna-logo-v2-header.svg"
@@ -92,10 +96,20 @@ export default function AdminSidebarClient({ labels }: { labels: Labels }) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <div className="mt-auto p-3">
-          <LanguageSwitcher />
-        </div>
       </SidebarContent>
+      <SidebarFooter className="border-t border-sidebar-border p-3">
+        <Link className="flex min-h-10 items-center gap-2 rounded-md px-2 text-sm font-medium transition hover:bg-sidebar-accent" href="/">
+          <ExternalLink aria-hidden="true" className="size-4" />
+          {labels.viewCyna}
+        </Link>
+        <form action={logout}>
+          <button className="flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md px-2 text-left text-sm font-medium transition hover:bg-sidebar-accent" type="submit">
+            <LogOut aria-hidden="true" className="size-4" />
+            {labels.logout}
+          </button>
+        </form>
+        <LanguageSwitcher fullWidth placement="top" />
+      </SidebarFooter>
     </Sidebar>
   );
 }

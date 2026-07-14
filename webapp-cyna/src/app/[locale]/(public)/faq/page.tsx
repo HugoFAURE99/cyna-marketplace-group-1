@@ -27,6 +27,14 @@ export default async function FaqPage({
     data: { user },
   } = await supabase.auth.getUser();
   const orders = user ? await getUserOrderOptions(user.id, locale) : [];
+  const { data: profile } = user
+    ? await supabase
+        .from("utilisateur")
+        .select("role, is_actif")
+        .eq("id_compte", user.id)
+        .maybeSingle()
+    : { data: null };
+  const allowAdminAccess = profile?.role === "client" && profile.is_actif;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-12">
@@ -84,6 +92,7 @@ export default async function FaqPage({
           defaultCategory={category}
           defaultSubject={subject}
           defaultOrderId={orderId}
+          allowAdminAccess={allowAdminAccess}
         />
       </div>
     </div>

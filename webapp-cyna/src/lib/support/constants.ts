@@ -4,6 +4,8 @@ export const SUPPORT_TICKET_CATEGORIES = [
   "subscription",
   "account",
   "technical",
+  "admin_access",
+  "mfa_reset",
   "other",
 ] as const;
 

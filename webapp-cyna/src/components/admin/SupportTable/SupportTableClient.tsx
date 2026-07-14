@@ -21,8 +21,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Dialog } from "@base-ui/react/dialog";
 import Spinner from "@/components/ui/spinner";
+import type { Enums } from "@/types/database.types";
 import {
   updateTicketStatus,
   bulkUpdateTicketStatus,
@@ -32,6 +32,7 @@ import {
 } from "@/app/[locale]/(admin)/admin/_actions/ticket.actions";
 
 type Tab = "new" | "urgent" | "to_process" | "in_progress" | "closed";
+type TicketStatus = Enums<"support_ticket_status">;
 
 const STATUS_MAP: Record<Tab, string> = {
   new: "open",
@@ -99,7 +100,10 @@ interface Translations {
   categorySubscription: string;
   categoryAccount: string;
   categoryTechnical: string;
+  categoryAdminAccess: string;
+  categoryMfaReset: string;
   categoryOther: string;
+  reviewAccount: string;
   statusOpen: string;
   statusUrgent: string;
   statusToProcess: string;
@@ -116,6 +120,8 @@ function categoryColor(cat: string): string {
     case "subscription": return "bg-purple-100 text-purple-800";
     case "account": return "bg-cyan-100 text-cyan-800";
     case "technical": return "bg-red-100 text-red-800";
+    case "admin_access": return "bg-violet-100 text-violet-800";
+    case "mfa_reset": return "bg-orange-100 text-orange-800";
     default: return "bg-gray-100 text-gray-700";
   }
 }
@@ -138,6 +144,8 @@ function translateCategory(cat: string, t: Translations): string {
     case "subscription": return t.categorySubscription;
     case "account": return t.categoryAccount;
     case "technical": return t.categoryTechnical;
+    case "admin_access": return t.categoryAdminAccess;
+    case "mfa_reset": return t.categoryMfaReset;
     case "other": return t.categoryOther;
     default: return cat;
   }
@@ -232,14 +240,14 @@ export default function SupportTableClient({
     router.back();
   };
 
-  const handleStatusChange = (id: string, newStatus: string) => {
+  const handleStatusChange = (id: string, newStatus: TicketStatus) => {
     startTransition(async () => {
       await updateTicketStatus(id, newStatus);
       router.refresh();
     });
   };
 
-  const handleBulkStatusChange = (newStatus: string) => {
+  const handleBulkStatusChange = (newStatus: TicketStatus) => {
     startTransition(async () => {
       await bulkUpdateTicketStatus(Array.from(selectedIds), newStatus);
       setSelectedIds(new Set());
@@ -301,7 +309,11 @@ export default function SupportTableClient({
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <InfoCard label={t.client} value={detail.client_name ? `${detail.client_name}` : "—"} />
-          <InfoCard label={t.email} value={detail.email_contact} />
+          <InfoCard label={t.email}>
+            <a className="break-all text-sm font-semibold text-primary underline-offset-4 hover:underline" href={`mailto:${detail.email_contact}`}>
+              {detail.email_contact}
+            </a>
+          </InfoCard>
           <InfoCard label={t.category}>
             <span className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${categoryColor(detail.categorie)}`}>
               {translateCategory(detail.categorie, t)}
@@ -334,6 +346,20 @@ export default function SupportTableClient({
                   {t.viewOrder}
                 </Button>
               </div>
+            </InfoCard>
+          )}
+          {detail.categorie === "admin_access" && detail.id_compte && (
+            <InfoCard label={t.categoryAdminAccess}>
+              <Button size="sm" variant="outline" onClick={() => router.push(`/admin/users?detail=${detail.id_compte}`)}>
+                {t.reviewAccount}
+              </Button>
+            </InfoCard>
+          )}
+          {detail.categorie === "mfa_reset" && detail.id_compte && (
+            <InfoCard label={t.categoryMfaReset}>
+              <Button size="sm" variant="outline" onClick={() => router.push(`/admin/users?detail=${detail.id_compte}&mfaTicket=${detail.id_support}`)}>
+                {t.reviewAccount}
+              </Button>
             </InfoCard>
           )}
         </div>
@@ -435,7 +461,7 @@ export default function SupportTableClient({
     { key: "closed", label: t.tabClosed, count: tabCounts.closed },
   ];
 
-  const bulkTarget = (): { label: string; status: string } | null => {
+  const bulkTarget = (): { label: string; status: TicketStatus } | null => {
     switch (tab) {
       case "new": return null;
       case "urgent": return { label: t.bulkInProgress, status: "resolved" };
@@ -498,6 +524,8 @@ export default function SupportTableClient({
           <option value="subscription">{t.categorySubscription}</option>
           <option value="account">{t.categoryAccount}</option>
           <option value="technical">{t.categoryTechnical}</option>
+          <option value="admin_access">{t.categoryAdminAccess}</option>
+          <option value="mfa_reset">{t.categoryMfaReset}</option>
           <option value="other">{t.categoryOther}</option>
         </select>
 
@@ -595,7 +623,7 @@ export default function SupportTableClient({
                     {ticket.client_name && (
                       <span className="text-sm font-medium">{ticket.client_name}</span>
                     )}
-                    <span className="text-xs text-muted-foreground">{ticket.email_contact}</span>
+                    <a className="text-xs text-muted-foreground underline-offset-4 hover:text-primary hover:underline" href={`mailto:${ticket.email_contact}`} onClick={(event) => event.stopPropagation()}>{ticket.email_contact}</a>
                   </div>
                 </TableCell>
                 <TableCell className="text-sm">

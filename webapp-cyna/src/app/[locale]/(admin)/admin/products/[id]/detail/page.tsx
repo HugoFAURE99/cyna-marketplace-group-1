@@ -4,6 +4,7 @@ import ProductForm from "@/components/admin/ProductForm/ProductForm";
 import {
   getProductById,
   getCategories,
+  getTechnicalCharacteristics,
 } from "@/app/[locale]/(admin)/admin/_actions/product.actions";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -18,9 +19,10 @@ export default async function ProductDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("admin.products");
   const tActions = await getTranslations("admin.actions");
-  const [product, categories] = await Promise.all([
+  const [product, categories, characteristics] = await Promise.all([
     getProductById(Number(id)),
     getCategories(locale),
+    getTechnicalCharacteristics(),
   ]);
 
   return (
@@ -33,7 +35,7 @@ export default async function ProductDetailPage({
         {tActions("back")}
       </Link>
       <h1>{t("detail")}</h1>
-      <ProductForm product={product} categories={categories} readOnly />
+      <ProductForm product={product} categories={categories} characteristics={characteristics} readOnly />
     </div>
   );
 }

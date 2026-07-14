@@ -23,6 +23,7 @@ export default function SupportTicketForm({
   defaultCategory,
   defaultSubject,
   defaultOrderId,
+  allowAdminAccess = false,
 }: {
   defaultEmail?: string;
   isAuthenticated?: boolean;
@@ -30,10 +31,14 @@ export default function SupportTicketForm({
   defaultCategory?: string;
   defaultSubject?: string;
   defaultOrderId?: string;
+  allowAdminAccess?: boolean;
 }) {
   const t = useTranslations("support");
   const { notify } = useNotification();
   const [serverError, setServerError] = useState(false);
+  const categories = SUPPORT_TICKET_CATEGORIES.filter(
+    (category) => category !== "mfa_reset" && (category !== "admin_access" || allowAdminAccess),
+  );
 
   const schema = z.object({
     sujet: z.string().trim().min(1, t("errors.subjectRequired")),
@@ -60,7 +65,7 @@ export default function SupportTicketForm({
       email_contact: defaultEmail,
       description: "",
       categorie:
-        SUPPORT_TICKET_CATEGORIES.find(
+        categories.find(
           (category) => category === defaultCategory,
         ) ?? "other",
       orderId: defaultOrderId || "",
@@ -89,7 +94,7 @@ export default function SupportTicketForm({
       <div className="space-y-1.5">
         <label htmlFor="ticket-category" className="text-sm font-medium text-slate-800">{t("category")}</label>
         <select id="ticket-category" className={fieldClass} {...register("categorie")}>
-          {SUPPORT_TICKET_CATEGORIES.map((category) => <option key={category} value={category}>{t(`categories.${category}`)}</option>)}
+          {categories.map((category) => <option key={category} value={category}>{t(`categories.${category}`)}</option>)}
         </select>
       </div>
 

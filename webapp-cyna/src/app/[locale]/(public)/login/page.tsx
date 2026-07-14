@@ -7,8 +7,8 @@ import type { Locale } from "@/lib/i18n/translations";
 
 // Query-param keys the auth flow may redirect here with. We map them to
 // translated copy so the user never sees a raw key like "checkEmail".
-const MESSAGE_KEYS = ["checkEmail", "updatePasswordSuccess"] as const;
-const ERROR_KEYS = ["invalidLink"] as const;
+const MESSAGE_KEYS = ["checkEmail", "updatePasswordSuccess", "sessionExpired"] as const;
+const ERROR_KEYS = ["invalidLink", "errorInactive"] as const;
 
 export default async function Login({
   params,

@@ -23,9 +23,11 @@ const FLAG_CLASS = "h-4 w-6 rounded-[3px] shadow-sm ring-1 ring-black/10";
 export default function LanguageSwitcher({
   fullWidth = false,
   label,
+  placement = "bottom",
 }: {
   fullWidth?: boolean;
   label?: string;
+  placement?: "bottom" | "top";
 } = {}) {
   const t = useTranslations("common");
   const locale = useLocale();
@@ -89,7 +91,11 @@ export default function LanguageSwitcher({
 
       {open && (
         <ul
-          className={cn("absolute right-0 z-50 mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg", fullWidth ? "w-full" : "w-[5.75rem]")}
+          className={cn(
+            "absolute right-0 z-50 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg",
+            placement === "top" ? "bottom-full mb-2" : "top-full mt-2",
+            fullWidth ? "w-full" : "w-[5.75rem]",
+          )}
           id="language-options"
         >
           {otherLocales.map((loc) => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition, useCallback, useEffect, useMemo, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
 import { Dialog } from "@base-ui/react/dialog";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
@@ -97,10 +98,13 @@ function SortableRow({
       <TableCell className="font-medium">{index + 1}</TableCell>
       <TableCell>
         {product.image ? (
-          <img
+          <Image
             src={product.image}
             alt=""
             className="h-10 w-10 rounded object-cover"
+            height={40}
+            unoptimized
+            width={40}
           />
         ) : (
           <span className="text-muted-foreground">—</span>
@@ -140,7 +144,9 @@ export default function PriorityProductsTable({
     useUnsavedChanges(isDirty);
 
   const itemsRef = useRef(items);
-  itemsRef.current = items;
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   useEffect(() => {
     onDirtyChange?.(isDirty);

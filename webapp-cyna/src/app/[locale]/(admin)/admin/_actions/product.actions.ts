@@ -8,6 +8,14 @@ import { routing } from "@/i18n/routing";
 import type { TablesInsert } from "@/types/database.types";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
+import { planEnglishTranslation } from "@/lib/admin/translation-mutation";
+import {
+  mapTechnicalCharacteristicMutationError,
+  mapTechnicalCharacteristics,
+  normalizeTechnicalCharacteristicIds,
+  type TechnicalCharacteristicMutationError,
+} from "@/lib/admin/technical-characteristics";
+import { requireActiveAal2Admin } from "@/lib/auth/admin-guard";
 
 const DEFAULT_LOCALE = routing.defaultLocale;
 
@@ -16,12 +24,12 @@ const DEFAULT_LOCALE = routing.defaultLocale;
 type BillingType = "mensuel" | "annuel";
 
 type ProductFormData = {
+  has_en_translation: boolean;
   nom_pro_fr: string;
   pro_description_fr: string;
-  pro_carac_technique_fr?: string;
   nom_pro_en?: string;
   pro_description_en?: string;
-  pro_carac_technique_en?: string;
+  technical_characteristic_ids: number[];
   id_categorie: number;
   prix_mensuel?: number;
   prix_annuel?: number;
@@ -46,21 +54,84 @@ function buildTranslationRows(
       langue: "fr",
       nom_pro: formData.nom_pro_fr,
       pro_description: formData.pro_description_fr || null,
-      pro_carac_technique: formData.pro_carac_technique_fr || null,
     },
   ];
 
-  if (formData.nom_pro_en && formData.nom_pro_en.trim().length > 0) {
-    rows.push({
+  const english = planEnglishTranslation(formData.has_en_translation, formData.nom_pro_en, {
       id_produit,
-      langue: "en",
-      nom_pro: formData.nom_pro_en,
+      langue: "en" as const,
+      nom_pro: formData.nom_pro_en ?? "",
       pro_description: formData.pro_description_en || null,
-      pro_carac_technique: formData.pro_carac_technique_en || null,
-    });
-  }
+  });
+  if (english.mode === "upsert") rows.push(english.value);
 
   return rows;
+}
+
+export type TechnicalCharacteristic = {
+  id: number;
+  labelEn: string | null;
+  labelFr: string | null;
+};
+
+export type TechnicalCharacteristicMutationResult =
+  | { ok: true; characteristic: TechnicalCharacteristic }
+  | { ok: false; error: TechnicalCharacteristicMutationError };
+
+export async function getTechnicalCharacteristics(): Promise<TechnicalCharacteristic[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("caracteristique_technique")
+    .select(`
+      id_caracteristique,
+      caracteristique_technique_traduction (
+        langue,
+        nom_caracteristique
+      )
+    `)
+    .order("date_creation", { ascending: true });
+  if (error) throw new Error(`Erreur chargement caractéristiques : ${error.message}`);
+
+  return mapTechnicalCharacteristics(data ?? []);
+}
+
+export async function upsertTechnicalCharacteristic(input: {
+  id?: number;
+  labelFr: string;
+  labelEn: string;
+}): Promise<TechnicalCharacteristicMutationResult> {
+  await requireActiveAal2Admin();
+  const labelFr = input.labelFr.trim();
+  const labelEn = input.labelEn.trim();
+  if (!labelFr || !labelEn) return { ok: false, error: "invalid" };
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.rpc("upsert_technical_characteristic", {
+    p_label_fr: labelFr,
+    p_label_en: labelEn,
+    ...(input.id === undefined ? {} : { p_id: input.id }),
+  });
+  if (error || typeof data !== "number") {
+    console.error("[products] characteristic mutation failed", error);
+    return { ok: false, error: mapTechnicalCharacteristicMutationError(error) };
+  }
+
+  revalidatePath("/[locale]/admin/products", "layout");
+  return { ok: true, characteristic: { id: data, labelFr, labelEn } };
+}
+
+async function replaceTechnicalCharacteristics(
+  productId: number,
+  characteristicIds: number[],
+) {
+  const supabase = createAdminClient();
+  const { error } = await supabase.rpc("replace_product_technical_characteristics", {
+    p_product_id: productId,
+    p_characteristic_ids: normalizeTechnicalCharacteristicIds(characteristicIds),
+  });
+  if (error) {
+    throw new Error(`Erreur mise à jour caractéristiques : ${error.message}`);
+  }
 }
 
 function stripePriceArgs(prixCentimes: number, type: BillingType) {
@@ -148,6 +219,7 @@ export async function createProduct(
   formData: ProductFormData,
   imageFiles?: File[],
 ) {
+  await requireActiveAal2Admin();
   // 1. Produit Stripe (langue par défaut = fr).
   const stripeProduct = await stripe.products.create({
     name: formData.nom_pro_fr,
@@ -185,6 +257,17 @@ export async function createProduct(
     throw new Error(
       `Erreur création traductions produit : ${traductionError.message}`,
     );
+  }
+
+  try {
+    await replaceTechnicalCharacteristics(
+      produit.id_produit,
+      formData.technical_characteristic_ids,
+    );
+  } catch (error) {
+    await supabase.from("produit").delete().eq("id_produit", produit.id_produit);
+    await stripe.products.update(stripeProduct.id, { active: false });
+    throw error;
   }
 
   // 4. Créer les Stripe Prices en parallèle, puis insérer en base.
@@ -325,8 +408,11 @@ export async function getProductById(id: number) {
       produit_traduction (
         langue,
         nom_pro,
-        pro_description,
-        pro_carac_technique
+        pro_description
+      ),
+      produit_caracteristique_technique (
+        id_caracteristique,
+        ordre_affichage
       ),
       prix_tarif (
         id_prix,
@@ -354,6 +440,9 @@ export async function getProductById(id: number) {
   const sortedImages = [...(data.image_produit ?? [])].sort(
     (a, b) => (a.ordre_affichage ?? 0) - (b.ordre_affichage ?? 0),
   );
+  const technicalCharacteristicIds = [...(data.produit_caracteristique_technique ?? [])]
+    .sort((a, b) => a.ordre_affichage - b.ordre_affichage)
+    .map((item) => item.id_caracteristique);
 
   return {
     id_produit: data.id_produit,
@@ -365,10 +454,9 @@ export async function getProductById(id: number) {
     image_produit: sortedImages,
     nom_pro_fr: fr?.nom_pro ?? "",
     pro_description_fr: fr?.pro_description ?? "",
-    pro_carac_technique_fr: fr?.pro_carac_technique ?? "",
     nom_pro_en: en?.nom_pro ?? "",
     pro_description_en: en?.pro_description ?? "",
-    pro_carac_technique_en: en?.pro_carac_technique ?? "",
+    technical_characteristic_ids: technicalCharacteristicIds,
   };
 }
 
@@ -378,6 +466,7 @@ export async function updateProduct(
   imageFiles?: File[],
   removedImageIds?: number[],
 ) {
+  await requireActiveAal2Admin();
   const supabase = createAdminClient();
 
   const { data: existing, error: existingError } = await supabase
@@ -422,7 +511,6 @@ export async function updateProduct(
       langue: "fr",
       nom_pro: formData.nom_pro_fr,
       pro_description: formData.pro_description_fr || null,
-      pro_carac_technique: formData.pro_carac_technique_fr || null,
     },
     { onConflict: "id_produit,langue" },
   );
@@ -431,15 +519,15 @@ export async function updateProduct(
     throw new Error(`Erreur mise à jour traduction fr : ${frError.message}`);
   }
 
-  if (formData.nom_pro_en && formData.nom_pro_en.trim().length > 0) {
+  const english = planEnglishTranslation(formData.has_en_translation, formData.nom_pro_en, {
+    id_produit: id,
+    langue: "en" as const,
+    nom_pro: formData.nom_pro_en ?? "",
+    pro_description: formData.pro_description_en || null,
+  });
+  if (english.mode === "upsert") {
     const { error: enError } = await supabase.from("produit_traduction").upsert(
-      {
-        id_produit: id,
-        langue: "en",
-        nom_pro: formData.nom_pro_en,
-        pro_description: formData.pro_description_en || null,
-        pro_carac_technique: formData.pro_carac_technique_en || null,
-      },
+      english.value,
       { onConflict: "id_produit,langue" },
     );
 
@@ -447,12 +535,17 @@ export async function updateProduct(
       throw new Error(`Erreur mise à jour traduction en : ${enError.message}`);
     }
   } else {
-    await supabase
+    const { error: deleteEnError } = await supabase
       .from("produit_traduction")
       .delete()
       .eq("id_produit", id)
       .eq("langue", "en");
+    if (deleteEnError) {
+      throw new Error(`Erreur suppression traduction en : ${deleteEnError.message}`);
+    }
   }
+
+  await replaceTechnicalCharacteristics(id, formData.technical_characteristic_ids);
 
   // Tarifs : reconcilier les lignes existantes avec la sélection.
   const { data: existingTarifs } = await supabase

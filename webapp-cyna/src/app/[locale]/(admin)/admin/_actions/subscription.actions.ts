@@ -2,6 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/server";
 import { stripe } from "@/lib/stripe";
+import { requireActiveAal2Admin } from "@/lib/auth/admin-guard";
 
 export type SubscriptionRow = {
   id_abonnement: number;
@@ -26,6 +27,22 @@ export type SubscriptionDetail = SubscriptionRow & {
   } | null;
 };
 
+type SubscriptionQueryRow = {
+  commande: { mail_utilisateur_invite: string | null } | null;
+  date_debut: string;
+  date_fin: string | null;
+  id_abonnement: number;
+  id_commande: number;
+  id_compte: string | null;
+  prix_tarif: {
+    prix: number;
+    produit: { produit_traduction: { langue: string; nom_pro: string }[] | null } | null;
+    type_facturation: string;
+  } | null;
+  statut_abonnement: string;
+  stripe_subscription_id: string | null;
+};
+
 export async function getSubscriptions(): Promise<SubscriptionRow[]> {
   const supabase = await createAdminClient();
 
@@ -40,6 +57,7 @@ export async function getSubscriptions(): Promise<SubscriptionRow[]> {
       id_commande,
       id_compte,
       id_prix,
+      commande (mail_utilisateur_invite),
       prix_tarif (
         prix,
         type_facturation,
@@ -55,10 +73,11 @@ export async function getSubscriptions(): Promise<SubscriptionRow[]> {
 
   if (error || !abonnements) return [];
 
+  const subscriptionRows = abonnements as unknown as SubscriptionQueryRow[];
   const compteIds = [
     ...new Set(
-      abonnements
-        .map((a: any) => a.id_compte)
+      subscriptionRows
+        .map((subscription) => subscription.id_compte)
         .filter(Boolean) as string[]
     ),
   ];
@@ -79,12 +98,12 @@ export async function getSubscriptions(): Promise<SubscriptionRow[]> {
     }
   }
 
-  return abonnements.map((a: any) => {
+  return subscriptionRows.map((a) => {
     const user = a.id_compte ? userMap.get(a.id_compte) : null;
-    const pt = a.prix_tarif as any;
-    const traductions = pt?.produit?.produit_traduction as any[] | undefined;
+    const pt = a.prix_tarif;
+    const traductions = pt?.produit?.produit_traduction;
     const frName =
-      traductions?.find((t: any) => t.langue === "fr")?.nom_pro || "—";
+      traductions?.find((translation) => translation.langue === "fr")?.nom_pro || "—";
 
     return {
       id_abonnement: a.id_abonnement,
@@ -93,7 +112,7 @@ export async function getSubscriptions(): Promise<SubscriptionRow[]> {
       statut_abonnement: a.statut_abonnement,
       stripe_subscription_id: a.stripe_subscription_id,
       client_name: user?.nom_complet || null,
-      client_email: user?.adresse_mail || "—",
+      client_email: user?.adresse_mail || a.commande?.mail_utilisateur_invite || "—",
       produit_nom: frName,
       type_facturation: pt?.type_facturation || "—",
       prix: pt?.prix || 0,
@@ -118,6 +137,7 @@ export async function getSubscriptionDetail(
       id_commande,
       id_compte,
       id_prix,
+      commande (mail_utilisateur_invite),
       prix_tarif (
         prix,
         type_facturation,
@@ -134,9 +154,9 @@ export async function getSubscriptionDetail(
 
   if (error || !abonnement) return null;
 
-  const a = abonnement as any;
+  const a = abonnement as unknown as SubscriptionQueryRow;
 
-  let client_email = "—";
+  let client_email = a.commande?.mail_utilisateur_invite || "—";
   let client_name: string | null = null;
 
   if (a.id_compte) {
@@ -152,10 +172,10 @@ export async function getSubscriptionDetail(
     }
   }
 
-  const pt = a.prix_tarif as any;
-  const traductions = pt?.produit?.produit_traduction as any[] | undefined;
+  const pt = a.prix_tarif;
+  const traductions = pt?.produit?.produit_traduction;
   const frName =
-    traductions?.find((t: any) => t.langue === "fr")?.nom_pro || "—";
+    traductions?.find((translation) => translation.langue === "fr")?.nom_pro || "—";
 
   let commande: SubscriptionDetail["commande"] = null;
   if (a.id_commande) {
@@ -185,6 +205,7 @@ export async function getSubscriptionDetail(
 }
 
 export async function cancelSubscription(id: number): Promise<void> {
+  await requireActiveAal2Admin();
   const supabase = await createAdminClient();
 
   const { data: abo } = await supabase
@@ -208,6 +229,7 @@ export async function cancelSubscription(id: number): Promise<void> {
 }
 
 export async function reactivateSubscription(id: number): Promise<void> {
+  await requireActiveAal2Admin();
   const supabase = await createAdminClient();
 
   const { data: abo } = await supabase

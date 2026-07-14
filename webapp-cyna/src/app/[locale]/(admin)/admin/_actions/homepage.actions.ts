@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import { createAdminClient } from "@/lib/supabase/server";
+import { parseManagedLink } from "@/lib/navigation/managed-link";
 
 // ─── Carousel ───
 
@@ -20,6 +21,14 @@ export type CarouselSlide = {
   texte_bouton_fr: string;
   texte_bouton_en: string;
 };
+
+function validateButtonLink(value: string): string {
+  const link = value.trim();
+  if (link && !parseManagedLink(link)) {
+    throw new Error("Le lien du bouton doit être un chemin CYNA, une ancre ou une URL HTTP(S) valide.");
+  }
+  return link;
+}
 
 export async function getCarouselSlides(): Promise<CarouselSlide[]> {
   const supabase = createAdminClient();
@@ -126,7 +135,7 @@ export async function createCarouselSlide(formData: FormData) {
   const titreEn = (formData.get("titre_en") as string) || "";
   const descriptionEn = (formData.get("description_en") as string) || null;
   const hasEn = formData.get("has_en") === "true";
-  const lienBouton = (formData.get("lien_bouton") as string) || "";
+  const lienBouton = validateButtonLink((formData.get("lien_bouton") as string) || "");
   const texteBoutonFr = (formData.get("texte_bouton_fr") as string) || "";
   const texteBoutonEn = (formData.get("texte_bouton_en") as string) || "";
 
@@ -177,7 +186,7 @@ export async function updateCarouselSlide(id: number, formData: FormData) {
   const titreEn = (formData.get("titre_en") as string) || "";
   const descriptionEn = (formData.get("description_en") as string) || null;
   const hasEn = formData.get("has_en") === "true";
-  const lienBouton = (formData.get("lien_bouton") as string) || "";
+  const lienBouton = validateButtonLink((formData.get("lien_bouton") as string) || "");
   const texteBoutonFr = (formData.get("texte_bouton_fr") as string) || "";
   const texteBoutonEn = (formData.get("texte_bouton_en") as string) || "";
 

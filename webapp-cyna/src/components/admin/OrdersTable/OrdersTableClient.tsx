@@ -137,6 +137,10 @@ function StatusBadge({ status, label }: { status: string; label: string }) {
   );
 }
 
+function SortHeader({ active, label, onSort, sortField }: { active: boolean; label: string; onSort: (field: SortKey) => void; sortField: SortKey }) {
+  return <button className="inline-flex items-center gap-1 hover:text-foreground" onClick={() => onSort(sortField)} type="button">{label}<ArrowUpDown className={`h-3.5 w-3.5 ${active ? "text-foreground" : "text-muted-foreground/50"}`} /></button>;
+}
+
 export default function OrdersTableClient({
   orders,
   translations: t,
@@ -154,25 +158,24 @@ export default function OrdersTableClient({
   const [sortKey, setSortKey] = useState<SortKey>("date_commande");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [detail, setDetail] = useState<OrderDetail | null>(null);
-  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(Boolean(initialDetailId));
   const router = useRouter();
   const pathname = usePathname();
   const tPagination = useTranslations("admin.pagination");
 
   useEffect(() => {
-    if (initialDetailId) {
-      const id = Number(initialDetailId);
-      if (!isNaN(id)) {
-        setIsLoadingDetail(true);
-        getOrderDetail(id).then((data) => {
-          setDetail(data);
-          setIsLoadingDetail(false);
-        });
+    let cancelled = false;
+    const id = Number(initialDetailId);
+    Promise.resolve().then(async () => {
+      if (!initialDetailId || Number.isNaN(id)) {
+        if (!cancelled) { setDetail(null); setIsLoadingDetail(false); }
+        return;
       }
-    } else {
-      setDetail(null);
-      setIsLoadingDetail(false);
-    }
+      if (!cancelled) setIsLoadingDetail(true);
+      const data = await getOrderDetail(id);
+      if (!cancelled) { setDetail(data); setIsLoadingDetail(false); }
+    });
+    return () => { cancelled = true; };
   }, [initialDetailId]);
 
   // Localised label for a raw (French) status value, with fallback to the value.
@@ -257,17 +260,6 @@ export default function OrdersTableClient({
     setDetail(data);
     setIsLoadingDetail(false);
   };
-
-  const SortHeader = ({ label, sortField }: { label: string; sortField: SortKey }) => (
-    <button
-      type="button"
-      onClick={() => toggleSort(sortField)}
-      className="inline-flex items-center gap-1 hover:text-foreground"
-    >
-      {label}
-      <ArrowUpDown className={`h-3.5 w-3.5 ${sortKey === sortField ? "text-foreground" : "text-muted-foreground/50"}`} />
-    </button>
-  );
 
   // ─── Detail view ───
   if (detail) {
@@ -457,18 +449,18 @@ export default function OrdersTableClient({
         <TableHeader>
           <TableRow>
             <TableHead>
-              <SortHeader label={t.orderId} sortField="id_commande" />
+              <SortHeader active={sortKey === "id_commande"} label={t.orderId} onSort={toggleSort} sortField="id_commande" />
             </TableHead>
             <TableHead>
-              <SortHeader label={t.date} sortField="date_commande" />
+              <SortHeader active={sortKey === "date_commande"} label={t.date} onSort={toggleSort} sortField="date_commande" />
             </TableHead>
             <TableHead>{t.client}</TableHead>
             <TableHead>
-              <SortHeader label={t.total} sortField="montant_total" />
+              <SortHeader active={sortKey === "montant_total"} label={t.total} onSort={toggleSort} sortField="montant_total" />
             </TableHead>
             <TableHead>{t.billingType}</TableHead>
             <TableHead>
-              <SortHeader label={t.status} sortField="statut_commande" />
+              <SortHeader active={sortKey === "statut_commande"} label={t.status} onSort={toggleSort} sortField="statut_commande" />
             </TableHead>
             <TableHead>{t.actions}</TableHead>
           </TableRow>

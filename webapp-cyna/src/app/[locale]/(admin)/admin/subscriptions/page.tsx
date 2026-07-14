@@ -44,7 +44,6 @@ export default async function SubscriptionsPage({
     cancelling: tSub("cancelling"),
     bulkCancel: tSub("bulkCancel"),
     bulkCancelTitle: tSub("bulkCancelTitle"),
-    bulkCancelMessage: tSub("bulkCancelMessage"),
     selected: tSub("selected"),
     selectAll: tSub("selectAll"),
     back: tSub("back"),
