@@ -12,6 +12,7 @@ type AuthActionState = {
   successKey?: string;
 } | null;
 
+//==================================lOGIN
 export async function login(
   locale: string,
   next: string,
@@ -37,8 +38,8 @@ export async function login(
       return { errorKey: "errorUnavailable" };
     }
 
-    // ==========================================
-    // INTERCEPTION 2FA POUR LES ADMINS
+
+    //2FA POUR LES ADMINS
     // ==========================================
     if (authData.user) {
       const { data: profile } = await supabase
@@ -53,7 +54,7 @@ export async function login(
         redirect(localizedPath(locale, mfaUrl));
       }
     }
-    // ==========================================
+
 
     redirect(localizedPath(locale, next));
   } catch (error) {
@@ -62,7 +63,7 @@ export async function login(
     return { errorKey: "errorUnavailable" };
   }
 }
-//==================================register=====================
+//==================================REGISTER=====================
 export async function register(
   locale: string,
   _prevState: AuthActionState,
@@ -129,7 +130,7 @@ export async function logout() {
   const { getLocale } = await import("next-intl/server");
   redirect(`/${normaliseLocale(await getLocale())}`);
 }
-//=============================
+//============================= RESET PASSWORD
 export async function resetPassword(
   locale: string,
   _prevState: AuthActionState,
@@ -148,7 +149,7 @@ export async function resetPassword(
     return { errorKey: "errorUnavailable" };
   }
 }
-//=============================
+//=============================UPDATE PASSWORD
 export async function updatePassword(
   _prevState: AuthActionState,
   formData: FormData,
