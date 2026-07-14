@@ -6,6 +6,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import "../globals.css";
 import { cn } from "@/lib/utils";
 import { routing } from "@/i18n/routing";
+import { A11yInitScript } from "@/components/layout/public-header/A11yMenu";
 import type { Locale } from "@/lib/i18n/translations";
 import { NotificationProvider } from "@/components/ui/notification-provider";
 
@@ -62,6 +63,8 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
       className={cn(
         "h-full",
         "antialiased",
@@ -71,6 +74,9 @@ export default async function LocaleLayout({
         inter.variable,
       )}
     >
+      <head>
+        <A11yInitScript />
+      </head>
       <body className="antialiased">
         <NextIntlClientProvider>
           <NotificationProvider>{children}</NotificationProvider>

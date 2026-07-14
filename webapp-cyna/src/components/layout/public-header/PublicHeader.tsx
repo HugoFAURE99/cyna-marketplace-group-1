@@ -11,6 +11,7 @@ import MobileSearch from "@/components/layout/public-header/MobileSearch";
 import PublicMenuSheet from "@/components/layout/public-header/PublicMenuSheet";
 import SearchAutocomplete from "@/components/layout/public-header/SearchAutocomplete";
 import { getCartCount } from "@/lib/cart/cart";
+import { A11yProvider } from "@/components/layout/public-header/A11yMenu";
 import { getCatalogCategories } from "@/lib/products/public-catalog";
 import { getLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/translations";
@@ -42,6 +43,7 @@ export default async function PublicHeader() {
 
   return (
     <header className="fixed inset-x-0 top-0 z-40 border-b border-slate-200 bg-white shadow-sm">
+      <A11yProvider />
       {/* logo | search | actions. Search is centered in the flex-1 track between
           logo and actions, so its gap to each side stays even despite their
           different widths. */}
