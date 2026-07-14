@@ -27,7 +27,7 @@ export function MfaSettingsCard({ initialEnabled, required }: { initialEnabled: 
     const factors = await supabase.auth.mfa.listFactors();
     if (factors.error) { setError(t("errors.load")); setLoading(false); return; }
     await Promise.all((factors.data.all ?? []).filter((factor) => factor.factor_type === "totp" && factor.status === "unverified").map((factor) => supabase.auth.mfa.unenroll({ factorId: factor.id })));
-    const enrollment = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: required ? "CYNA BackOffice" : "CYNA Account", issuer: "CYNA" });
+    const enrollment = await supabase.auth.mfa.enroll({ factorType: "totp", friendlyName: required ? "CYNA Back-Office" : "CYNA Account", issuer: "CYNA" });
     if (enrollment.error) { setError(t("errors.enroll")); setLoading(false); return; }
     setFactorId(enrollment.data.id);
     setQrCode(normalizeTotpQrCode(enrollment.data.totp.qr_code));

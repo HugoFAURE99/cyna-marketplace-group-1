@@ -82,7 +82,7 @@ export default function LanguageSwitcher({
           fullWidth
             ? "w-full justify-between rounded-md px-3"
             : showLocaleCode
-              ? "h-11 min-h-11 w-auto gap-2 rounded-md border border-slate-200 bg-white px-2.5 shadow-xs"
+              ? "h-11 min-h-11 w-auto gap-1.5 rounded-md border border-slate-200 bg-white px-2 shadow-xs"
               : "size-11 rounded-full",
         )}
         onClick={() => setOpen((value) => !value)}
@@ -100,7 +100,7 @@ export default function LanguageSwitcher({
           className={cn(
             "absolute right-0 z-50 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg",
             placement === "top" ? "bottom-full mb-2" : "top-full mt-2",
-            fullWidth ? "w-full" : "w-[5.75rem]",
+            fullWidth ? "w-full" : showLocaleCode ? "w-[5.25rem]" : "w-[5.75rem]",
           )}
           id="language-options"
         >
