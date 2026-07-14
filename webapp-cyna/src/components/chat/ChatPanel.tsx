@@ -6,7 +6,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { BotMessageSquare, Send, X } from "lucide-react";
+import { ArrowUp, BotMessageSquare, X } from "lucide-react";
 
 import ChatMessage from "@/components/chat/ChatMessage";
 import type { ChatUiMessage } from "@/components/chat/useCynaChat";
@@ -115,15 +115,15 @@ export default function ChatPanel({
           onChange={(event) => setInput(event.target.value)}
           placeholder={t("placeholder")}
           aria-label={t("placeholder")}
-          className="h-10 min-w-0 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 outline-none transition focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-200"
+          className="h-10 min-w-0 flex-1 rounded-full border border-slate-200 bg-slate-50 px-4 text-sm text-slate-800 outline-none transition focus:border-slate-300 focus:bg-white focus:shadow-sm focus:ring-0"
         />
         <button
           type="submit"
           disabled={isStreaming || !input.trim()}
           aria-label={t("send")}
-          className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-purple-700 text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 focus-visible:ring-offset-2 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full bg-gradient-to-br from-purple-800 to-fuchsia-500 text-white shadow-sm transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-600 focus-visible:ring-offset-2 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <Send aria-hidden="true" className="size-4" />
+          <ArrowUp aria-hidden="true" className="size-5" strokeWidth={2.5} />
         </button>
       </form>
     </div>

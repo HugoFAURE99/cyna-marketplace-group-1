@@ -25,7 +25,7 @@ export default function ChatProductCard({
       : product.type_facturation === "annuel"
         ? t("perYear")
         : "";
-  const unavailable = product.quantite_produit <= 0;
+  const unavailable = !product.est_disponible;
 
   return (
     <Link
@@ -60,7 +60,7 @@ export default function ChatProductCard({
             ? `${formatPriceCents(product.priceCents, locale)}${period}`
             : t("pricingUnavailable")}
           {unavailable && (
-            <span className="ml-1 font-normal text-slate-400">
+            <span className="ml-1 font-medium text-black">
               · {t("unavailable")}
             </span>
           )}

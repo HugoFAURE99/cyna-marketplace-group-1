@@ -134,7 +134,7 @@ export async function runChatTool(
           category: product.cat_nom,
           priceCents: product.priceCents,
           billing: product.type_facturation,
-          inStock: product.quantite_produit > 0,
+          inStock: product.est_disponible,
         })),
       },
       card:

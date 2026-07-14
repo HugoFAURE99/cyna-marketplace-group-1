@@ -19,13 +19,13 @@ export default function ContactSalesInfo({ className }: ContactSalesInfoProps) {
   return (
     <p
       className={cn(
-        "inline-flex items-start gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm leading-relaxed text-slate-700 ring-1 ring-slate-200",
+        "inline-flex items-start gap-2 rounded-md bg-slate-50 px-3 py-2 text-sm leading-relaxed text-black ring-1 ring-slate-200",
         className,
       )}
     >
       <PhoneCall
         aria-hidden="true"
-        className="mt-0.5 size-4 shrink-0 text-purple-700"
+        className="mt-0.5 size-4 shrink-0 text-black"
       />
       <span>{t("contactSalesInfo", { phone: SALES_PHONE })}</span>
     </p>

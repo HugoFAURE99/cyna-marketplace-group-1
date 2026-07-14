@@ -41,34 +41,43 @@ export type Database = {
     Tables: {
       abonnement: {
         Row: {
+          annulation_programmee: boolean
           date_debut: string
           date_fin: string | null
           id_abonnement: number
           id_commande: number
           id_compte: string | null
           id_prix: number
+          nombre_utilisateurs: number
           statut_abonnement: string
           stripe_subscription_id: string | null
+          stripe_subscription_item_id: string | null
         }
         Insert: {
+          annulation_programmee?: boolean
           date_debut: string
           date_fin?: string | null
           id_abonnement?: number
           id_commande: number
           id_compte?: string | null
           id_prix: number
+          nombre_utilisateurs?: number
           statut_abonnement: string
           stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
         }
         Update: {
+          annulation_programmee?: boolean
           date_debut?: string
           date_fin?: string | null
           id_abonnement?: number
           id_commande?: number
           id_compte?: string | null
           id_prix?: number
+          nombre_utilisateurs?: number
           statut_abonnement?: string
           stripe_subscription_id?: string | null
+          stripe_subscription_item_id?: string | null
         }
         Relationships: [
           {
@@ -412,18 +421,21 @@ export type Database = {
         Row: {
           est_actif: boolean
           id_image: number
+          lien_bouton: string | null
           lien_image_caroussel: string
           ordre: number
         }
         Insert: {
           est_actif?: boolean
           id_image?: number
+          lien_bouton?: string | null
           lien_image_caroussel: string
           ordre?: number
         }
         Update: {
           est_actif?: boolean
           id_image?: number
+          lien_bouton?: string | null
           lien_image_caroussel?: string
           ordre?: number
         }
@@ -434,18 +446,21 @@ export type Database = {
           description_image: string | null
           id_image: number
           langue: Database["public"]["Enums"]["langue"]
+          texte_bouton: string | null
           titre_image: string
         }
         Insert: {
           description_image?: string | null
           id_image: number
           langue: Database["public"]["Enums"]["langue"]
+          texte_bouton?: string | null
           titre_image: string
         }
         Update: {
           description_image?: string | null
           id_image?: number
           langue?: Database["public"]["Enums"]["langue"]
+          texte_bouton?: string | null
           titre_image?: string
         }
         Relationships: [
@@ -666,6 +681,7 @@ export type Database = {
       produit: {
         Row: {
           date_ajout: string
+          est_disponible: boolean
           id_categorie: number
           id_produit: number
           is_priorite: boolean
@@ -678,6 +694,7 @@ export type Database = {
         }
         Insert: {
           date_ajout?: string
+          est_disponible?: boolean
           id_categorie: number
           id_produit?: number
           is_priorite?: boolean
@@ -690,6 +707,7 @@ export type Database = {
         }
         Update: {
           date_ajout?: string
+          est_disponible?: boolean
           id_categorie?: number
           id_produit?: number
           is_priorite?: boolean

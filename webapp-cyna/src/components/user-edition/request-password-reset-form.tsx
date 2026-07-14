@@ -1,9 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { requestPasswordResetEmail } from "@/components/user-edition/action";
 import { AuthMessage } from "@/components/connection/auth-message";
+import { useNotification } from "@/components/ui/notification-provider";
 
 type ActionState = {
   errorKey?: string;
@@ -15,11 +16,18 @@ const initialState: ActionState = {};
 
 export function RequestPasswordResetForm() {
   const t = useTranslations("user_edition");
+  const { notify } = useNotification();
 
   const [state, formAction, isPending] = useActionState(
     requestPasswordResetEmail,
     initialState
   );
+
+  useEffect(() => {
+    if (state?.successKey) {
+      notify(t(state.successKey as Parameters<typeof t>[0]));
+    }
+  }, [notify, state, t]);
 
   return (
     <section>
@@ -29,11 +37,6 @@ export function RequestPasswordResetForm() {
           <AuthMessage variant="error">
             {t(state.errorKey as Parameters<typeof t>[0])}
             {state.rawError && <span className="block mt-1 text-sm font-medium">({state.rawError})</span>}
-          </AuthMessage>
-        )}
-        {state?.successKey && (
-          <AuthMessage variant="info">
-            {t(state.successKey as Parameters<typeof t>[0])}
           </AuthMessage>
         )}
         <p className="text-slate-600 mb-2">

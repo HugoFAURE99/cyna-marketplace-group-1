@@ -26,6 +26,18 @@ export default async function PurchaseOrders({ params }: { params: Promise<{ loc
         payment_method_last4,
         statut_commande,
         facture (*),
+        abonnement (
+          annulation_programmee,
+          date_fin,
+          id_abonnement,
+          nombre_utilisateurs,
+          statut_abonnement,
+          prix_tarif (
+            prix,
+            type_facturation,
+            produit (produit_traduction (langue, nom_pro))
+          )
+        ),
         ligne_commande (
           prix_unitaire,
           quantite,

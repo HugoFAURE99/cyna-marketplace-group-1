@@ -1,5 +1,5 @@
 // Presentational "unavailable" badge. The caller decides when to render it
-// (i.e. when quantite_produit === 0) and passes the localised label.
+// (i.e. when est_disponible is false) and passes the localised label.
 import { cn } from "@/lib/utils";
 
 type AvailabilityBadgeProps = {
@@ -14,7 +14,7 @@ export default function AvailabilityBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full bg-slate-900/85 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm",
+        "inline-flex items-center rounded-full bg-black px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white",
         className,
       )}
     >

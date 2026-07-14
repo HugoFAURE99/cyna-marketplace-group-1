@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Spinner from "@/components/ui/spinner";
 import type { IntroTexts } from "@/app/[locale]/(admin)/admin/_actions/homepage.actions";
 import { updateIntroTexts } from "@/app/[locale]/(admin)/admin/_actions/homepage.actions";
+import { useNotification } from "@/components/ui/notification-provider";
 
 interface Translations {
   title: string;
@@ -38,7 +39,7 @@ export default function IntroTextsEditor({
     linkLabel: !!introTexts.linkLabel_en,
   });
   const [isPending, startTransition] = useTransition();
-  const [showSaved, setShowSaved] = useState(false);
+  const { notify } = useNotification();
   const router = useRouter();
   const t = translations;
 
@@ -64,8 +65,7 @@ export default function IntroTextsEditor({
       }
       await updateIntroTexts(cleaned, hasEn);
       router.refresh();
-      setShowSaved(true);
-      setTimeout(() => setShowSaved(false), 2000);
+      notify(t.saved);
     });
   };
 
@@ -90,7 +90,6 @@ export default function IntroTextsEditor({
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-lg font-semibold">{t.title}</h2>
         <div className="flex items-center gap-3">
-          {showSaved && <span className="text-sm text-green-600">{t.saved}</span>}
           <Button
             size="sm"
             onClick={handleSave}

@@ -8,11 +8,6 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { createServerClient } from "@/lib/supabase/server-client";
 import { stripe } from "@/lib/stripe";
 
-type InventoryTariff = {
-  id_prix: number;
-  produit: { id_produit: number; quantite_produit: number } | null;
-};
-
 export async function processCheckout(locale: Locale) {
   const supabase = await createServerClient();
   const admin = createAdminClient();
@@ -25,28 +20,8 @@ export async function processCheckout(locale: Locale) {
     throw new Error("EMPTY_CART");
   }
 
-  const tariffIds = cart.items.map((item) => item.tariffId);
-  const { data: inventoryRows, error: inventoryError } = await admin
-    .from("prix_tarif")
-    .select("id_prix, produit(id_produit, quantite_produit)")
-    .in("id_prix", tariffIds);
-
-  if (inventoryError || !inventoryRows) {
-    throw new Error("INVENTORY_UNAVAILABLE");
-  }
-
-  const inventoryByTariff = new Map(
-    (inventoryRows as unknown as InventoryTariff[]).map((row) => [
-      row.id_prix,
-      row.produit,
-    ]),
-  );
-  const unavailableItem = cart.items.find((item) => {
-    const product = inventoryByTariff.get(item.tariffId);
-    return !product || product.quantite_produit < item.licenseUserCount;
-  });
-  if (unavailableItem) {
-    throw new Error("INSUFFICIENT_STOCK");
+  if (cart.items.some((item) => item.isUnavailable)) {
+    throw new Error("PRODUCT_UNAVAILABLE");
   }
 
   let stripeCustomerId: string | undefined;

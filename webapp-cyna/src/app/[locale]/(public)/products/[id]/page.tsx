@@ -98,9 +98,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <h1 className="text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
                 {product.nom_pro}
               </h1>
-              {product.quantite_produit > 0 ? (
-                <p className="text-sm font-medium text-emerald-700">
-                  {t("quantityAvailable", { count: product.quantite_produit })}
+              {product.est_disponible ? (
+                <p className="w-fit bg-gradient-to-r from-purple-800 via-purple-600 to-fuchsia-500 bg-clip-text text-sm font-semibold text-transparent">
+                  {t("availableNow")}
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -110,8 +110,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
               )}
             </div>
             <ProductPricingCard
-              isUnavailable={product.quantite_produit <= 0}
+              isUnavailable={!product.est_disponible}
               productId={product.id_produit}
+              productName={product.nom_pro}
               tariffs={product.tariffs}
             />
           </aside>

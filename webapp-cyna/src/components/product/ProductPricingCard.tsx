@@ -5,13 +5,12 @@
 
 import {
   useCallback,
-  useEffect,
   useMemo,
   useState,
   useTransition,
   type KeyboardEvent,
 } from "react";
-import { Check, Minus, Plus, ShoppingCart } from "lucide-react";
+import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -26,9 +25,11 @@ import {
 import { cn } from "@/lib/utils";
 import { formatPriceCents } from "@/lib/i18n/format";
 import type { PublicProductTariff } from "@/lib/products/public-products";
+import { useNotification } from "@/components/ui/notification-provider";
 
 type ProductPricingCardProps = {
   productId: number;
+  productName: string;
   isUnavailable: boolean;
   tariffs: PublicProductTariff[];
 };
@@ -46,10 +47,12 @@ function clampUserCount(value: number, fallback: number) {
 
 export default function ProductPricingCard({
   productId,
+  productName,
   isUnavailable,
   tariffs,
 }: ProductPricingCardProps) {
   const t = useTranslations("product");
+  const { notify } = useNotification();
   const locale = useLocale();
   const [selectedTariffId, setSelectedTariffId] = useState(
     tariffs[0]?.id_prix ?? null,
@@ -57,16 +60,6 @@ export default function ProductPricingCard({
   const [userCount, setUserCount] = useState(DEFAULT_LICENSE_USERS);
   const [userInput, setUserInput] = useState(String(DEFAULT_LICENSE_USERS));
   const [isPending, startTransition] = useTransition();
-  const [justAdded, setJustAdded] = useState(false);
-
-  // Briefly flip the button to a confirmation state after a successful add.
-  useEffect(() => {
-    if (!justAdded) {
-      return;
-    }
-    const timer = setTimeout(() => setJustAdded(false), 2000);
-    return () => clearTimeout(timer);
-  }, [justAdded]);
 
   const selectedTariff = useMemo(
     () =>
@@ -137,7 +130,7 @@ export default function ProductPricingCard({
         tariffId: selectedTariff.id_prix,
         licenseUserCount: userCount,
       });
-      setJustAdded(true);
+      notify(t("addedToCartNotification", { name: productName }));
     });
   };
 
@@ -259,17 +252,8 @@ export default function ProductPricingCard({
           onClick={handleAddToCart}
           type="button"
         >
-          {justAdded ? (
-            <>
-              <Check aria-hidden="true" className="size-5" />
-              {t("addedToCart")}
-            </>
-          ) : (
-            <>
-              <ShoppingCart aria-hidden="true" className="size-5" />
-              {t("addToCart")}
-            </>
-          )}
+          <ShoppingCart aria-hidden="true" className="size-5" />
+          {t("addToCart")}
         </Button>
       )}
     </section>

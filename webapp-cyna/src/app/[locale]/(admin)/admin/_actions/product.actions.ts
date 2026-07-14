@@ -26,6 +26,7 @@ type ProductFormData = {
   prix_mensuel?: number;
   prix_annuel?: number;
   billings: BillingType[];
+  est_disponible?: boolean;
   statut_produit?: boolean;
 };
 
@@ -159,6 +160,7 @@ export async function createProduct(
     .from("produit")
     .insert({
       id_categorie: formData.id_categorie,
+      est_disponible: formData.est_disponible ?? true,
       stripe_product_id: stripeProduct.id,
       statut_produit: formData.statut_produit ?? false,
     })
@@ -243,6 +245,7 @@ export async function getProducts(locale: Locale = DEFAULT_LOCALE) {
     .select(
       `
       id_produit,
+      est_disponible,
       statut_produit,
       is_priorite,
       ordre_priorite,
@@ -311,6 +314,7 @@ export async function getProductById(id: number) {
       `
       id_produit,
       id_categorie,
+      est_disponible,
       stripe_product_id,
       statut_produit,
       produit_traduction (
@@ -349,6 +353,7 @@ export async function getProductById(id: number) {
   return {
     id_produit: data.id_produit,
     id_categorie: data.id_categorie,
+    est_disponible: data.est_disponible,
     statut_produit: data.statut_produit,
     prix_tarif: data.prix_tarif,
     image_produit: sortedImages,
@@ -391,6 +396,7 @@ export async function updateProduct(
     .from("produit")
     .update({
       id_categorie: formData.id_categorie,
+      est_disponible: formData.est_disponible ?? true,
       statut_produit: formData.statut_produit ?? false,
     })
     .eq("id_produit", id);

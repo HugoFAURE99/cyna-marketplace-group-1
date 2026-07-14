@@ -172,7 +172,7 @@ export async function getCartView(locale: Locale): Promise<CartView> {
       typeFacturation: tariff.type_facturation,
       unitPriceCents: tariff.prix,
       lineTotalCents: tariff.prix * line.licenseUserCount,
-      isUnavailable: product.quantite_produit <= 0,
+      isUnavailable: !product.est_disponible,
       stripePriceId: tariff.stripe_price_id,
     });
   }

@@ -140,7 +140,7 @@ export default function SearchAutocomplete({
   };
 
   const priceLabel = (product: SearchSuggestion) => {
-    if (product.quantite_produit <= 0) {
+    if (!product.est_disponible) {
       return tp("unavailable");
     }
     if (product.priceCents === null) {
@@ -256,7 +256,14 @@ export default function SearchAutocomplete({
                             {product.cat_nom}
                           </span>
                         )}
-                        <span className="ml-auto shrink-0 font-semibold text-purple-700">
+                        <span
+                          className={cn(
+                            "ml-auto shrink-0 font-semibold",
+                            product.est_disponible
+                              ? "text-purple-700"
+                              : "text-black",
+                          )}
+                        >
                           {priceLabel(product)}
                         </span>
                       </span>
