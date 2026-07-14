@@ -145,6 +145,14 @@
   }
 }
 
+html.a11y-daltonisme {
+  filter: grayscale(100%) contrast(120%);
+}
+
+html.a11y-large-font {
+  font-size: 120%;
+}
+
 @keyframes cyna-notification-in {
   from {
     opacity: 0;
