@@ -246,6 +246,19 @@
       "errorUpdateFailed": "Impossible de mettre à jour votre mot de passe. Le lien a peut-être expiré."
     }
   },
+  "mfa": {
+    "loading": "Loading security settings...",
+    "errorFetchParams": "Unable to fetch security settings.",
+    "errorGenQr": "Error generating QR Code.",
+    "errorChallenge": "Unable to start verification.",
+    "errorCode": "Incorrect code. Please try again.",
+    "titleVerify": "Security Verification",
+    "titleSetup": "2FA Setup",
+    "descVerify": "Enter the 6-digit code from your authenticator app.",
+    "descSetup": "Scan this QR Code with Google Authenticator or Authy.",
+    "authCodeLabel": "Authentication Code",
+    "submitButton": "Validate and continue"
+  },
   "admin": {
     "nav": {
       "backoffice": "Back-office",
