@@ -58,6 +58,8 @@ interface CarouselTranslations {
   unsavedMessage: string;
   unsavedLeave: string;
   unsavedStay: string;
+  buttonText: string;
+  buttonLink: string;
 }
 
 interface IntroTranslations {
@@ -66,6 +68,7 @@ interface IntroTranslations {
   introTitle: string;
   body: string;
   linkLabel: string;
+  linkUrl: string;
   defaultLang: string;
   addTranslation: string;
   save: string;

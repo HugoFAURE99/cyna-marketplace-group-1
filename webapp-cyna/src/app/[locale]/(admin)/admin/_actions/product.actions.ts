@@ -28,6 +28,7 @@ type ProductFormData = {
   billings: BillingType[];
   est_disponible?: boolean;
   statut_produit?: boolean;
+  quantite_produit?: number;
 };
 
 function getPrixForBilling(formData: ProductFormData, billing: BillingType) {
@@ -163,6 +164,7 @@ export async function createProduct(
       est_disponible: formData.est_disponible ?? true,
       stripe_product_id: stripeProduct.id,
       statut_produit: formData.statut_produit ?? false,
+      quantite_produit: formData.quantite_produit ?? 0,
     })
     .select("id_produit")
     .single();
@@ -247,6 +249,7 @@ export async function getProducts(locale: Locale = DEFAULT_LOCALE) {
       id_produit,
       est_disponible,
       statut_produit,
+      quantite_produit,
       is_priorite,
       ordre_priorite,
       mis_avant,
@@ -288,6 +291,7 @@ export async function getProducts(locale: Locale = DEFAULT_LOCALE) {
       id_produit: product.id_produit,
       id_categorie: product.id_categorie,
       statut_produit: product.statut_produit,
+      quantite_produit: product.quantite_produit,
       is_priorite: product.is_priorite,
       ordre_priorite: product.ordre_priorite,
       mis_avant: product.mis_avant,
@@ -317,6 +321,7 @@ export async function getProductById(id: number) {
       est_disponible,
       stripe_product_id,
       statut_produit,
+      quantite_produit,
       produit_traduction (
         langue,
         nom_pro,
@@ -355,6 +360,7 @@ export async function getProductById(id: number) {
     id_categorie: data.id_categorie,
     est_disponible: data.est_disponible,
     statut_produit: data.statut_produit,
+    quantite_produit: data.quantite_produit,
     prix_tarif: data.prix_tarif,
     image_produit: sortedImages,
     nom_pro_fr: fr?.nom_pro ?? "",
@@ -384,12 +390,15 @@ export async function updateProduct(
     throw new Error(`Produit introuvable : ${existingError?.message}`);
   }
 
-  // Stripe reste neutre : on envoie le texte de la langue par défaut (fr).
   if (existing.stripe_product_id) {
-    await stripe.products.update(existing.stripe_product_id, {
-      name: formData.nom_pro_fr,
-      description: formData.pro_description_fr,
-    });
+    try {
+      await stripe.products.update(existing.stripe_product_id, {
+        name: formData.nom_pro_fr,
+        description: formData.pro_description_fr,
+      });
+    } catch (e) {
+      console.error("Stripe product update failed (non-blocking):", e);
+    }
   }
 
   const { error: produitError } = await supabase
@@ -398,6 +407,7 @@ export async function updateProduct(
       id_categorie: formData.id_categorie,
       est_disponible: formData.est_disponible ?? true,
       statut_produit: formData.statut_produit ?? false,
+      quantite_produit: formData.quantite_produit ?? 0,
     })
     .eq("id_produit", id);
 
@@ -461,13 +471,17 @@ export async function updateProduct(
   await Promise.all(
     toRemove.map(async ([, tarif]) => {
       if (tarif.stripe_price_id) {
-        await stripe.prices.update(tarif.stripe_price_id, { active: false });
+        try {
+          await stripe.prices.update(tarif.stripe_price_id, { active: false });
+        } catch (e) {
+          console.error("Stripe price deactivation failed (non-blocking):", e);
+        }
       }
       await supabase.from("prix_tarif").delete().eq("id_prix", tarif.id_prix);
     }),
   );
 
-  // Ajouter ou mettre à jour les tarifs sélectionnés (Stripe en parallèle).
+  // Ajouter ou mettre à jour les tarifs sélectionnés.
   const toUpsert = formData.billings
     .map((billing) => {
       const prixCentimes = getPrixForBilling(formData, billing);
@@ -479,29 +493,34 @@ export async function updateProduct(
     })
     .filter((x) => x !== null);
 
-  const newStripePrices = await Promise.all(
-    toUpsert.map((item) =>
-      stripe.prices
-        .create({
-          product: existing.stripe_product_id!,
+  for (const item of toUpsert) {
+    let stripe_price_id: string | null = null;
+    if (existing.stripe_product_id) {
+      try {
+        const sp = await stripe.prices.create({
+          product: existing.stripe_product_id,
           ...stripePriceArgs(item.prixCentimes, item.billing),
-        })
-        .then((sp) => ({ ...item, stripe_price_id: sp.id })),
-    ),
-  );
+        });
+        stripe_price_id = sp.id;
+      } catch (e) {
+        console.error("Stripe price creation failed (non-blocking):", e);
+      }
+    }
 
-  for (const item of newStripePrices) {
     if (item.mode === "create") {
       await supabase.from("prix_tarif").insert({
         id_produit: id,
         prix: item.prixCentimes,
-        stripe_price_id: item.stripe_price_id,
+        stripe_price_id: stripe_price_id ?? "",
         type_facturation: item.billing,
       });
     } else {
       await supabase
         .from("prix_tarif")
-        .update({ prix: item.prixCentimes, stripe_price_id: item.stripe_price_id })
+        .update({
+          prix: item.prixCentimes,
+          ...(stripe_price_id ? { stripe_price_id } : {}),
+        })
         .eq("id_prix", item.id_prix!);
     }
   }
@@ -563,7 +582,7 @@ export async function updateProduct(
     }
   }
 
-  revalidatePath("/[locale]/admin/products", "page");
+  revalidatePath("/[locale]/admin/products", "layout");
 }
 
 export async function toggleProductStatus(id: number, active: boolean) {
@@ -735,5 +754,15 @@ export async function updateFeaturedProducts(
       throw new Error(`Erreur mise à jour des produits mis en avant.`);
   }
 
+  revalidatePath("/[locale]/admin/products", "page");
+}
+
+export async function updateProductStock(id: number, quantity: number) {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("produit")
+    .update({ quantite_produit: quantity })
+    .eq("id_produit", id);
+  if (error) throw new Error(`Erreur mise à jour stock : ${error.message}`);
   revalidatePath("/[locale]/admin/products", "page");
 }

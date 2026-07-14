@@ -72,6 +72,8 @@ export default async function AdminPage({
     unsavedMessage: tCarousel("unsavedMessage"),
     unsavedLeave: tCarousel("unsavedLeave"),
     unsavedStay: tCarousel("unsavedStay"),
+    buttonText: tCarousel("buttonText"),
+    buttonLink: tCarousel("buttonLink"),
   };
 
   const introTranslations = {
@@ -80,6 +82,7 @@ export default async function AdminPage({
     introTitle: tIntro("introTitle"),
     body: tIntro("body"),
     linkLabel: tIntro("linkLabel"),
+    linkUrl: tIntro("linkUrl"),
     defaultLang: tIntro("defaultLang"),
     addTranslation: tIntro("addTranslation"),
     save: tIntro("save"),

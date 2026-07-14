@@ -23,6 +23,7 @@ interface ProductsTableTranslations {
   priceAnnual: string;
   actions: string;
   priority: string;
+  stock: string;
   active: string;
   inactive: string;
   edit: string;

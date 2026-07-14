@@ -21,6 +21,8 @@ export default async function OrdersPage({
     title: tOrders("title"),
     search: tOrders("search"),
     allStatuses: tOrders("allStatuses"),
+    statusEnAttente: tOrders("statusEnAttente"),
+    statusValidee: tOrders("statusValidee"),
     statusEnCours: tOrders("statusEnCours"),
     statusPayee: tOrders("statusPayee"),
     statusActive: tOrders("statusActive"),
@@ -49,6 +51,9 @@ export default async function OrdersPage({
     loading: tOrders("loading"),
     dateFrom: tOrders("dateFrom"),
     dateTo: tOrders("dateTo"),
+    billingMensuel: tOrders("billingMensuel"),
+    billingAnnuel: tOrders("billingAnnuel"),
+    invoice: tOrders("invoice"),
   };
 
   return (

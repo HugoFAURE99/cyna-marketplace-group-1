@@ -134,129 +134,167 @@ export function SalesDashboard({
 
   const stackedCategoryNames = stackedData?.categoryNames || [];
 
+  const axisStyle = { fontSize: 12 };
+  const tooltipStyle = {
+    borderRadius: 8,
+    border: "1px solid var(--border)",
+    fontSize: 12,
+  };
+
   return (
-    <div>
-      <div className="mb-6 flex items-center justify-between">
+    <div className="flex flex-col gap-4">
+      {/* Header */}
+      <div className="flex shrink-0 items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">{translations.title}</h1>
-        <PeriodSelect
-          value={globalPeriod}
-          onChange={handleGlobalChange}
-          translations={translations}
-        />
-      </div>
-
-      {isPending && (
-        <div className="mb-4 text-sm text-muted-foreground">
-          {translations.period}...
-        </div>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Chart 1 - Sales histogram */}
-        <div className="rounded-lg border bg-card p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{salesTitle}</h2>
-            <PeriodSelect
-              value={chartPeriods.sales}
-              onChange={(p) => handleChartPeriodChange("sales", p)}
-              translations={translations}
-            />
-          </div>
-          {salesData && salesData.salesByDay.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={salesData.salesByDay}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="label" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="total" fill="#6366f1" name={translations.total} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="py-12 text-center text-muted-foreground">
-              {translations.noData}
-            </p>
+        <div className="flex items-center gap-2">
+          {isPending && (
+            <span className="text-xs text-muted-foreground">
+              {translations.period}…
+            </span>
           )}
-        </div>
-
-        {/* Chart 2 - Stacked bar chart by category */}
-        <div className="rounded-lg border bg-card p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">{stackedTitle}</h2>
-            <PeriodSelect
-              value={chartPeriods.stacked}
-              onChange={(p) => handleChartPeriodChange("stacked", p)}
-              translations={translations}
-            />
-          </div>
-          {stackedData && stackedChartData.length > 0 && stackedCategoryNames.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stackedChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="label" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                {stackedCategoryNames.map((catName, idx) => (
-                  <Bar
-                    key={catName}
-                    dataKey={catName}
-                    stackId="a"
-                    fill={COLORS[idx % COLORS.length]}
-                    name={catName}
-                  />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="py-12 text-center text-muted-foreground">
-              {translations.noData}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {/* Chart 3 - Pie chart full width */}
-      <div className="mt-6 rounded-lg border bg-card p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">
-            {translations.salesByCategory}
-          </h2>
           <PeriodSelect
-            value={chartPeriods.pie}
-            onChange={(p) => handleChartPeriodChange("pie", p)}
+            value={globalPeriod}
+            onChange={handleGlobalChange}
             translations={translations}
           />
         </div>
-        {pieData && pieData.categoryPieData.length > 0 ? (
-          <ResponsiveContainer width="100%" height={300}>
+      </div>
+
+      {/* Charts grid */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Chart 1 — Sales histogram */}
+        <ChartCard
+          title={salesTitle}
+          period={chartPeriods.sales}
+          onPeriodChange={(p) => handleChartPeriodChange("sales", p)}
+          translations={translations}
+          hasData={!!salesData && salesData.salesByDay.length > 0}
+          noData={translations.noData}
+        >
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={salesData?.salesByDay ?? []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="label" tick={axisStyle} stroke="var(--muted-foreground)" />
+              <YAxis tick={axisStyle} stroke="var(--muted-foreground)" width={48} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--muted)" }} />
+              <Bar
+                dataKey="total"
+                fill="var(--primary)"
+                name={translations.total}
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
+
+        {/* Chart 2 — Stacked bar chart by category */}
+        <ChartCard
+          title={stackedTitle}
+          period={chartPeriods.stacked}
+          onPeriodChange={(p) => handleChartPeriodChange("stacked", p)}
+          translations={translations}
+          hasData={stackedChartData.length > 0 && stackedCategoryNames.length > 0}
+          noData={translations.noData}
+        >
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={stackedChartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="label" tick={axisStyle} stroke="var(--muted-foreground)" />
+              <YAxis tick={axisStyle} stroke="var(--muted-foreground)" width={48} />
+              <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--muted)" }} />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              {stackedCategoryNames.map((catName, idx) => (
+                <Bar
+                  key={catName}
+                  dataKey={catName}
+                  stackId="a"
+                  fill={COLORS[idx % COLORS.length]}
+                  name={catName}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartCard>
+
+        {/* Chart 3 — Pie chart, full width bottom row */}
+        <ChartCard
+          className="lg:col-span-2"
+          title={translations.salesByCategory}
+          period={chartPeriods.pie}
+          onPeriodChange={(p) => handleChartPeriodChange("pie", p)}
+          translations={translations}
+          hasData={!!pieData && pieData.categoryPieData.length > 0}
+          noData={translations.noData}
+        >
+          <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
-                data={pieData.categoryPieData}
+                data={pieData?.categoryPieData ?? []}
                 cx="50%"
                 cy="50%"
-                outerRadius={100}
+                innerRadius="45%"
+                outerRadius="80%"
+                paddingAngle={2}
                 dataKey="value"
                 nameKey="name"
-                label
               >
-                {pieData.categoryPieData.map((_, idx) => (
-                  <Cell
-                    key={`cell-${idx}`}
-                    fill={COLORS[idx % COLORS.length]}
-                  />
+                {(pieData?.categoryPieData ?? []).map((_, idx) => (
+                  <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip />
-              <Legend />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Legend
+                layout="vertical"
+                align="right"
+                verticalAlign="middle"
+                wrapperStyle={{ fontSize: 12 }}
+              />
             </PieChart>
           </ResponsiveContainer>
-        ) : (
-          <p className="py-12 text-center text-muted-foreground">
-            {translations.noData}
-          </p>
-        )}
+        </ChartCard>
       </div>
+    </div>
+  );
+}
+
+function ChartCard({
+  title,
+  period,
+  onPeriodChange,
+  translations,
+  hasData,
+  noData,
+  children,
+  className = "",
+}: {
+  title: string;
+  period: Period;
+  onPeriodChange: (p: Period) => void;
+  translations: Translations;
+  hasData: boolean;
+  noData: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`flex flex-col rounded-xl border bg-card p-4 shadow-sm ${className}`}
+    >
+      <div className="mb-3 flex shrink-0 items-center justify-between gap-2">
+        <h2 className="truncate text-sm font-semibold">{title}</h2>
+        <PeriodSelect
+          value={period}
+          onChange={onPeriodChange}
+          translations={translations}
+        />
+      </div>
+      {hasData ? (
+        children
+      ) : (
+        <div className="flex h-[280px] items-center justify-center text-center text-sm text-muted-foreground">
+          {noData}
+        </div>
+      )}
     </div>
   );
 }

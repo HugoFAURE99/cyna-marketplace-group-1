@@ -11,6 +11,8 @@ export async function AdminSidebar() {
     categories: t("categories"),
     users: t("users"),
     orders: t("orders"),
+    subscriptions: t("subscriptions"),
+    support: t("support"),
     promotions: t("promotions"),
     sales: t("sales"),
   };

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useState, useMemo, useTransition, useRef, useEffect } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { Pencil, Check, X } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,6 +20,7 @@ import {
   deleteProducts,
   bulkToggleProductStatus,
   bulkToggleProductPriority,
+  updateProductStock,
 } from "@/app/[locale]/(admin)/admin/_actions/product.actions";
 import Spinner from "@/components/ui/spinner";
 import DeleteProductButton from "@/components/admin/ProductsTable/DeleteProductButton";
@@ -28,7 +30,7 @@ import TogglePriorityButton from "@/components/admin/ProductsTable/TogglePriorit
 type Product = Awaited<ReturnType<typeof getProducts>>[number];
 
 type SortDirection = "asc" | "desc" | null;
-type SortKey = "name" | "category" | "status" | "priority" | "priceMonthly" | "priceAnnual";
+type SortKey = "name" | "category" | "status" | "priority" | "stock" | "priceMonthly" | "priceAnnual";
 
 interface Translations {
   image: string;
@@ -39,6 +41,7 @@ interface Translations {
   priceAnnual: string;
   actions: string;
   priority: string;
+  stock: string;
   active: string;
   inactive: string;
   edit: string;
@@ -79,6 +82,81 @@ function getMonthlyPrice(product: Product): number | null {
 function getAnnualPrice(product: Product): number | null {
   const t = product.prix_tarif.find((p) => p.type_facturation === "annuel");
   return t ? t.prix : null;
+}
+
+function InlineStockEditor({ productId, quantity }: { productId: number; quantity: number }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(String(quantity));
+  const [isPending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (editing) inputRef.current?.focus();
+  }, [editing]);
+
+  useEffect(() => {
+    setValue(String(quantity));
+  }, [quantity]);
+
+  const save = () => {
+    const num = parseInt(value, 10);
+    if (isNaN(num) || num < 0) {
+      setValue(String(quantity));
+      setEditing(false);
+      return;
+    }
+    if (num === quantity) {
+      setEditing(false);
+      return;
+    }
+    startTransition(async () => {
+      await updateProductStock(productId, num);
+      setEditing(false);
+      router.refresh();
+    });
+  };
+
+  const cancel = () => {
+    setValue(String(quantity));
+    setEditing(false);
+  };
+
+  if (editing) {
+    return (
+      <div className="flex items-center gap-1">
+        <input
+          ref={inputRef}
+          type="number"
+          min="0"
+          step="1"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") save();
+            if (e.key === "Escape") cancel();
+          }}
+          disabled={isPending}
+          className="w-16 rounded border bg-background px-1.5 py-0.5 text-sm outline-none focus:ring-2 focus:ring-ring"
+        />
+        <Button type="button" variant="outline" size="sm" onClick={save} disabled={isPending} className="h-7 w-7 p-0 text-green-600">
+          <Check className="h-4 w-4" strokeWidth={3} />
+        </Button>
+        <Button type="button" variant="outline" size="sm" onClick={cancel} disabled={isPending} className="h-7 w-7 p-0 text-red-500">
+          <X className="h-4 w-4" strokeWidth={3} />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className={`text-sm font-medium ${quantity <= 0 ? "text-red-600" : ""}`}>{quantity}</span>
+      <Button type="button" variant="outline" size="sm" onClick={() => setEditing(true)} className="h-7 w-7 p-0">
+        <Pencil className="h-3.5 w-3.5" />
+      </Button>
+    </div>
+  );
 }
 
 export default function ProductsTableClient({
@@ -133,6 +211,9 @@ export default function ProductsTableClient({
           break;
         case "priority":
           cmp = Number(a.is_priorite) - Number(b.is_priorite);
+          break;
+        case "stock":
+          cmp = a.quantite_produit - b.quantite_produit;
           break;
         case "priceMonthly": {
           const pa = getMonthlyPrice(a) ?? -Infinity;
@@ -338,6 +419,12 @@ export default function ProductsTableClient({
               onClick={() => handleSort("priority")}
             />
             <SortableHeader
+              label={t.stock}
+              active={sortKey === "stock"}
+              direction={sortDir}
+              onClick={() => handleSort("stock")}
+            />
+            <SortableHeader
               label={t.priceMonthly}
               active={sortKey === "priceMonthly"}
               direction={sortDir}
@@ -356,7 +443,7 @@ export default function ProductsTableClient({
           {paginated.map((product, index) => (
             <TableRow
               key={product.id_produit}
-              className={`cursor-pointer transition-colors hover:bg-muted/50 ${selected.has(product.id_produit) ? "bg-muted/40" : index % 2 === 1 ? "bg-muted/20" : ""}`}
+              className={`cursor-pointer transition-colors hover:bg-muted/50 ${product.statut_produit && product.quantite_produit <= 0 ? "bg-red-50" : selected.has(product.id_produit) ? "bg-muted/40" : index % 2 === 1 ? "bg-muted/20" : ""}`}
               onClick={() => router.push(`/admin/products/${product.id_produit}/detail`)}
             >
               <TableCell onClick={(e) => e.stopPropagation()}>
@@ -412,6 +499,12 @@ export default function ProductsTableClient({
                   priority={product.is_priorite}
                 />
               </TableCell>
+              <TableCell onClick={(e) => e.stopPropagation()}>
+                <InlineStockEditor
+                  productId={product.id_produit}
+                  quantity={product.quantite_produit}
+                />
+              </TableCell>
               <TableCell>
                 {product.prix_tarif.find(
                   (p) => p.type_facturation === "mensuel",
@@ -428,9 +521,10 @@ export default function ProductsTableClient({
               </TableCell>
               <TableCell onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center gap-2">
-                  <Link href={`/admin/products/${product.id_produit}`}>
+                  <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/admin/products/${product.id_produit}`} />}>
+                    <Pencil className="mr-1 h-3.5 w-3.5" />
                     {t.edit}
-                  </Link>
+                  </Button>
                   <DeleteProductButton
                     productId={product.id_produit}
                     productName={product.nom_pro}

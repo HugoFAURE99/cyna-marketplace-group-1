@@ -9,9 +9,11 @@ export type OrderRow = {
   statut_commande: string;
   client_email: string;
   client_name: string | null;
+  type_facturation: string | null;
+  invoice_url: string | null;
 };
 
-export type OrderDetail = OrderRow & {
+export type OrderDetail = Omit<OrderRow, "type_facturation" | "invoice_url"> & {
   lignes: {
     produit_nom: string;
     quantite: number;
@@ -24,6 +26,7 @@ export type OrderDetail = OrderRow & {
     type_remise: string;
     valeur_remise: number;
   } | null;
+  invoice_url: string | null;
 };
 
 export async function getOrders(): Promise<OrderRow[]> {
@@ -31,7 +34,7 @@ export async function getOrders(): Promise<OrderRow[]> {
 
   const { data: commandes, error } = await supabase
     .from("commande")
-    .select("id_commande, date_commande, montant_total, statut_commande, mail_utilisateur_invite, id_promotion")
+    .select("id_commande, date_commande, montant_total, statut_commande, mail_utilisateur_invite, id_promotion, id_compte, url_facture")
     .order("date_commande", { ascending: false });
 
   if (error || !commandes) return [];
@@ -66,6 +69,19 @@ export async function getOrders(): Promise<OrderRow[]> {
     }
   }
 
+  // Billing type per order (from the first line item)
+  const { data: lignes } = await supabase
+    .from("ligne_commande")
+    .select("id_commande, prix_tarif ( type_facturation )")
+    .in("id_commande", orderIds);
+
+  const billingMap = new Map<number, string>();
+  for (const l of (lignes ?? []) as any[]) {
+    if (!billingMap.has(l.id_commande) && l.prix_tarif?.type_facturation) {
+      billingMap.set(l.id_commande, l.prix_tarif.type_facturation);
+    }
+  }
+
   return commandes.map((c) => {
     const compteId = commandeToCompte.get(c.id_commande);
     const user = compteId ? userMap.get(compteId) : null;
@@ -77,6 +93,8 @@ export async function getOrders(): Promise<OrderRow[]> {
       statut_commande: c.statut_commande,
       client_email: user?.adresse_mail || c.mail_utilisateur_invite || "—",
       client_name: user?.nom_complet || null,
+      type_facturation: billingMap.get(c.id_commande) || null,
+      invoice_url: c.url_facture || null,
     };
   });
 }
@@ -86,7 +104,7 @@ export async function getOrderDetail(id: number): Promise<OrderDetail | null> {
 
   const { data: commande, error } = await supabase
     .from("commande")
-    .select("id_commande, date_commande, montant_total, statut_commande, mail_utilisateur_invite, id_promotion")
+    .select("id_commande, date_commande, montant_total, statut_commande, mail_utilisateur_invite, id_promotion, id_compte")
     .eq("id_commande", id)
     .single();
 
@@ -160,6 +178,23 @@ export async function getOrderDetail(id: number): Promise<OrderDetail | null> {
     if (promo) promotion = promo;
   }
 
+  // Invoice PDF
+  let invoice_url: string | null = null;
+  const userId = commande.id_compte || abonnement?.id_compte;
+  if (userId) {
+    const { data: files } = await supabase.storage
+      .from("invoice-pdf")
+      .list(`${userId}/${id}`, { limit: 1 });
+
+    if (files && files.length > 0) {
+      const { data: signedUrl } = await supabase.storage
+        .from("invoice-pdf")
+        .createSignedUrl(`${userId}/${id}/${files[0].name}`, 3600);
+
+      if (signedUrl?.signedUrl) invoice_url = signedUrl.signedUrl;
+    }
+  }
+
   return {
     id_commande: commande.id_commande,
     date_commande: commande.date_commande,
@@ -169,5 +204,6 @@ export async function getOrderDetail(id: number): Promise<OrderDetail | null> {
     client_name,
     lignes: lignesFormatted,
     promotion,
+    invoice_url,
   };
 }

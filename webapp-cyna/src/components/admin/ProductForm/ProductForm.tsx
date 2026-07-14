@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { ArrowLeft, Plus, X } from "lucide-react";
+import { ArrowLeft, Pencil, Plus, X } from "lucide-react";
 import Spinner from "@/components/ui/spinner";
 
 import { useRouter } from "@/i18n/navigation";
@@ -40,6 +40,7 @@ type Product = {
   id_categorie: number;
   est_disponible: boolean;
   statut_produit: boolean;
+  quantite_produit: number;
   prix_tarif: {
     id_prix: number;
     prix: number;
@@ -185,6 +186,7 @@ export default function ProductForm({
           billings: z
             .array(z.enum(["mensuel", "annuel"]))
             .min(1, tv("billingRequired")),
+          quantite_produit: z.number().int().min(0),
           statut_produit: z.boolean(),
           est_disponible: z.boolean(),
         })
@@ -235,10 +237,11 @@ export default function ProductForm({
           billings: existingBillings.filter((b): b is BillingOption =>
             BILLING_OPTIONS.includes(b as BillingOption),
           ),
+          quantite_produit: product.quantite_produit,
           statut_produit: product.statut_produit,
           est_disponible: product.est_disponible,
         }
-      : { billings: [], est_disponible: true, statut_produit: false },
+      : { billings: [], est_disponible: true, quantite_produit: 0, statut_produit: false },
   });
 
   const toggleBilling = (option: BillingOption) => {
@@ -601,6 +604,19 @@ export default function ProductForm({
         readOnly={readOnly}
       />
 
+      {/* Stock */}
+      <div className={styles.field}>
+        <Label htmlFor="quantite_produit">{t("stock")}</Label>
+        <Input
+          id="quantite_produit"
+          type="number"
+          min="0"
+          step="1"
+          disabled={readOnly}
+          {...register("quantite_produit", { valueAsNumber: true })}
+        />
+      </div>
+
       {/* Product status toggle */}
       <div className="grid gap-3 sm:grid-cols-2">
       <div className="flex items-center justify-between rounded-lg border p-4">
@@ -659,6 +675,7 @@ export default function ProductForm({
             </Button>
             {product && (
               <Button type="button" onClick={() => router.push(`/admin/products/${product.id_produit}`)}>
+                <Pencil className="mr-1 h-3.5 w-3.5" />
                 {tActions("edit")}
               </Button>
             )}

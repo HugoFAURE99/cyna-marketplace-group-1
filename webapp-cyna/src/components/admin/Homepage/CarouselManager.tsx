@@ -76,6 +76,8 @@ interface Translations {
   unsavedMessage: string;
   unsavedLeave: string;
   unsavedStay: string;
+  buttonText: string;
+  buttonLink: string;
 }
 
 type EditingSlide = {
@@ -88,6 +90,10 @@ type EditingSlide = {
   hasEnDescription: boolean;
   imageFile: File | null;
   imagePreview: string | null;
+  lien_bouton: string;
+  texte_bouton_fr: string;
+  texte_bouton_en: string;
+  hasEnButton: boolean;
 };
 
 // ─── Sortable row ───
@@ -284,6 +290,7 @@ export default function CarouselManager({
     setEditing({
       id: null, titre_fr: "", description_fr: "", titre_en: "", description_en: "",
       hasEnTitle: false, hasEnDescription: false, imageFile: null, imagePreview: null,
+      lien_bouton: "", texte_bouton_fr: "", texte_bouton_en: "", hasEnButton: false,
     });
   };
 
@@ -293,6 +300,8 @@ export default function CarouselManager({
       description_fr: slide.description_fr ?? "", titre_en: slide.titre_en,
       description_en: slide.description_en ?? "", hasEnTitle: !!slide.titre_en, hasEnDescription: !!slide.description_en,
       imageFile: null, imagePreview: slide.lien_image_caroussel,
+      lien_bouton: slide.lien_bouton ?? "", texte_bouton_fr: slide.texte_bouton_fr ?? "",
+      texte_bouton_en: slide.texte_bouton_en ?? "", hasEnButton: !!slide.texte_bouton_en,
     });
   };
 
@@ -314,7 +323,10 @@ export default function CarouselManager({
       formData.set("description_fr", editing.description_fr);
       formData.set("titre_en", editing.hasEnTitle ? editing.titre_en : "");
       formData.set("description_en", editing.hasEnDescription ? editing.description_en : "");
-      formData.set("has_en", String(editing.hasEnTitle || editing.hasEnDescription));
+      formData.set("has_en", String(editing.hasEnTitle || editing.hasEnDescription || editing.hasEnButton));
+      formData.set("lien_bouton", editing.lien_bouton);
+      formData.set("texte_bouton_fr", editing.texte_bouton_fr);
+      formData.set("texte_bouton_en", editing.hasEnButton ? editing.texte_bouton_en : "");
 
       if (editing.id === null) {
         await createCarouselSlide(formData);
@@ -411,6 +423,33 @@ export default function CarouselManager({
                 <Plus className="h-4 w-4" />{t.addTranslation}
               </Button>
             )}
+          </fieldset>
+
+          <fieldset className="space-y-3 rounded-lg border p-4">
+            <legend className="px-2 text-sm font-semibold">{t.buttonText}</legend>
+            <div>
+              <label className="mb-1 block text-xs text-muted-foreground">{t.defaultLang}</label>
+              <input type="text" value={editing.texte_bouton_fr} onChange={(e) => setEditing((prev) => prev ? { ...prev, texte_bouton_fr: e.target.value } : prev)} className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
+            </div>
+            {editing.hasEnButton && (
+              <div>
+                <div className="mb-1 flex items-center justify-between">
+                  <label className="text-xs text-muted-foreground">EN</label>
+                  <button type="button" onClick={() => setEditing((prev) => prev ? { ...prev, hasEnButton: false, texte_bouton_en: "" } : prev)} className="rounded p-0.5 text-muted-foreground hover:text-destructive"><X className="h-3.5 w-3.5" /></button>
+                </div>
+                <input type="text" value={editing.texte_bouton_en} onChange={(e) => setEditing((prev) => prev ? { ...prev, texte_bouton_en: e.target.value } : prev)} className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
+              </div>
+            )}
+            {!editing.hasEnButton && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => setEditing((prev) => prev ? { ...prev, hasEnButton: true } : prev)} className="gap-1">
+                <Plus className="h-4 w-4" />{t.addTranslation}
+              </Button>
+            )}
+          </fieldset>
+
+          <fieldset className="space-y-3 rounded-lg border p-4">
+            <legend className="px-2 text-sm font-semibold">{t.buttonLink}</legend>
+            <input type="text" value={editing.lien_bouton} onChange={(e) => setEditing((prev) => prev ? { ...prev, lien_bouton: e.target.value } : prev)} placeholder="https://..." className="w-full rounded-md border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
           </fieldset>
 
           <div className="flex gap-2">

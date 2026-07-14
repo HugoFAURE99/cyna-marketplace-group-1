@@ -16,6 +16,9 @@ export type CarouselSlide = {
   description_fr: string | null;
   titre_en: string;
   description_en: string | null;
+  lien_bouton: string;
+  texte_bouton_fr: string;
+  texte_bouton_en: string;
 };
 
 export async function getCarouselSlides(): Promise<CarouselSlide[]> {
@@ -28,10 +31,12 @@ export async function getCarouselSlides(): Promise<CarouselSlide[]> {
       lien_image_caroussel,
       est_actif,
       ordre,
+      lien_bouton,
       image_carrousel_traduction (
         langue,
         titre_image,
-        description_image
+        description_image,
+        texte_bouton
       )
     `,
     )
@@ -40,7 +45,7 @@ export async function getCarouselSlides(): Promise<CarouselSlide[]> {
   if (error) throw new Error(`Erreur chargement carousel : ${error.message}`);
 
   return (data ?? []).map((slide) => {
-    const trads = (slide as unknown as { image_carrousel_traduction: { langue: string; titre_image: string; description_image: string | null }[] }).image_carrousel_traduction ?? [];
+    const trads = slide.image_carrousel_traduction ?? [];
     const fr = trads.find((t) => t.langue === "fr");
     const en = trads.find((t) => t.langue === "en");
     return {
@@ -52,6 +57,9 @@ export async function getCarouselSlides(): Promise<CarouselSlide[]> {
       description_fr: fr?.description_image ?? null,
       titre_en: en?.titre_image ?? "",
       description_en: en?.description_image ?? null,
+      lien_bouton: slide.lien_bouton ?? "",
+      texte_bouton_fr: fr?.texte_bouton ?? "",
+      texte_bouton_en: en?.texte_bouton ?? "",
     };
   });
 }
@@ -118,6 +126,9 @@ export async function createCarouselSlide(formData: FormData) {
   const titreEn = (formData.get("titre_en") as string) || "";
   const descriptionEn = (formData.get("description_en") as string) || null;
   const hasEn = formData.get("has_en") === "true";
+  const lienBouton = (formData.get("lien_bouton") as string) || "";
+  const texteBoutonFr = (formData.get("texte_bouton_fr") as string) || "";
+  const texteBoutonEn = (formData.get("texte_bouton_en") as string) || "";
 
   if (!imageFile || imageFile.size === 0) {
     throw new Error("Une image est requise.");
@@ -128,14 +139,14 @@ export async function createCarouselSlide(formData: FormData) {
 
   const { data: slide, error } = await supabase
     .from("image_carrousel")
-    .insert({ lien_image_caroussel: imageUrl, est_actif: true, ordre })
+    .insert({ lien_image_caroussel: imageUrl, est_actif: true, ordre, lien_bouton: lienBouton })
     .select("id_image")
     .single();
 
   if (error) throw new Error(`Erreur création slide : ${error.message}`);
 
-  const translations: { id_image: number; langue: "fr" | "en"; titre_image: string; description_image: string | null }[] = [
-    { id_image: slide.id_image, langue: "fr", titre_image: titreFr, description_image: descriptionFr },
+  const translations: { id_image: number; langue: "fr" | "en"; titre_image: string; description_image: string | null; texte_bouton: string }[] = [
+    { id_image: slide.id_image, langue: "fr", titre_image: titreFr, description_image: descriptionFr, texte_bouton: texteBoutonFr },
   ];
 
   if (hasEn) {
@@ -144,6 +155,7 @@ export async function createCarouselSlide(formData: FormData) {
       langue: "en",
       titre_image: titreEn || titreFr,
       description_image: descriptionEn,
+      texte_bouton: texteBoutonEn || texteBoutonFr,
     });
   }
 
@@ -165,6 +177,9 @@ export async function updateCarouselSlide(id: number, formData: FormData) {
   const titreEn = (formData.get("titre_en") as string) || "";
   const descriptionEn = (formData.get("description_en") as string) || null;
   const hasEn = formData.get("has_en") === "true";
+  const lienBouton = (formData.get("lien_bouton") as string) || "";
+  const texteBoutonFr = (formData.get("texte_bouton_fr") as string) || "";
+  const texteBoutonEn = (formData.get("texte_bouton_en") as string) || "";
 
   if (imageFile && imageFile.size > 0) {
     const { data: existing } = await supabase
@@ -183,7 +198,12 @@ export async function updateCarouselSlide(id: number, formData: FormData) {
     const newUrl = await uploadCarouselImage(imageFile);
     await supabase
       .from("image_carrousel")
-      .update({ lien_image_caroussel: newUrl })
+      .update({ lien_image_caroussel: newUrl, lien_bouton: lienBouton })
+      .eq("id_image", id);
+  } else {
+    await supabase
+      .from("image_carrousel")
+      .update({ lien_bouton: lienBouton })
       .eq("id_image", id);
   }
 
@@ -191,7 +211,7 @@ export async function updateCarouselSlide(id: number, formData: FormData) {
   await supabase
     .from("image_carrousel_traduction")
     .upsert(
-      { id_image: id, langue: "fr" as const, titre_image: titreFr, description_image: descriptionFr },
+      { id_image: id, langue: "fr" as const, titre_image: titreFr, description_image: descriptionFr, texte_bouton: texteBoutonFr },
       { onConflict: "id_image,langue" },
     );
 
@@ -199,11 +219,10 @@ export async function updateCarouselSlide(id: number, formData: FormData) {
     await supabase
       .from("image_carrousel_traduction")
       .upsert(
-        { id_image: id, langue: "en" as const, titre_image: titreEn || titreFr, description_image: descriptionEn },
+        { id_image: id, langue: "en" as const, titre_image: titreEn || titreFr, description_image: descriptionEn, texte_bouton: texteBoutonEn || texteBoutonFr },
         { onConflict: "id_image,langue" },
       );
   } else {
-    // Remove EN translation if it existed
     await supabase
       .from("image_carrousel_traduction")
       .delete()
@@ -291,6 +310,8 @@ export type IntroTexts = {
   body_en: string;
   linkLabel_fr: string;
   linkLabel_en: string;
+  linkUrl_fr: string;
+  linkUrl_en: string;
 };
 
 const INTRO_PLACEMENTS = {
@@ -298,6 +319,7 @@ const INTRO_PLACEMENTS = {
   title: "home_intro_title",
   body: "home_intro_body",
   linkLabel: "home_intro_link_label",
+  linkUrl: "home_intro_link_url",
 } as const;
 
 export async function getIntroTexts(): Promise<IntroTexts> {
@@ -322,6 +344,8 @@ export async function getIntroTexts(): Promise<IntroTexts> {
     body_en: get(INTRO_PLACEMENTS.body, "en"),
     linkLabel_fr: get(INTRO_PLACEMENTS.linkLabel, "fr"),
     linkLabel_en: get(INTRO_PLACEMENTS.linkLabel, "en"),
+    linkUrl_fr: get(INTRO_PLACEMENTS.linkUrl, "fr"),
+    linkUrl_en: get(INTRO_PLACEMENTS.linkUrl, "en"),
   };
 }
 
@@ -333,6 +357,7 @@ export async function updateIntroTexts(texts: IntroTexts, hasEn: boolean) {
     { placement: INTRO_PLACEMENTS.title, lang: "fr", texte: texts.title_fr },
     { placement: INTRO_PLACEMENTS.body, lang: "fr", texte: texts.body_fr },
     { placement: INTRO_PLACEMENTS.linkLabel, lang: "fr", texte: texts.linkLabel_fr },
+    { placement: INTRO_PLACEMENTS.linkUrl, lang: "fr", texte: texts.linkUrl_fr },
   ];
 
   if (hasEn) {
@@ -341,6 +366,7 @@ export async function updateIntroTexts(texts: IntroTexts, hasEn: boolean) {
       { placement: INTRO_PLACEMENTS.title, lang: "en", texte: texts.title_en },
       { placement: INTRO_PLACEMENTS.body, lang: "en", texte: texts.body_en },
       { placement: INTRO_PLACEMENTS.linkLabel, lang: "en", texte: texts.linkLabel_en },
+      { placement: INTRO_PLACEMENTS.linkUrl, lang: "en", texte: texts.linkUrl_en },
     );
   }
 

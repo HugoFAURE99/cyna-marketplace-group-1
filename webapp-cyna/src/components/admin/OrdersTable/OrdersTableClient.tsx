@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
-import { ArrowLeft, Eye, ArrowUpDown } from "lucide-react";
+import { ArrowLeft, Eye, ArrowUpDown, FileText } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -24,6 +24,8 @@ interface Translations {
   title: string;
   search: string;
   allStatuses: string;
+  statusEnAttente: string;
+  statusValidee: string;
   statusEnCours: string;
   statusPayee: string;
   statusActive: string;
@@ -52,35 +54,83 @@ interface Translations {
   loading: string;
   dateFrom: string;
   dateTo: string;
+  billingMensuel: string;
+  billingAnnuel: string;
+  invoice: string;
 }
 
 const PAGE_SIZE = 10;
 
+// Colours keyed by the actual (French) status values written by the
+// checkout/webhook, plus legacy/seed values. Lookup is case-insensitive and
+// falls back to grey for anything unknown, so the page never breaks if the
+// status vocabulary evolves.
 const STATUS_COLORS: Record<string, string> = {
-  active: "bg-green-100 text-green-800",
-  payee: "bg-blue-100 text-blue-800",
+  "validée": "bg-green-100 text-green-800",
+  "payée": "bg-green-100 text-green-800",
+  "active": "bg-green-100 text-green-800",
+  "en attente": "bg-yellow-100 text-yellow-800",
+  "en cours": "bg-yellow-100 text-yellow-800",
+  "échouée": "bg-red-100 text-red-800",
+  "expirée": "bg-gray-100 text-gray-800",
+  // legacy / seed values
+  payee: "bg-green-100 text-green-800",
   en_cours: "bg-yellow-100 text-yellow-800",
   echoue: "bg-red-100 text-red-800",
   expire: "bg-gray-100 text-gray-800",
 };
 
-const STATUS_LABELS: Record<string, keyof Translations> = {
-  en_cours: "statusEnCours",
+function statusColor(status: string): string {
+  return STATUS_COLORS[status.toLowerCase()] || "bg-gray-100 text-gray-800";
+}
+
+// Maps a raw (French) status value to a translation key, so the label follows
+// the active locale. Unknown values fall back to the raw value.
+const STATUS_LABEL_KEYS: Record<string, keyof Translations> = {
+  "en attente": "statusEnAttente",
+  "validée": "statusValidee",
+  "payée": "statusPayee",
+  "active": "statusActive",
+  "en cours": "statusEnCours",
+  "échouée": "statusEchoue",
+  "expirée": "statusExpire",
+  // legacy / seed values
   payee: "statusPayee",
-  active: "statusActive",
+  en_cours: "statusEnCours",
   echoue: "statusEchoue",
   expire: "statusExpire",
 };
 
-const ALL_STATUSES = ["en_cours", "payee", "active", "echoue", "expire"];
-
 type SortKey = "id_commande" | "date_commande" | "montant_total" | "statut_commande";
 type SortDir = "asc" | "desc";
+
+function translateBilling(raw: string, t: Translations): string {
+  const s = raw.toLowerCase();
+  if (s === "mensuel" || s === "monthly") return t.billingMensuel;
+  if (s === "annuel" || s === "annual" || s === "yearly") return t.billingAnnuel;
+  return raw;
+}
+
+function BillingBadge({ type, translations }: { type: string; translations: Translations }) {
+  const raw = type.toLowerCase();
+  const isAnnual = raw.includes("annuel") || raw.includes("annual") || raw.includes("year");
+  return (
+    <span
+      className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
+        isAnnual
+          ? "bg-primary/15 text-primary"
+          : "bg-amber-100 text-amber-700"
+      }`}
+    >
+      {translateBilling(type, translations)}
+    </span>
+  );
+}
 
 function StatusBadge({ status, label }: { status: string; label: string }) {
   return (
     <span
-      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[status] || "bg-gray-100 text-gray-800"}`}
+      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusColor(status)}`}
     >
       {label}
     </span>
@@ -125,10 +175,19 @@ export default function OrdersTableClient({
     }
   }, [initialDetailId]);
 
+  // Localised label for a raw (French) status value, with fallback to the value.
   const statusLabel = (s: string) => {
-    const key = STATUS_LABELS[s];
+    const key = STATUS_LABEL_KEYS[s.toLowerCase()];
     return key ? t[key] : s;
   };
+
+  // Filter options are derived from the statuses actually present in the data,
+  // so the dropdown always matches reality regardless of the vocabulary.
+  const statusOptions = useMemo(
+    () =>
+      [...new Set(orders.map((o) => o.statut_commande).filter(Boolean))].sort(),
+    [orders],
+  );
 
   const filtered = useMemo(() => {
     let result = orders;
@@ -255,6 +314,19 @@ export default function OrdersTableClient({
               label={statusLabel(detail.statut_commande)}
             />
           </div>
+          {detail.invoice_url && (
+            <div className="pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                nativeButton={false}
+                render={<a href={detail.invoice_url} target="_blank" rel="noopener noreferrer" />}
+              >
+                <FileText className="mr-1 h-4 w-4" />
+                {t.invoice}
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Line items */}
@@ -273,7 +345,9 @@ export default function OrdersTableClient({
             {detail.lignes.map((l, i) => (
               <TableRow key={i} className={i % 2 === 1 ? "bg-muted/20" : ""}>
                 <TableCell className="font-medium">{l.produit_nom}</TableCell>
-                <TableCell>{l.type_facturation}</TableCell>
+                <TableCell>
+                  <BillingBadge type={l.type_facturation} translations={t} />
+                </TableCell>
                 <TableCell className="text-right">
                   {l.prix_unitaire.toFixed(2)} €
                 </TableCell>
@@ -347,7 +421,7 @@ export default function OrdersTableClient({
           className="rounded-md border bg-background px-3 py-2 text-sm"
         >
           <option value="all">{t.allStatuses}</option>
-          {ALL_STATUSES.map((s) => (
+          {statusOptions.map((s) => (
             <option key={s} value={s}>
               {statusLabel(s)}
             </option>
@@ -392,6 +466,7 @@ export default function OrdersTableClient({
             <TableHead>
               <SortHeader label={t.total} sortField="montant_total" />
             </TableHead>
+            <TableHead>{t.billingType}</TableHead>
             <TableHead>
               <SortHeader label={t.status} sortField="statut_commande" />
             </TableHead>
@@ -402,7 +477,7 @@ export default function OrdersTableClient({
           {paginated.length === 0 ? (
             <TableRow>
               <TableCell
-                colSpan={6}
+                colSpan={7}
                 className="text-center text-muted-foreground"
               >
                 {t.noOrders}
@@ -434,6 +509,13 @@ export default function OrdersTableClient({
                 </TableCell>
                 <TableCell className="font-medium">
                   {order.montant_total.toFixed(2)} €
+                </TableCell>
+                <TableCell>
+                  {order.type_facturation ? (
+                    <BillingBadge type={order.type_facturation} translations={t} />
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <StatusBadge

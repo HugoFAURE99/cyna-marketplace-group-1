@@ -13,6 +13,16 @@ type SalesData = {
 
 const DAYS_FR = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 
+// Local calendar-day key (YYYY-MM-DD). Using local time — not toISOString(),
+// which is UTC — keeps buckets aligned with the day labels and the user's
+// timezone, otherwise orders land one day off near midnight.
+function localDateKey(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 function formatDayLabel(date: Date): string {
   const day = DAYS_FR[date.getDay()];
   const dd = String(date.getDate()).padStart(2, "0");
@@ -74,7 +84,9 @@ export async function getSalesData(period: Period): Promise<SalesData> {
       )
     `
     )
-    .in("statut_commande", ["payee", "active"])
+    // A completed sale is written as "Validée" by the checkout webhook.
+    // Legacy/seed values ("payee"/"active") are kept for backward compatibility.
+    .in("statut_commande", ["Validée", "payee", "active"])
     .gte("date_commande", startDate.toISOString())
     .lte("date_commande", now.toISOString());
 
@@ -94,8 +106,7 @@ export async function getSalesData(period: Period): Promise<SalesData> {
     for (let i = 0; i < 7; i++) {
       const d = new Date(startDate);
       d.setDate(d.getDate() + i);
-      const key = d.toISOString().slice(0, 10);
-      buckets.push({ key, label: formatDayLabel(d) });
+      buckets.push({ key: localDateKey(d), label: formatDayLabel(d) });
     }
   } else {
     for (let i = 0; i < 5; i++) {
@@ -121,7 +132,7 @@ export async function getSalesData(period: Period): Promise<SalesData> {
     let bucketKey: string;
 
     if (period === "7days") {
-      bucketKey = orderDate.toISOString().slice(0, 10);
+      bucketKey = localDateKey(orderDate);
     } else {
       bucketKey = `W${getISOWeek(orderDate)}`;
     }

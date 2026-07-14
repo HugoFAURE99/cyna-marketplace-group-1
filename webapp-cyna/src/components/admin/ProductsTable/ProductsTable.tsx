@@ -22,6 +22,7 @@ export default async function ProductsTable({
     priceAnnual: t("priceAnnual"),
     actions: t("actions"),
     priority: t("priority"),
+    stock: t("stock"),
     active: t("active"),
     inactive: t("inactive"),
     edit: tActions("edit"),

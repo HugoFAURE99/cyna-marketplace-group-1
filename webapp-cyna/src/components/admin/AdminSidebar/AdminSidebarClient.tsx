@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Home, Package, Layers, Users, BarChart3, ShoppingCart, Percent } from "lucide-react";
+import { Home, Package, Layers, Users, BarChart3, ShoppingCart, Percent, RefreshCw, LifeBuoy } from "lucide-react";
 
 import {
   Sidebar,
@@ -24,6 +24,8 @@ const menuItems = [
   { labelKey: "categories", href: "/admin/categories", icon: Layers, exact: false },
   { labelKey: "users", href: "/admin/users", icon: Users, exact: false },
   { labelKey: "orders", href: "/admin/orders", icon: ShoppingCart, exact: false },
+  { labelKey: "subscriptions", href: "/admin/subscriptions", icon: RefreshCw, exact: false },
+  { labelKey: "support", href: "/admin/support", icon: LifeBuoy, exact: false },
   { labelKey: "promotions", href: "/admin/promotions", icon: Percent, exact: false },
   { labelKey: "sales", href: "/admin/sales", icon: BarChart3, exact: false },
 ] as const;
@@ -35,6 +37,8 @@ interface Labels {
   categories: string;
   users: string;
   orders: string;
+  subscriptions: string;
+  support: string;
   promotions: string;
   sales: string;
 }

@@ -15,6 +15,7 @@ interface Translations {
   introTitle: string;
   body: string;
   linkLabel: string;
+  linkUrl: string;
   defaultLang: string;
   addTranslation: string;
   save: string;
@@ -22,7 +23,7 @@ interface Translations {
   saved: string;
 }
 
-type FieldKey = "eyebrow" | "title" | "body" | "linkLabel";
+type FieldKey = "eyebrow" | "title" | "body" | "linkLabel" | "linkUrl";
 
 export default function IntroTextsEditor({
   introTexts,
@@ -37,6 +38,7 @@ export default function IntroTextsEditor({
     title: !!introTexts.title_en,
     body: !!introTexts.body_en,
     linkLabel: !!introTexts.linkLabel_en,
+    linkUrl: !!introTexts.linkUrl_en,
   });
   const [isPending, startTransition] = useTransition();
   const { notify } = useNotification();
@@ -53,12 +55,13 @@ export default function IntroTextsEditor({
         title: !!introTexts.title_en,
         body: !!introTexts.body_en,
         linkLabel: !!introTexts.linkLabel_en,
+        linkUrl: !!introTexts.linkUrl_en,
       });
 
   const handleSave = () => {
     startTransition(async () => {
       const cleaned = { ...form };
-      for (const key of ["eyebrow", "title", "body", "linkLabel"] as FieldKey[]) {
+      for (const key of ["eyebrow", "title", "body", "linkLabel", "linkUrl"] as FieldKey[]) {
         if (!enFields[key]) {
           cleaned[`${key}_en`] = "";
         }
@@ -83,6 +86,7 @@ export default function IntroTextsEditor({
     { key: "title", label: t.introTitle, multiline: false },
     { key: "body", label: t.body, multiline: true },
     { key: "linkLabel", label: t.linkLabel, multiline: false },
+    { key: "linkUrl", label: t.linkUrl, multiline: false },
   ];
 
   return (

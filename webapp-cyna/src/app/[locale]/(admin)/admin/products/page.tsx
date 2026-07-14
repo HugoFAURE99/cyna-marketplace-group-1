@@ -37,6 +37,7 @@ export default async function ProductsPage({
     priceAnnual: tTable("priceAnnual"),
     actions: tTable("actions"),
     priority: tTable("priority"),
+    stock: tTable("stock"),
     active: tTable("active"),
     inactive: tTable("inactive"),
     edit: tActions("edit"),
