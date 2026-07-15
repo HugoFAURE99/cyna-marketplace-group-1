@@ -4,6 +4,7 @@ import { getLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { createServerClient } from "@/lib/supabase/server-client";
+import { getSiteOrigin } from "@/lib/site-url";
 import { stripe } from "@/lib/stripe";
 
 export async function openCustomerPortal() {
@@ -29,7 +30,7 @@ export async function openCustomerPortal() {
     configuration,
     customer: customerId,
     locale,
-    return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/${locale}/user-dashboard/purchases/subscriptions`,
+    return_url: `${getSiteOrigin()}/${locale}/user-dashboard/purchases/subscriptions`,
   });
   redirect(session.url);
 }

@@ -10,6 +10,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { isActiveAdmin } from "@/lib/auth/roles";
 import { isAdminDestination, sanitizeAuthNext } from "@/lib/auth/mfa-return";
 import { createServerClient } from "@/lib/supabase/server-client";
+import { getSiteOrigin } from "@/lib/site-url";
 
 type AuthActionState = {
   error?: string;
@@ -104,7 +105,7 @@ export async function register(
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${normaliseLocale(locale)}&flow=signup`,
+        emailRedirectTo: `${getSiteOrigin()}/api/auth/callback?locale=${normaliseLocale(locale)}&flow=signup`,
       },
     });
     if (error) {
@@ -151,7 +152,7 @@ export async function resetPassword(
   try {
     const supabase = await createServerClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${normaliseLocale(locale)}&flow=recovery&next=/user-dashboard/update-password`,
+      redirectTo: `${getSiteOrigin()}/api/auth/callback?locale=${normaliseLocale(locale)}&flow=recovery&next=/user-dashboard/update-password`,
     });
     return error ? { errorKey: "errorUnavailable" } : { successKey: "resetEmailSent" };
   } catch (error) {

@@ -11,6 +11,7 @@ import {
 import { isValidProfileName, normalizeProfileName } from "@/lib/account/profile-name";
 import { createAdminClient } from "@/lib/supabase/server";
 import { createServerClient } from "@/lib/supabase/server-client";
+import { getSiteOrigin } from "@/lib/site-url";
 
 type ActionState = { errorKey?: string; successKey?: string; rawError?: string };
 
@@ -110,7 +111,7 @@ export async function requestPasswordResetEmail(
   if (!user?.email) return { errorKey: "errorUpdateFailed" };
 
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${await getLocale()}&flow=recovery&next=/user-dashboard/update-password`,
+    redirectTo: `${getSiteOrigin()}/api/auth/callback?locale=${await getLocale()}&flow=recovery&next=/user-dashboard/update-password`,
   });
   if (error) {
     console.error("[auth] reset e-mail failed", error);
