@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Loader2, LogOut, RefreshCw, ShieldAlert, ShieldCheck } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -12,7 +11,6 @@ import { requestMfaRecovery } from "@/app/(auth)/_action/mfa.action";
 import { normalizeTotpQrCode } from "@/lib/auth/totp-qr";
 
 export function MfaPanel({ mode, next }: { mode: "challenge" | "required-admin-enrollment"; next: string }) {
-  const router = useRouter();
   const t = useTranslations("mfa");
   const locale = useLocale();
   const [supabase] = useState(createBrowserClient);
@@ -29,12 +27,12 @@ export function MfaPanel({ mode, next }: { mode: "challenge" | "required-admin-e
     setLoading(true);
     setError("");
 
-    const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (assurance?.currentLevel === "aal2") {
-      router.replace(next);
-      return;
-    }
-
+    // The server page (mfa-verify) is the single source of truth for "already
+    // aal2 -> go to next". Re-deriving that here from the browser session can
+    // read a stale aal2 level right after a fresh login and fight the server's
+    // redirect, producing an infinite navigation loop. So we never auto-redirect
+    // from the client: if the challenge is actually unnecessary the server would
+    // not have rendered this panel.
     const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
     if (factorsError) {
       setError(t("errorFetchParams"));
@@ -80,7 +78,7 @@ export function MfaPanel({ mode, next }: { mode: "challenge" | "required-admin-e
     setSecret(enrollment.totp.secret);
     setIsEnrolled(false);
     setLoading(false);
-  }, [mode, next, router, supabase, t]);
+  }, [mode, supabase, t]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => void prepareFactor(), 0);
@@ -110,8 +108,11 @@ export function MfaPanel({ mode, next }: { mode: "challenge" | "required-admin-e
       return;
     }
 
-    router.replace(next);
-    router.refresh();
+    // Full-page navigation (not an RSC soft nav): guarantees the freshly-set
+    // aal2 cookies are sent to the server so the middleware re-evaluates with
+    // the upgraded session instead of bouncing back to mfa-verify (which
+    // produced a post-verification blank screen).
+    window.location.assign(next);
   }
 
   async function handleRecovery() {
