@@ -1,8 +1,8 @@
 CYNA MARKETPLACE - NOTE DE MANQUES ET LIMITES
-Version 2.0 - 15 juillet 2026
+Édition du 15 juillet 2026
 
 Objet : recenser factuellement ce qui n’est pas, ou seulement partiellement,
-implémenté. Cette note complète la documentation technique et fonctionnelle V2.
+implémenté. Cette note complète la documentation technique et fonctionnelle.
 
 1. NOTIFICATIONS
 - Aucun e-mail transactionnel propre à CYNA pour la confirmation de commande,
@@ -38,7 +38,7 @@ implémenté. Cette note complète la documentation technique et fonctionnelle V
 
 8. INTERNATIONALISATION ET ACCESSIBILITÉ
 - Français et anglais uniquement ; pas de prise en charge RTL.
-- Les documents V2 ont un audit structurel, mais le site n’a pas encore d’audit WCAG
+- Les documents ont un audit structurel, mais le site n’a pas encore d’audit WCAG
   exhaustif ni de tests d’accessibilité end-to-end.
 
 9. INTÉGRATION CONTINUE, DÉPLOIEMENT ET SUPERVISION

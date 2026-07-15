@@ -151,7 +151,7 @@ npm audit --omit=dev --audit-level=high
 
 La CI GitHub exécute ces contrôles sur les pushes et pull requests vers `dev` et `prod`. Le statut stable à protéger est `CI / quality`. Le lint du dépôt est propre ; la suite Vitest contient 112 tests au moment de cette documentation.
 
-Le déploiement Netlify est décrit par le `netlify.toml` racine. Sentry capture uniquement les erreurs si `NEXT_PUBLIC_SENTRY_DSN` est défini ; les traces, replays, logs et PII par défaut sont désactivés. Réserver le DSN et le jeton de source maps au contexte Production Netlify.
+Le déploiement Netlify est décrit par le `netlify.toml` racine. Le build Netlify utilise Node.js 22 et `@netlify/plugin-nextjs`, tandis que le développement et la CI restent fixés à Node.js 24 par `.nvmrc`. Sentry capture uniquement les erreurs si `NEXT_PUBLIC_SENTRY_DSN` est défini ; les traces, replays, logs et PII par défaut sont désactivés. Réserver le DSN et le jeton de source maps au contexte Production Netlify.
 
 ## Architecture
 
@@ -163,7 +163,7 @@ Le déploiement Netlify est décrit par le `netlify.toml` racine. Sentry capture
 - `supabase/seeds/development` : données locales non destinées à la production ;
 - `scripts/maintenance` : opérations manuelles, jamais lancées au déploiement.
 - `.github/workflows/ci.yml` : lint, tests, audit de production et build ;
-- `../documentation` : sources Markdown/Mermaid et six livrables DOCX V2.
+- `../documentation` : livrables DOCX, note de limites et plan de tests Excel.
 
 ## Sécurité et périmètre
 
