@@ -7,6 +7,7 @@ import { getCommerceReport } from "@/lib/admin/commerce-report";
 import type { ReportPreset, SubscriptionHorizon } from "@/lib/admin/commerce-report-types";
 import { createReportRange } from "@/lib/admin/report-range";
 import type { Locale } from "@/lib/i18n/translations";
+import { captureOperationalException } from "@/lib/observability/capture";
 import { createServerClient } from "@/lib/supabase/server-client";
 
 const PRESETS = new Set<ReportPreset>(["7d", "30d", "90d", "ytd", "custom"]);
@@ -56,6 +57,12 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "REPORT_FAILED";
+    if (message !== "INVALID_RANGE") {
+      captureOperationalException(error, {
+        area: "commerce-report",
+        stage: "render-pdf",
+      });
+    }
     return NextResponse.json({ error: message }, { status: message === "INVALID_RANGE" ? 400 : 500 });
   }
 }

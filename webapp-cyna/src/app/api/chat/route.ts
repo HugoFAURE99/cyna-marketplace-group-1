@@ -21,6 +21,7 @@ import {
   resolveChatConversation,
 } from "@/lib/chat/persistence";
 import { createSafeChatMetadata } from "@/lib/chat/history-metadata";
+import { captureOperationalException } from "@/lib/observability/capture";
 import type { ChatCardPayload } from "@/lib/gemini/types";
 
 export const runtime = "nodejs";
@@ -120,6 +121,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("[/api/chat] Could not persist user turn", error);
+    captureOperationalException(error, {
+      area: "chat",
+      stage: "persist-user-turn",
+    });
     return new Response("Chat history unavailable", { status: 503 });
   }
 
@@ -232,6 +237,10 @@ export async function POST(request: Request) {
         send({ type: "done" });
       } catch (error) {
         console.error("[/api/chat]", error);
+        captureOperationalException(error, {
+          area: "chat",
+          stage: "generate-response",
+        });
         try {
           await appendChatMessage({
             content:
@@ -246,6 +255,10 @@ export async function POST(request: Request) {
           });
         } catch (persistenceError) {
           console.error("[/api/chat] Could not persist partial assistant turn", persistenceError);
+          captureOperationalException(persistenceError, {
+            area: "chat",
+            stage: "persist-assistant-error",
+          });
         }
         send({
           type: "error",

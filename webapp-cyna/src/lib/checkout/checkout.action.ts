@@ -11,6 +11,7 @@ import {
 import type { Locale } from "@/lib/i18n/translations";
 import { getCatalogProductsByIds } from "@/lib/products/public-catalog";
 import { calculatePromotionalPriceCents } from "@/lib/promotions/automatic-promotion";
+import { captureOperationalException } from "@/lib/observability/capture";
 import { createAdminClient } from "@/lib/supabase/server";
 import { createServerClient } from "@/lib/supabase/server-client";
 import { stripe } from "@/lib/stripe";
@@ -201,6 +202,10 @@ async function createCheckout({
       .update({ statut_commande: "Échouée" })
       .eq("id_commande", order.id_commande);
     console.error("[checkout] Stripe session creation failed", error);
+    captureOperationalException(error, {
+      area: "checkout",
+      stage: "create-stripe-session",
+    });
     throw new Error("CHECKOUT_FAILED");
   }
 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import Stripe from "stripe";
 
+import { captureOperationalException } from "@/lib/observability/capture";
 import { stripe } from "@/lib/stripe";
 import { syncStripeSubscription } from "@/lib/stripe/subscription-sync";
 import type { Database, TablesInsert } from "@/types/database.types";
@@ -57,6 +58,11 @@ export async function POST(req: Request) {
     }
   } catch (error) {
     console.error(`[stripe-webhook] ${event.type} failed`, error);
+    captureOperationalException(error, {
+      area: "stripe-webhook",
+      stage: "process-event",
+      tags: { "stripe.event_type": event.type },
+    });
     // A non-2xx response asks Stripe to retry. Every write below is idempotent.
     return NextResponse.json({ received: false }, { status: 500 });
   }
