@@ -7,6 +7,14 @@ import { fileURLToPath } from "node:url";
 const appDir = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Behind Netlify's proxy the forwarded host differs from the internal
+    // host, so Next.js rejects Server Action POSTs unless the public origins
+    // are allow-listed here.
+    serverActions: {
+      allowedOrigins: ["cyna-g1.netlify.app"],
+    },
+  },
   async redirects() {
     return [{
       source: "/:locale(en|fr)/contact",
