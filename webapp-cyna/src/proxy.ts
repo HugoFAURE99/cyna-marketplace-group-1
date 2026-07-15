@@ -2,7 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import createMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 
-
 import { routing } from "@/i18n/routing";
 import { isActiveAdmin } from "@/lib/auth/roles";
 
@@ -33,17 +32,21 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-
   // Refresh an expired session when needed. Authentication redirects stay in
   // layouts so their destination always includes the active locale.
-  const { data: { user } } = await supabase.auth.getUser(); // On récupère l'utilisateur ici
+  const {
+    data: { user },
+  } = await supabase.auth.getUser(); // On récupère l'utilisateur ici
 
   // ==========================================
   // VÉRIFICATION 2FA ET RÔLE POUR LES ADMINS
   // ==========================================
   const pathname = request.nextUrl.pathname;
   const locale = pathname.startsWith("/en") ? "en" : "fr";
-  const isAuthRoute = /^\/(?:fr|en)\/(?:login|register|reset-password|mfa-verify)(?:\/|$)/.test(pathname);
+  const isAuthRoute =
+    /^\/(?:fr|en)\/(?:login|register|reset-password|mfa-verify)(?:\/|$)/.test(
+      pathname,
+    );
   const { data: profile } = user
     ? await supabase
         .from("utilisateur")
