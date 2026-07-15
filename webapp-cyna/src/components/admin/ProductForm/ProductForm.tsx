@@ -360,7 +360,7 @@ export default function ProductForm({
           {!readOnly && (
             <Button
               aria-label={t("removeTranslation")}
-              className="absolute right-3 top-1 z-10"
+              className="absolute right-3 top-5 z-10"
               onClick={() => setEnglishTranslation(false)}
               size="icon-sm"
               title={t("removeTranslation")}
