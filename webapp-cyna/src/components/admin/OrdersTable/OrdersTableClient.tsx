@@ -41,6 +41,7 @@ interface Translations {
   orderId: string;
   date: string;
   client: string;
+  guest: string;
   total: string;
   status: string;
   actions: string;
@@ -234,9 +235,13 @@ export default function OrdersTableClient({
           <div className="flex justify-between">
             <span className="text-sm text-muted-foreground">{t.client}</span>
             <span className="text-sm font-medium">
-              {detail.client_name
-                ? `${detail.client_name} (${detail.client_email})`
-                : detail.client_email}
+              {detail.is_guest
+                ? detail.client_email && detail.client_email !== "—"
+                  ? `${t.guest} (${detail.client_email})`
+                  : t.guest
+                : detail.client_name
+                  ? `${detail.client_name} (${detail.client_email})`
+                  : detail.client_email}
             </span>
           </div>
           <div className="flex justify-between">
@@ -432,10 +437,16 @@ export default function OrdersTableClient({
                 </TableCell>
                 <TableCell>
                   <div>
-                    {order.client_name && (
-                      <span className="block text-sm font-medium">
-                        {order.client_name}
+                    {order.is_guest ? (
+                      <span className="block text-sm font-medium italic text-muted-foreground">
+                        {t.guest}
                       </span>
+                    ) : (
+                      order.client_name && (
+                        <span className="block text-sm font-medium">
+                          {order.client_name}
+                        </span>
+                      )
                     )}
                     <span className="text-xs text-muted-foreground">
                       {order.client_email}
