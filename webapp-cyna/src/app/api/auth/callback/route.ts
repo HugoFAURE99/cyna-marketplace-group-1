@@ -9,6 +9,7 @@ export async function GET(request: Request) {
   const code = searchParams.get("code");
   const locale = searchParams.get("locale") === "en" ? "en" : "fr";
   const next = searchParams.get("next") ?? "/";
+  const flow = searchParams.get("flow");
   const redirectPath = sanitizeAuthNext(next, locale);
 
   if (code) {
@@ -16,6 +17,14 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
+      // Signup confirmation has no meaningful destination — land on the login
+      // page with a clear "email confirmed" message instead of silently
+      // dropping the user on the home page. Recovery / next flows are unchanged.
+      if (flow === "signup") {
+        const loginUrl = new URL(`/${locale}/login`, request.url);
+        loginUrl.searchParams.set("message", "emailConfirmed");
+        return NextResponse.redirect(loginUrl);
+      }
       return NextResponse.redirect(new URL(redirectPath, request.url));
     }
   }
