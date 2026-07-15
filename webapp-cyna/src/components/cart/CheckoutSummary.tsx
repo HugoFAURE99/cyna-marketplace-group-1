@@ -37,8 +37,14 @@ export default function CheckoutSummary({
         // 👇 On récupère le résultat de l'action
         const result = await processCheckout(locale);
 
+        // DEBUG TEMPORAIRE
+        if (result && "debugError" in result && result.debugError) {
+          alert(`DEBUG checkout: ${result.debugError}`);
+          return;
+        }
+
         // 👇 Si on a bien reçu une URL, on redirige l'utilisateur vers Stripe
-        if (result && result.url) {
+        if (result && "url" in result && result.url) {
           window.location.href = result.url;
         }
       } catch (error) {

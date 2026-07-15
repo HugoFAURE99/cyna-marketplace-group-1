@@ -180,7 +180,15 @@ export default function ProductPricingCard({
           tariffId: selectedTariff.id_prix,
           licenseUserCount: userCount,
         });
-        window.location.assign(result.url);
+        // DEBUG TEMPORAIRE
+        if (result && "debugError" in result && result.debugError) {
+          alert(`DEBUG buy-now: ${result.debugError}`);
+          setPendingAction(null);
+          return;
+        }
+        if (result && "url" in result && result.url) {
+          window.location.assign(result.url);
+        }
       } catch (error) {
         console.error("[buy-now] Checkout failed", error);
         notify(t("buyNowError"), { kind: "error" });

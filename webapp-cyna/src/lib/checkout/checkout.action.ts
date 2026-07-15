@@ -209,18 +209,25 @@ async function createCheckout({
       area: "checkout",
       stage: "create-stripe-session",
     });
-    throw new Error("CHECKOUT_FAILED");
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(`CHECKOUT_FAILED: ${detail}`);
   }
 }
 
 export async function processCheckout(locale: Locale) {
-  const cart = await getCartView(locale);
-  return createCheckout({
-    cancelPath: `/${locale}/cart`,
-    items: cart.items,
-    locale,
-    subtotalCents: cart.subtotalCents,
-  });
+  try {
+    const cart = await getCartView(locale);
+    return await createCheckout({
+      cancelPath: `/${locale}/cart`,
+      items: cart.items,
+      locale,
+      subtotalCents: cart.subtotalCents,
+    });
+  } catch (error) {
+    // DEBUG TEMPORAIRE: renvoie le vrai message pour diagnostiquer en prod.
+    const message = error instanceof Error ? error.message : String(error);
+    return { debugError: message };
+  }
 }
 
 export async function processBuyNow(input: BuyNowInput) {
@@ -274,10 +281,16 @@ export async function processBuyNow(input: BuyNowInput) {
     seats: String(licenseUserCount),
   });
 
-  return createCheckout({
-    cancelPath: `/${locale}/products/${productId}?${cancelQuery}`,
-    items: [item],
-    locale,
-    subtotalCents: item.lineTotalCents,
-  });
+  try {
+    return await createCheckout({
+      cancelPath: `/${locale}/products/${productId}?${cancelQuery}`,
+      items: [item],
+      locale,
+      subtotalCents: item.lineTotalCents,
+    });
+  } catch (error) {
+    // DEBUG TEMPORAIRE: renvoie le vrai message pour diagnostiquer en prod.
+    const message = error instanceof Error ? error.message : String(error);
+    return { debugError: message };
+  }
 }
