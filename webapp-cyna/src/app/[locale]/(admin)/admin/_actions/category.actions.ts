@@ -5,7 +5,6 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { pickTranslation, type Locale } from "@/lib/i18n/translations";
 import { routing } from "@/i18n/routing";
 import type { TablesInsert } from "@/types/database.types";
-import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import { planEnglishTranslation } from "@/lib/admin/translation-mutation";
 import { planCategoryDeletion } from "@/lib/admin/category-deletion";
@@ -355,6 +354,7 @@ async function uploadCategoryImage(
     const buffer = Buffer.from(arrayBuffer);
 
     // Conversion en WebP avec optimisation
+    const { default: sharp } = await import("sharp");
     const webpBuffer = await sharp(buffer)
       .webp({ quality: 80, effort: 6 })
       .toBuffer();

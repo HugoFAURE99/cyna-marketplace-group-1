@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
-import sharp from "sharp";
 import { v4 as uuidv4 } from "uuid";
 import { createAdminClient } from "@/lib/supabase/server";
 import {
@@ -132,6 +131,7 @@ async function uploadCarouselImage(file: File): Promise<string> {
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
+  const { default: sharp } = await import("sharp");
   const webpBuffer = await sharp(buffer)
     .webp({ quality: 80, effort: 6 })
     .toBuffer();
