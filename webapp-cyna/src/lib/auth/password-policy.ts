@@ -1,7 +1,30 @@
-export const ENFORCE_PASSWORD_COMPLEXITY = false;
+export const ENFORCE_PASSWORD_COMPLEXITY = true;
 export const MIN_PASSWORD_LENGTH = 8;
+export const MAX_USERNAME_LENGTH = 12;
 
 const COMPLEX_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/;
+
+// Règles individuelles, réutilisées côté client pour l'affichage temps réel
+// et côté serveur pour la validation. Une seule source de vérité.
+export type PasswordRuleId =
+  | "length"
+  | "uppercase"
+  | "lowercase"
+  | "number"
+  | "special";
+
+export const PASSWORD_RULES: Record<PasswordRuleId, (password: string) => boolean> = {
+  length: (password) => password.length >= MIN_PASSWORD_LENGTH,
+  uppercase: (password) => /[A-Z]/.test(password),
+  lowercase: (password) => /[a-z]/.test(password),
+  number: (password) => /\d/.test(password),
+  special: (password) => /[^A-Za-z\d]/.test(password),
+};
+
+export function isUsernameValid(username: string): boolean {
+  const trimmed = username.trim();
+  return trimmed.length >= 1 && trimmed.length <= MAX_USERNAME_LENGTH;
+}
 
 export type PasswordValidationKey =
   | "errorCompromised"
