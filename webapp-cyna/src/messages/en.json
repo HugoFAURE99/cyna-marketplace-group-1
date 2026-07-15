@@ -160,7 +160,7 @@
     "saveCartPrompt": "<login>Log in</login> or <register>create an account</register> to save your cart",
     "checkoutError": "An error occurred while preparing the order.",
     "redirecting": "Redirecting...",
-    "securePayment": "Secure payment via Stripe.",
+    "securePayment": "Payment processed by Stripe. CYNA stores neither your full card number nor its security code.",
     "mixedIntervalsError": "You cannot mix monthly and annual subscriptions in the same order. Please select a single billing cycle for all items."
   },
   "guestCheckout": {
@@ -1087,6 +1087,7 @@
       "order": "Order",
       "subscription": "Subscription",
       "account": "Account",
+      "data_access": "Personal data access request",
       "technical": "Technical issue",
       "other": "Other"
     },
@@ -1134,7 +1135,12 @@
     "intelprop_title": "Intellectual Property Rights",
     "intelprop_paragraph1": "The application source code and original project content were produced for an educational assignment by the student team.",
     "intelprop_paragraph2": "Third-party names, product examples, libraries and services remain the property of their respective owners. Their presence does not imply a commercial partnership.",
-    "intelprop_paragraph3": "The catalog is fictional demonstration content and does not grant licences to real cybersecurity products."
+    "intelprop_paragraph3": "The catalog is fictional demonstration content and does not grant licences to real cybersecurity products.",
+    "privacy_title": "Personal data and GDPR",
+    "privacy_paragraph1": "CYNA limits collection to the personal data needed to operate accounts, orders and support. Data should not be kept merely for convenience when less precise or anonymous information is sufficient.",
+    "privacy_paragraph2": "To request access to your personal data, open a ticket and select “Personal data access request”. Proportionate identity verification may be required. Never send your password, an MFA code or card details in a ticket.",
+    "payment_security_title": "Payments and PCI DSS",
+    "payment_security_paragraph": "The full card number and security code are entered directly in Stripe Checkout and are not stored by CYNA. PCI DSS governs the protection of card data. Stripe states that it is a PCI DSS Level 1 certified service provider; this certification does not automatically extend to CYNA, which remains responsible for securing its integration."
   },
   "terms": {
     "title": "Terms of Service",
@@ -1194,6 +1200,7 @@
       "order": "Order",
       "subscription": "Subscription",
       "account": "Account",
+      "data_access": "Personal data access request",
       "technical": "Technical issue",
       "other": "Other"
     },

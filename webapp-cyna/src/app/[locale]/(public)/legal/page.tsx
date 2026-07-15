@@ -20,6 +20,8 @@ export default async function Legal({ params }: { params: Promise<{ locale: Loca
       <ContentSection index={1} title={t("webedit_title")}><InfoList rows={publisherRows} /></ContentSection>
       <ContentSection index={2} title={t("hosting_title")}><p>{t("hosting_paragraph")}</p><InfoList rows={[{ label: t("hosting_title"), value: t("hostingValue") }]} /></ContentSection>
       <ContentSection index={3} title={t("intelprop_title")}><p>{t("intelprop_paragraph1")}</p><p>{t("intelprop_paragraph2")}</p><p>{t("intelprop_paragraph3")}</p></ContentSection>
+      <ContentSection index={4} title={t("privacy_title")}><p>{t("privacy_paragraph1")}</p><p>{t("privacy_paragraph2")}</p></ContentSection>
+      <ContentSection index={5} title={t("payment_security_title")}><p>{t("payment_security_paragraph")}</p></ContentSection>
     </ContentPage>
   );
 }
