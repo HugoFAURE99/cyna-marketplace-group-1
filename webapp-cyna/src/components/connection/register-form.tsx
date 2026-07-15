@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { AuthMessage } from "@/components/connection/auth-message";
 import { Link } from "@/i18n/navigation";
+import { MIN_PASSWORD_LENGTH } from "@/lib/auth/password-policy";
 
 import { register } from "@/app/(auth)/_action/auth.action";
 
@@ -87,6 +88,7 @@ export function RegisterForm({
                     id="password"
                     name="password"
                     type="password"
+                    minLength={MIN_PASSWORD_LENGTH}
                     required
                   />
 
@@ -102,6 +104,7 @@ export function RegisterForm({
                     id="confirmPassword"
                     name="confirmPassword"
                     type="password"
+                    minLength={MIN_PASSWORD_LENGTH}
                     required
                   />
                 </FieldSet>

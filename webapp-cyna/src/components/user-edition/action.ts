@@ -4,7 +4,10 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 
-import { validatePassword } from "@/lib/auth/password-policy";
+import {
+  getAuthPasswordErrorKey,
+  validatePassword,
+} from "@/lib/auth/password-policy";
 import { isValidProfileName, normalizeProfileName } from "@/lib/account/profile-name";
 import { createAdminClient } from "@/lib/supabase/server";
 import { createServerClient } from "@/lib/supabase/server-client";
@@ -87,7 +90,7 @@ export async function updateDashboardPassword(
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {
     return {
-      errorKey: error.code === "weak_password" ? "errorTooShort" : "errorUpdateFailed",
+      errorKey: getAuthPasswordErrorKey(error) ?? "errorUpdateFailed",
     };
   }
   const locale = await getLocale();
@@ -107,7 +110,7 @@ export async function requestPasswordResetEmail(
   if (!user?.email) return { errorKey: "errorUpdateFailed" };
 
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${await getLocale()}&next=/user-dashboard/update-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${await getLocale()}&flow=recovery&next=/user-dashboard/update-password`,
   });
   if (error) {
     console.error("[auth] reset e-mail failed", error);

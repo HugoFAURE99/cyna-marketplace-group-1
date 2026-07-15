@@ -7,7 +7,12 @@ import type { Locale } from "@/lib/i18n/translations";
 
 // Query-param keys the auth flow may redirect here with. We map them to
 // translated copy so the user never sees a raw key like "checkEmail".
-const MESSAGE_KEYS = ["checkEmail", "updatePasswordSuccess"] as const;
+const MESSAGE_KEYS = [
+  "checkEmail",
+  "confirmationLinkUsed",
+  "emailConfirmed",
+  "updatePasswordSuccess",
+] as const;
 const ERROR_KEYS = ["invalidLink", "errorInactive"] as const;
 
 export default async function Login({
@@ -42,7 +47,12 @@ export default async function Login({
         </div>
 
         {/* Message de succès venant de l'inscription / reset (traduit) */}
-        {messageText && <AccountToast message={messageText} />}
+        {messageText && (
+          <AccountToast
+            kind={message === "confirmationLinkUsed" ? "info" : "success"}
+            message={messageText}
+          />
+        )}
 
         {/* Erreur venant du callback (ex: lien expiré) (traduit) */}
         {errorText && <AuthMessage variant="error">{errorText}</AuthMessage>}

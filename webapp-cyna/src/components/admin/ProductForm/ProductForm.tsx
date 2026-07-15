@@ -343,6 +343,40 @@ export default function ProductForm({
 
       </fieldset>
 
+      {englishEnabled ? (
+        <div className="relative">
+          <fieldset className="space-y-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
+            <legend className="px-2 text-sm font-semibold">{t("englishTranslation")}</legend>
+            <div className={styles.field}>
+              <Label htmlFor="nom_pro_en">{t("nameGroup")}</Label>
+              <Input id="nom_pro_en" disabled={readOnly} {...register("nom_pro_en")} />
+              {errors.nom_pro_en && <span className={styles.error}>{errors.nom_pro_en.message}</span>}
+            </div>
+            <div className={styles.field}>
+              <Label htmlFor="pro_description_en">{t("descriptionGroup")}</Label>
+              <Input id="pro_description_en" disabled={readOnly} {...register("pro_description_en")} />
+            </div>
+          </fieldset>
+          {!readOnly && (
+            <Button
+              aria-label={t("removeTranslation")}
+              className="absolute right-3 top-1 z-10"
+              onClick={() => setEnglishTranslation(false)}
+              size="icon-sm"
+              title={t("removeTranslation")}
+              type="button"
+              variant="ghost"
+            >
+              <X aria-hidden="true" className="size-4" />
+            </Button>
+          )}
+        </div>
+      ) : !readOnly ? (
+        <Button className="w-fit gap-2" onClick={() => setEnglishTranslation(true)} type="button" variant="outline">
+          <Plus className="size-4" /> {t("addTranslation", { code: "EN" })}
+        </Button>
+      ) : null}
+
       <TechnicalCharacteristicsEditor
         initialOptions={characteristics}
         onChange={(ids) => {
@@ -352,30 +386,6 @@ export default function ProductForm({
         readOnly={readOnly}
         value={technicalCharacteristicIds}
       />
-
-      {englishEnabled ? (
-        <fieldset className="space-y-4 rounded-lg border border-primary/30 bg-primary/5 p-4">
-          <legend className="px-2 text-sm font-semibold">{t("englishTranslation")}</legend>
-          {!readOnly && (
-            <Button className="float-right -mt-2 gap-1" onClick={() => setEnglishTranslation(false)} size="sm" type="button" variant="ghost">
-              <X className="size-4" /> {t("removeTranslation")}
-            </Button>
-          )}
-          <div className={styles.field}>
-            <Label htmlFor="nom_pro_en">{t("nameGroup")}</Label>
-            <Input id="nom_pro_en" disabled={readOnly} {...register("nom_pro_en")} />
-            {errors.nom_pro_en && <span className={styles.error}>{errors.nom_pro_en.message}</span>}
-          </div>
-          <div className={styles.field}>
-            <Label htmlFor="pro_description_en">{t("descriptionGroup")}</Label>
-            <Input id="pro_description_en" disabled={readOnly} {...register("pro_description_en")} />
-          </div>
-        </fieldset>
-      ) : !readOnly ? (
-        <Button className="w-fit gap-2" onClick={() => setEnglishTranslation(true)} type="button" variant="outline">
-          <Plus className="size-4" /> {t("addTranslation", { code: "EN" })}
-        </Button>
-      ) : null}
 
       {/* Billing toggle cards */}
       <div className={styles.field}>
