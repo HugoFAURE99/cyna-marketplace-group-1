@@ -4,7 +4,7 @@ Marketplace pédagogique bilingue construite avec Next.js 16, React 19, Supabase
 
 ## Installation
 
-Prérequis : Node.js 20+, npm, un projet Supabase et un compte Stripe de test.
+Prérequis : Node.js 24, npm, un projet Supabase et un compte Stripe de test.
 
 ```bash
 cd webapp-cyna
@@ -30,6 +30,10 @@ STRIPE_WEBHOOK_SECRET=
 # l'application réutilise ou crée une configuration sûre à la première ouverture.
 STRIPE_CUSTOMER_PORTAL_CONFIGURATION_ID=
 GEMINI_API_KEY=
+NEXT_PUBLIC_SENTRY_DSN=
+SENTRY_ORG=
+SENTRY_PROJECT=
+SENTRY_AUTH_TOKEN=
 ```
 
 Ne jamais exposer les clés `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY` ou `STRIPE_WEBHOOK_SECRET` au navigateur.
@@ -141,9 +145,13 @@ Carte de test Stripe : `4242 4242 4242 4242`, date future et CVC quelconque.
 ```bash
 npm run build
 npm run lint
+npm test -- --run
+npm audit --omit=dev --audit-level=high
 ```
 
-Le build de production est la vérification de référence. Le dépôt contient encore des erreurs ESLint préexistantes principalement dans le back-office ; les fichiers du parcours utilisateur modifiés doivent rester propres au lint ciblé.
+La CI GitHub exécute ces contrôles sur les pushes et pull requests vers `dev` et `prod`. Le statut stable à protéger est `CI / quality`. Le lint du dépôt est propre ; la suite Vitest contient 112 tests au moment de cette documentation.
+
+Le déploiement Netlify est décrit par le `netlify.toml` racine. Sentry capture uniquement les erreurs si `NEXT_PUBLIC_SENTRY_DSN` est défini ; les traces, replays, logs et PII par défaut sont désactivés. Réserver le DSN et le jeton de source maps au contexte Production Netlify.
 
 ## Architecture
 
@@ -154,6 +162,8 @@ Le build de production est la vérification de référence. Le dépôt contient 
 - `supabase/migrations` : schéma, RLS et fonctions SQL.
 - `supabase/seeds/development` : données locales non destinées à la production ;
 - `scripts/maintenance` : opérations manuelles, jamais lancées au déploiement.
+- `.github/workflows/ci.yml` : lint, tests, audit de production et build ;
+- `../documentation` : sources Markdown/Mermaid et six livrables DOCX V2.
 
 ## Sécurité et périmètre
 

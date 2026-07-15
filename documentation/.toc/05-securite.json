@@ -1,0 +1,20 @@
+{
+  "Objectifs et périmètre": 3,
+  "Frontières de confiance et menaces": 3,
+  "Gestion des identités et accès": 5,
+  "Clients et administrateurs": 5,
+  "RBAC, RLS et service role": 5,
+  "Secrets et configuration": 6,
+  "Sécurité Stripe et commerce": 7,
+  "Sécurité du chatbot et protection des données": 8,
+  "Données et propriété": 8,
+  "Prompt injection et abus": 8,
+  "Escalade support": 8,
+  "Observabilité respectueuse de la vie privée": 8,
+  "Dépendances, CI et chaîne de livraison": 9,
+  "RGPD et cycle de vie": 9,
+  "Réponse à incident": 10,
+  "Qualification et confinement": 10,
+  "Niveaux indicatifs": 10,
+  "Vérifications et risques résiduels": 10
+}

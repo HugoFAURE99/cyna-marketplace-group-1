@@ -16,3 +16,14 @@ export function getCheckoutPromotionOptions(
 
   return { allow_promotion_codes: true };
 }
+
+export function getLinePromotionId(
+  itemPromotion: AutomaticPromotion | null,
+  checkoutPromotion: AutomaticPromotion | null,
+): number | null {
+  if (!checkoutPromotion || itemPromotion?.id !== checkoutPromotion.id) {
+    return null;
+  }
+
+  return checkoutPromotion.id;
+}
