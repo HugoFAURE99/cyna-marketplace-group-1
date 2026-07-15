@@ -1,0 +1,27 @@
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F1EEFA","primaryTextColor":"#1A1A24","primaryBorderColor":"#4A339E","lineColor":"#4A339E","secondaryColor":"#E8EEF5","fontFamily":"Calibri, Arial"}}}%%
+sequenceDiagram
+  autonumber
+  actor A as Administrateur
+  participant P as Proxy Next.js
+  participant Auth as Supabase Auth MFA
+  participant DB as utilisateur / ticket / audit
+  actor A2 as Second administrateur
+
+  A->>P: Accès /fr/admin
+  P->>Auth: getUser + assurance level
+  P->>DB: Lire role et is_actif
+  alt Non connecté ou inactif
+    P-->>A: Redirection login
+  else Admin sans AAL2
+    P-->>A: Redirection mfa-verify
+    A->>Auth: Vérifier facteur TOTP
+    Auth-->>A: Session AAL2
+  else Admin AAL2
+    P-->>A: BackOffice autorisé
+  end
+  opt Récupération MFA
+    A->>DB: Ouvrir ticket admin_access
+    A2->>DB: Vérifier ticket et cible
+    A2->>Auth: Supprimer facteurs de la cible
+    A2->>DB: Écrire mfa_reset_audit
+  end

@@ -1,0 +1,48 @@
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F1EEFA","primaryTextColor":"#1A1A24","primaryBorderColor":"#4A339E","lineColor":"#4A339E","secondaryColor":"#E8EEF5","fontFamily":"Calibri, Arial"}}}%%
+flowchart LR
+  Guest[Visiteur]
+  Client[Client authentifié]
+  Admin[Administrateur AAL2]
+
+  subgraph Store[Marketplace]
+    Browse[Consulter, chercher et filtrer le catalogue]
+    Cart[Gérer panier et achat immédiat]
+    Checkout[Payer avec Stripe]
+    Chat[Dialoguer avec CynAI]
+    Ticket[Créer un ticket support]
+  end
+
+  subgraph Account[Espace client]
+    Profile[Gérer profil, adresses et MFA]
+    Orders[Consulter commandes et factures]
+    Subs[Gérer licences et abonnements]
+    Tickets[Consulter les tickets]
+  end
+
+  subgraph Backoffice[BackOffice]
+    Catalog[Administrer catalogue, tarifs et contenus]
+    Commerce[Suivre commandes, abonnements et ventes]
+    Support[Traiter tickets et conversations chatbot]
+    Users[Administrer comptes et récupération MFA]
+    Reports[Exporter les rapports PDF]
+  end
+
+  Guest --> Browse
+  Guest --> Cart
+  Guest --> Checkout
+  Guest --> Chat
+  Guest --> Ticket
+  Client --> Browse
+  Client --> Cart
+  Client --> Checkout
+  Client --> Chat
+  Client --> Ticket
+  Client --> Profile
+  Client --> Orders
+  Client --> Subs
+  Client --> Tickets
+  Admin --> Catalog
+  Admin --> Commerce
+  Admin --> Support
+  Admin --> Users
+  Admin --> Reports

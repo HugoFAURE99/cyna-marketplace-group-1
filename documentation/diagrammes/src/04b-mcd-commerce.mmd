@@ -1,0 +1,22 @@
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F1EEFA","primaryTextColor":"#1A1A24","primaryBorderColor":"#4A339E","lineColor":"#4A339E","secondaryColor":"#E8EEF5","fontFamily":"Calibri, Arial"}}}%%
+erDiagram
+  UTILISATEUR o|--o{ COMMANDE : passe
+  UTILISATEUR o|--o{ ADRESSE : possede
+  PROMOTION o|--o{ COMMANDE : applique
+  COMMANDE ||--|{ LIGNE_COMMANDE : contient
+  PRIX_TARIF ||--o{ LIGNE_COMMANDE : reference
+  PROMOTION o|--o{ LIGNE_COMMANDE : remet
+  COMMANDE ||--o{ ABONNEMENT : active
+  PRIX_TARIF ||--o{ ABONNEMENT : definit
+  UTILISATEUR o|--o{ ABONNEMENT : detient
+  COMMANDE ||--o{ FACTURE : produit
+  UTILISATEUR o|--o{ FACTURE : accede
+
+  UTILISATEUR { uuid id_compte PK }
+  ADRESSE { int id_adresse PK }
+  COMMANDE { int id_commande PK }
+  LIGNE_COMMANDE { int id_commande FK }
+  PRIX_TARIF { int id_prix PK }
+  PROMOTION { int id_promotion PK }
+  ABONNEMENT { int id_abonnement PK }
+  FACTURE { int id_facture PK }

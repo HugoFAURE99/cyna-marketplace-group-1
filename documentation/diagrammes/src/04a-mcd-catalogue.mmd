@@ -1,0 +1,31 @@
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F1EEFA","primaryTextColor":"#1A1A24","primaryBorderColor":"#4A339E","lineColor":"#4A339E","secondaryColor":"#E8EEF5","fontFamily":"Calibri, Arial"}}}%%
+erDiagram
+  CATEGORIE ||--o{ PRODUIT : contient
+  CATEGORIE ||--o{ CATEGORIE_TRADUCTION : traduit
+  PRODUIT ||--o{ PRODUIT_TRADUCTION : traduit
+  PRODUIT ||--o{ IMAGE_PRODUIT : illustre
+  PRODUIT ||--o{ PRIX_TARIF : tarifie
+  PRIX_TARIF ||--o{ PRIX_TARIF_TRADUCTION : traduit
+  PRODUIT ||--o{ PRODUIT_CARACTERISTIQUE : qualifie
+  CARACTERISTIQUE_TECHNIQUE ||--o{ PRODUIT_CARACTERISTIQUE : reutilise
+  CARACTERISTIQUE_TECHNIQUE ||--o{ CARACTERISTIQUE_TRADUCTION : traduit
+  CATEGORIE ||--o{ LIEN_CATEGORIE_PROMO : cible
+  PROMOTION ||--o{ LIEN_CATEGORIE_PROMO : associe
+  PRODUIT ||--o{ LIEN_PRODUIT_PROMO : cible
+  PROMOTION ||--o{ LIEN_PRODUIT_PROMO : associe
+  PROMOTION ||--o| CODE_PROMO : publie
+
+  CATEGORIE { int id_categorie PK }
+  CATEGORIE_TRADUCTION { int id_categorie FK }
+  PRODUIT { int id_produit PK }
+  PRODUIT_TRADUCTION { int id_produit FK }
+  IMAGE_PRODUIT { int id_image PK }
+  PRIX_TARIF { int id_prix PK }
+  PRIX_TARIF_TRADUCTION { int id_prix FK }
+  CARACTERISTIQUE_TECHNIQUE { int id_caracteristique PK }
+  CARACTERISTIQUE_TRADUCTION { int id_caracteristique FK }
+  PRODUIT_CARACTERISTIQUE { int id_produit FK }
+  PROMOTION { int id_promotion PK }
+  CODE_PROMO { int id_code_promo PK }
+  LIEN_CATEGORIE_PROMO { int id_categorie FK }
+  LIEN_PRODUIT_PROMO { int id_produit FK }
