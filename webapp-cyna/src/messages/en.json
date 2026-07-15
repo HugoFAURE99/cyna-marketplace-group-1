@@ -345,6 +345,7 @@
       "orderId": "#",
       "date": "Date",
       "client": "Client",
+      "guest": "Guest",
       "total": "Total",
       "status": "Status",
       "actions": "Actions",

@@ -201,7 +201,7 @@ export function SalesOverviewCharts({
                 <XAxis dataKey="label" fontSize={11} interval={0} minTickGap={12} />
                 <YAxis
                   fontSize={11}
-                  label={{ angle: -90, position: "insideLeft", value: t("averageCartAxis") }}
+                  label={{ angle: -90, position: "insideLeft", style: { textAnchor: "middle" }, value: t("averageCartAxis") }}
                   tickFormatter={(value) => compactCurrency.format(Number(value))}
                   width={72}
                 />
