@@ -63,7 +63,7 @@
     "pdfjs-dist": "^6.1.200",
     "supabase": "2.109.1",
     "tailwindcss": "^4",
-    "typescript": "^5",
+    "typescript": "^7",
     "vitest": "^4.1.10"
   }
 }
