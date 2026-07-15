@@ -29,12 +29,12 @@ export function MfaPanel({ mode, next }: { mode: "challenge" | "required-admin-e
     setLoading(true);
     setError("");
 
-    const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (assurance?.currentLevel === "aal2") {
-      router.replace(next);
-      return;
-    }
-
+    // The server page (mfa-verify) is the single source of truth for "already
+    // aal2 -> go to next". Re-deriving that here from the browser session can
+    // read a stale aal2 level right after a fresh login and fight the server's
+    // redirect, producing an infinite navigation loop. So we never auto-redirect
+    // from the client: if the challenge is actually unnecessary the server would
+    // not have rendered this panel.
     const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors();
     if (factorsError) {
       setError(t("errorFetchParams"));
