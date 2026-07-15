@@ -3,6 +3,7 @@ export const SUPPORT_TICKET_CATEGORIES = [
   "order",
   "subscription",
   "account",
+  "data_access",
   "technical",
   "admin_access",
   "mfa_reset",

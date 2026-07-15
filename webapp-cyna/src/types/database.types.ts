@@ -1153,6 +1153,7 @@ export type Database = {
         | "order"
         | "subscription"
         | "account"
+        | "data_access"
         | "technical"
         | "other"
         | "admin_access"
@@ -1300,6 +1301,7 @@ export const Constants = {
         "order",
         "subscription",
         "account",
+        "data_access",
         "technical",
         "other",
         "admin_access",
