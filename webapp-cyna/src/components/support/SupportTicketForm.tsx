@@ -1,0 +1,180 @@
+"use client";
+
+// Support ticket form. Uses the project's react-hook-form + zod stack (see
+// admin ProductForm) and posts to the submitSupportTicket server action.
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useTranslations } from "next-intl";
+
+import { submitSupportTicket } from "@/app/[locale]/(public)/faq/_actions/support.actions";
+import type { ChatOrderOption } from "@/lib/gemini/types";
+import { SUPPORT_TICKET_CATEGORIES } from "@/lib/support/constants";
+import { useNotification } from "@/components/ui/notification-provider";
+
+const fieldClass =
+  "min-h-11 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 shadow-sm outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-200";
+
+export default function SupportTicketForm({
+  defaultEmail = "",
+  isAuthenticated = false,
+  orders = [],
+  defaultCategory,
+  defaultSubject,
+  defaultOrderId,
+  allowAdminAccess = false,
+}: {
+  defaultEmail?: string;
+  isAuthenticated?: boolean;
+  orders?: ChatOrderOption[];
+  defaultCategory?: string;
+  defaultSubject?: string;
+  defaultOrderId?: string;
+  allowAdminAccess?: boolean;
+}) {
+  const t = useTranslations("support");
+  const { notify } = useNotification();
+  const [serverError, setServerError] = useState(false);
+  const categories = SUPPORT_TICKET_CATEGORIES.filter(
+    (category) => category !== "mfa_reset" && (category !== "admin_access" || allowAdminAccess),
+  );
+
+  const schema = z.object({
+    sujet: z.string().trim().min(1, t("errors.subjectRequired")),
+    email_contact: z
+      .string()
+      .trim()
+      .min(1, t("errors.emailRequired"))
+      .email(t("errors.emailInvalid")),
+    description: z.string().trim().min(1, t("errors.messageRequired")),
+    categorie: z.enum(SUPPORT_TICKET_CATEGORIES),
+    orderId: z.string().optional(),
+  });
+  type FormValues = z.infer<typeof schema>;
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      sujet: defaultSubject || "",
+      email_contact: defaultEmail,
+      description: "",
+      categorie:
+        categories.find(
+          (category) => category === defaultCategory,
+        ) ?? "other",
+      orderId: defaultOrderId || "",
+    },
+  });
+
+  const onSubmit = handleSubmit(async (values) => {
+    setServerError(false);
+    const result = await submitSupportTicket({
+      sujet: values.sujet,
+      email_contact: values.email_contact,
+      description: values.description,
+      categorie: values.categorie,
+      orderId: values.orderId ? Number(values.orderId) : undefined,
+    });
+    if (result.ok) {
+      reset();
+      notify(t("success"));
+    } else {
+      setServerError(true);
+    }
+  });
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-4" noValidate>
+      <div className="space-y-1.5">
+        <label htmlFor="ticket-category" className="text-sm font-medium text-slate-800">{t("category")}</label>
+        <select id="ticket-category" className={fieldClass} {...register("categorie")}>
+          {categories.map((category) => <option key={category} value={category}>{t(`categories.${category}`)}</option>)}
+        </select>
+      </div>
+
+      <div className="space-y-1.5">
+        <label
+          htmlFor="ticket-subject"
+          className="text-sm font-medium text-slate-800"
+        >
+          {t("subject")}
+        </label>
+        <input
+          id="ticket-subject"
+          className={fieldClass}
+          placeholder={t("subjectPlaceholder")}
+          {...register("sujet")}
+        />
+        {errors.sujet && (
+          <p className="text-xs font-medium text-purple-700">{errors.sujet.message}</p>
+        )}
+      </div>
+
+      {orders.length > 0 && (
+        <div className="space-y-1.5">
+          <label htmlFor="ticket-order" className="text-sm font-medium text-slate-800">{t("orderLabel")}</label>
+          <select id="ticket-order" className={fieldClass} {...register("orderId")}>
+            <option value="">{t("orderNone")}</option>
+            {orders.map((order) => <option key={order.id} value={order.id}>{order.label}</option>)}
+          </select>
+        </div>
+      )}
+
+      <div className="space-y-1.5">
+        <label
+          htmlFor="ticket-email"
+          className="text-sm font-medium text-slate-800"
+        >
+          {t("email")}
+        </label>
+        <input
+          id="ticket-email"
+          type="email"
+          className={fieldClass}
+          placeholder={t("emailPlaceholder")}
+          {...register("email_contact")}
+        />
+        {errors.email_contact && (
+          <p className="text-xs font-medium text-purple-700">{errors.email_contact.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-1.5">
+        <label
+          htmlFor="ticket-message"
+          className="text-sm font-medium text-slate-800"
+        >
+          {t("message")}
+        </label>
+        <textarea
+          id="ticket-message"
+          rows={5}
+          className={`${fieldClass} resize-y`}
+          placeholder={t("messagePlaceholder")}
+          {...register("description")}
+        />
+        {errors.description && (
+          <p className="text-xs font-medium text-purple-700">{errors.description.message}</p>
+        )}
+      </div>
+
+      {serverError && <p className="text-sm font-medium text-purple-800" role="alert">{t("error")}</p>}
+
+      {isAuthenticated && <p className="text-xs text-slate-500">{t("accountNote")}</p>}
+
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-md bg-purple-700 px-5 text-sm font-semibold text-white transition hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+      >
+        {isSubmitting ? t("submitting") : t("submit")}
+      </button>
+    </form>
+  );
+}

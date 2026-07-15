@@ -1,0 +1,119 @@
+"use client";
+
+import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { Home, Package, Layers, Users, BarChart3, ShoppingCart, Percent, RefreshCw, LifeBuoy, LogOut, BotMessageSquare } from "lucide-react";
+import { logout } from "@/app/(auth)/_action/auth.action";
+
+import {
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
+import { Link } from "@/i18n/navigation";
+import SiteModeSwitch from "@/components/layout/SiteModeSwitch";
+
+const menuItems = [
+  { labelKey: "homepage", href: "/admin", icon: Home, exact: true },
+  { labelKey: "products", href: "/admin/products", icon: Package, exact: false },
+  { labelKey: "categories", href: "/admin/categories", icon: Layers, exact: false },
+  { labelKey: "users", href: "/admin/users", icon: Users, exact: false },
+  { labelKey: "orders", href: "/admin/orders", icon: ShoppingCart, exact: false },
+  { labelKey: "subscriptions", href: "/admin/subscriptions", icon: RefreshCw, exact: false },
+  { labelKey: "support", href: "/admin/support", icon: LifeBuoy, exact: false },
+  { labelKey: "chatbot", href: "/admin/chatbot", icon: BotMessageSquare, exact: false },
+  { labelKey: "promotions", href: "/admin/promotions", icon: Percent, exact: false },
+  { labelKey: "sales", href: "/admin/sales", icon: BarChart3, exact: false },
+] as const;
+
+interface Labels {
+  backoffice: string;
+  homepage: string;
+  products: string;
+  categories: string;
+  users: string;
+  orders: string;
+  subscriptions: string;
+  support: string;
+  promotions: string;
+  sales: string;
+  chatbot: string;
+  viewCyna: string;
+  switchingToCyna: string;
+  logout: string;
+}
+
+export default function AdminSidebarClient({ labels }: { labels: Labels }) {
+  const pathname = usePathname();
+
+  const isActive = (href: string, exact: boolean) => {
+    // Strip locale prefix (e.g. /fr/admin/products -> /admin/products)
+    const clean = pathname.replace(/^\/(fr|en)/, "");
+    if (exact) return clean === href;
+    return clean.startsWith(href);
+  };
+
+  return (
+    <Sidebar>
+      <SidebarHeader className="h-16 min-h-16 shrink-0 justify-center border-b border-sidebar-border px-3 py-0">
+        <Link href="/admin" className="flex items-center gap-2">
+          <Image
+            src="/brand/cyna-logo-v2-header.svg"
+            alt="CYNA"
+            width={96}
+            height={26}
+            className="h-auto w-[96px]"
+            priority
+          />
+          <span className="rounded-md bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+            {labels.backoffice}
+          </span>
+        </Link>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>{labels.backoffice}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menuItems.map((item) => {
+                const active = isActive(item.href, item.exact);
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      render={<Link href={item.href} />}
+                      className={active ? "bg-primary/10 text-primary font-medium" : ""}
+                    >
+                      <item.icon />
+                      <span>{labels[item.labelKey]}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter className="border-t border-sidebar-border p-3">
+        <SiteModeSwitch
+          direction="exit"
+          href="/"
+          label={labels.viewCyna}
+          pendingLabel={labels.switchingToCyna}
+        />
+        <form action={logout}>
+          <button className="flex min-h-10 w-full cursor-pointer items-center gap-2 rounded-md px-2 text-left text-sm font-medium transition hover:bg-sidebar-accent" type="submit">
+            <LogOut aria-hidden="true" className="size-4" />
+            {labels.logout}
+          </button>
+        </form>
+      </SidebarFooter>
+    </Sidebar>
+  );
+}

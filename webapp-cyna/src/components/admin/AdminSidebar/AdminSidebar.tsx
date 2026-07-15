@@ -1,44 +1,25 @@
-import {
-    Sidebar,
-    SidebarContent,
-    SidebarGroup,
-    SidebarGroupLabel,
-    SidebarGroupContent,
-    SidebarMenu,
-    SidebarMenuItem,
-    SidebarMenuButton,
-  } from '@/components/ui/sidebar'
-  import { Package } from 'lucide-react'
-  import Link from 'next/link'
-  
-  const menuItems = [
-    {
-      label: 'Produits',
-      href: '/admin/products',
-      icon: Package,
-    },
-  ]
-  
-  export function AdminSidebar() {
-    return (
-      <Sidebar>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>Backoffice</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton render={<Link href={item.href} />}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
-    )
-  }
+import { getTranslations } from "next-intl/server";
+import AdminSidebarClient from "./AdminSidebarClient";
+
+export async function AdminSidebar() {
+  const t = await getTranslations("admin.nav");
+
+  const labels = {
+    backoffice: t("backoffice"),
+    homepage: t("homepage"),
+    products: t("products"),
+    categories: t("categories"),
+    users: t("users"),
+    orders: t("orders"),
+    subscriptions: t("subscriptions"),
+    support: t("support"),
+    promotions: t("promotions"),
+    sales: t("sales"),
+    chatbot: t("chatbot"),
+    viewCyna: t("viewCyna"),
+    switchingToCyna: t("switchingToCyna"),
+    logout: t("logout"),
+  };
+
+  return <AdminSidebarClient labels={labels} />;
+}

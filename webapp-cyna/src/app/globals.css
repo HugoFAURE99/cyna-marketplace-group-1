@@ -1,3 +1,4 @@
+@import url('https://fonts.cdnfonts.com/css/opendyslexic');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -117,6 +118,48 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* ─── Admin backoffice theme (light only, CYNA purple DA) ─── */
+.admin-theme {
+  --primary: oklch(0.496 0.265 301.924); /* purple-700 */
+  --primary-foreground: oklch(0.985 0 0);
+  --ring: oklch(0.496 0.265 301.924);
+  --accent: oklch(0.977 0.014 308.299); /* purple-50 */
+  --accent-foreground: oklch(0.438 0.218 303.724); /* purple-800 */
+  --sidebar: oklch(0.995 0.003 308);
+  --sidebar-primary: oklch(0.496 0.265 301.924);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.977 0.014 308.299);
+  --sidebar-accent-foreground: oklch(0.438 0.218 303.724);
+  --sidebar-ring: oklch(0.496 0.265 301.924);
+}
+
+/* Native controls do not inherit the shared Button component's cursor style. */
+.admin-theme
+  :where(
+    a[href],
+    button:not(:disabled),
+    select:not(:disabled),
+    summary,
+    label[for],
+    input[type="checkbox"]:not(:disabled),
+    input[type="radio"]:not(:disabled),
+    [role="button"]:not([aria-disabled="true"]):not(.cursor-grab),
+    [role="link"]:not([aria-disabled="true"])
+  ) {
+  cursor: pointer;
+}
+
+.admin-theme
+  :where(
+    button:disabled,
+    select:disabled,
+    input[type="checkbox"]:disabled,
+    input[type="radio"]:disabled,
+    [aria-disabled="true"]
+  ) {
+  cursor: not-allowed;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -126,5 +169,128 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
   }
+}
+
+html.a11y-daltonisme {
+  filter: grayscale(100%) contrast(120%);
+}
+
+html.a11y-large-font {
+  font-size: 120%;
+}
+
+html.a11y-dyslexic-font * {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
+
+html.a11y-highlight-links a[href] {
+  outline: 3px solid #8b5cf6 !important; /* purple-500 */
+  outline-offset: 2px !important;
+  text-decoration: underline !important;
+}
+
+@keyframes cyna-notification-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cyna-notification-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.cyna-notification-in {
+  animation: cyna-notification-in 280ms ease-out both;
+  will-change: opacity;
+}
+
+.cyna-notification-out {
+  animation: cyna-notification-out 240ms ease-in both;
+  will-change: opacity;
+}
+
+@keyframes cyna-site-transition-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cyna-site-transition-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes cyna-site-transition-dot-rise {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-0.65rem);
+  }
+}
+
+.cyna-site-transition {
+  opacity: 0;
+  will-change: opacity;
+}
+
+html[data-cyna-site-transition="active"],
+html[data-cyna-site-transition="active"] body {
+  overflow: hidden;
+}
+
+.cyna-site-transition[data-phase="entering"] {
+  animation: cyna-site-transition-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.cyna-site-transition[data-phase="leaving"] {
+  animation: cyna-site-transition-out 360ms ease-in both;
+}
+
+.cyna-site-transition-dot {
+  animation: cyna-site-transition-dot-rise 840ms ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cyna-site-transition[data-phase="entering"],
+  .cyna-site-transition[data-phase="leaving"] {
+    animation-duration: 1ms;
+  }
+
+  .cyna-site-transition-dot {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+.cynai-launcher {
+  transition:
+    scale 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    translate 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 320ms ease;
+  will-change: scale, translate;
 }

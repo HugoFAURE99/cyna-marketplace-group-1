@@ -1,0 +1,11 @@
+project_id = "cyna-marketplace"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+
+[db]
+major_version = 17
+
+[db.seed]
+enabled = false

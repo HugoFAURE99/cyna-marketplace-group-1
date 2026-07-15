@@ -1,0 +1,55 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { useActionState, useEffect } from "react";
+import { requestPasswordResetEmail } from "@/components/user-edition/action";
+import { AuthMessage } from "@/components/connection/auth-message";
+import { useNotification } from "@/components/ui/notification-provider";
+
+type ActionState = {
+  errorKey?: string;
+  successKey?: string;
+  rawError?: string;
+};
+
+const initialState: ActionState = {};
+
+export function RequestPasswordResetForm() {
+  const t = useTranslations("user_edition");
+  const { notify } = useNotification();
+
+  const [state, formAction, isPending] = useActionState(
+    requestPasswordResetEmail,
+    initialState
+  );
+
+  useEffect(() => {
+    if (state?.successKey) {
+      notify(t(state.successKey as Parameters<typeof t>[0]));
+    }
+  }, [notify, state, t]);
+
+  return (
+    <section>
+      <h2 className="text-xl font-semibold mb-6">{t("editPasswordTitle")}</h2>
+      <form action={formAction} className="max-w-md flex flex-col gap-4">
+        {state?.errorKey && (
+          <AuthMessage variant="error">
+            {t(state.errorKey as Parameters<typeof t>[0])}
+            {state.rawError && <span className="block mt-1 text-sm font-medium">({state.rawError})</span>}
+          </AuthMessage>
+        )}
+        <p className="text-slate-600 mb-2">
+          {t("requestResetDescription") || "Vous recevrez un email contenant un lien sécurisé pour changer votre mot de passe."}
+        </p>
+        <button
+          type="submit"
+          disabled={isPending}
+          className="min-h-11 cursor-pointer self-start rounded-md bg-purple-700 px-4 py-2 text-white transition-colors hover:bg-purple-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-700 active:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {isPending ? "..." : t("requestResetButton") || "Envoyer un email de réinitialisation"}
+        </button>
+      </form>
+    </section>
+  );
+}
