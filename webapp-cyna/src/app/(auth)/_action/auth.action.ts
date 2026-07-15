@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import {
   getAuthPasswordErrorKey,
+  isUsernameValid,
   validatePassword,
 } from "@/lib/auth/password-policy";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -16,6 +17,8 @@ type AuthActionState = {
   error?: string;
   errorKey?: string;
   successKey?: string;
+  // Valeurs à ré-afficher dans le formulaire après une erreur (jamais le mot de passe)
+  values?: { username?: string; email?: string };
 } | null;
 
 //==================================lOGIN
@@ -84,12 +87,15 @@ export async function register(
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
   const username = String(formData.get("username") ?? "").trim();
+  // On renvoie ces valeurs dans chaque état d'erreur pour ne pas vider le formulaire.
+  const values = { username, email };
   if (!email || !password || !confirmPassword || !username) {
-    return { errorKey: "errorMissingFields" };
+    return { errorKey: "errorMissingFields", values };
   }
-  if (password !== confirmPassword) return { errorKey: "errorMismatch" };
+  if (!isUsernameValid(username)) return { errorKey: "errorUsernameTooLong", values };
+  if (password !== confirmPassword) return { errorKey: "errorMismatch", values };
   const passwordError = validatePassword(password);
-  if (passwordError) return { errorKey: passwordError };
+  if (passwordError) return { errorKey: passwordError, values };
 
   try {
     const supabase = await createServerClient();
@@ -99,7 +105,7 @@ export async function register(
       .select("adresse_mail")
       .ilike("adresse_mail", email)
       .maybeSingle();
-    if (existingUser) return { errorKey: "errorEmailTaken" };
+    if (existingUser) return { errorKey: "errorEmailTaken", values };
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -109,9 +115,21 @@ export async function register(
       },
     });
     if (error) {
-      return {
-        errorKey: getAuthPasswordErrorKey(error) ?? "errorUnavailable",
-      };
+      // On journalise l'erreur réelle : sans ça, tout retombe sur "errorUnavailable".
+      console.error("[auth] signUp failed", {
+        code: (error as { code?: string }).code,
+        status: (error as { status?: number }).status,
+        message: error.message,
+      });
+      const passwordKey = getAuthPasswordErrorKey(error);
+      if (passwordKey) return { errorKey: passwordKey, values };
+      if (isEmailRateLimitError(error)) return { errorKey: "errorRateLimit", values };
+      return { errorKey: "errorUnavailable", values };
+    }
+    // Email déjà enregistré : Supabase renvoie un user avec `identities` vide (anti-énumération),
+    // sans erreur. Ce cas couvre un compte auth orphelin (sans ligne `utilisateur`).
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      return { errorKey: "errorEmailTaken", values };
     }
     if (data.user) {
       const { error: profileError } = await admin.from("utilisateur").insert({
@@ -123,16 +141,26 @@ export async function register(
         token_connexion_stripe: "non_configure",
       });
       if (profileError) {
+        console.error("[auth] profile insert failed", profileError);
         await admin.auth.admin.deleteUser(data.user.id);
-        return { errorKey: "errorUnavailable" };
+        return { errorKey: "errorUnavailable", values };
       }
     }
     redirect(`/${normaliseLocale(locale)}/login?message=checkEmail`);
   } catch (error) {
     if (error && typeof error === "object" && "digest" in error) throw error;
     console.error("[auth] registration failed", error);
-    return { errorKey: "errorUnavailable" };
+    return { errorKey: "errorUnavailable", values };
   }
+}
+
+// Détecte le rate-limit d'envoi d'e-mails de Supabase (429 / over_email_send_rate_limit),
+// qui sinon retomberait dans le message générique "compte non créé".
+function isEmailRateLimitError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const code = (error as { code?: string }).code;
+  const status = (error as { status?: number }).status;
+  return code === "over_email_send_rate_limit" || status === 429;
 }
 
 export async function logout() {

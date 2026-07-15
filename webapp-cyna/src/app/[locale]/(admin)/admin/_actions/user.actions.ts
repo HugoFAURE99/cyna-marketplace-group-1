@@ -172,11 +172,23 @@ export async function resetUserMfa(targetId: string, ticketId: string): Promise<
 }
 
 export async function deleteUser(id: string) {
-  await requireActiveAal2Admin();
+  const { user: actor } = await requireActiveAal2Admin();
+  // Un admin ne peut pas se supprimer lui-même (sinon auto-verrouillage).
+  if (actor.id === id) throw new Error("CANNOT_DELETE_SELF");
+
   const supabase = await createAdminClient();
+  // Soft delete : on ne supprime pas la ligne. Des commandes, factures, abonnements,
+  // tickets et journaux d'audit la référencent (FK sans cascade -> erreur 23503).
+  // On désactive le compte et on anonymise les données personnelles ; les
+  // enregistrements financiers et d'audit sont conservés (obligations comptables/RGPD).
   const { error } = await supabase
     .from("utilisateur")
-    .delete()
+    .update({
+      is_actif: false,
+      nom_complet: "Utilisateur supprimé",
+      // adresse_mail est UNIQUE et NOT NULL : on garde une valeur unique et inutilisable.
+      adresse_mail: `deleted-${id}@deleted.invalid`,
+    })
     .eq("id_compte", id);
 
   if (error) throw error;
