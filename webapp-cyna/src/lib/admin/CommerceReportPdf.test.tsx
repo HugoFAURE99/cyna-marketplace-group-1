@@ -24,7 +24,11 @@ describe("commerce PDF", () => {
   });
 
   it("renders a readable branded multipage report", async () => {
-    const range = createReportRange("custom", { from: "2026-07-01", to: "2026-07-31" });
+    const range = createReportRange("custom", {
+      from: "2026-07-01",
+      now: new Date("2026-08-01T12:00:00Z"),
+      to: "2026-07-31",
+    });
     const orders: CommerceOrder[] = Array.from({ length: 20 }, (_, index) => ({
       id: index + 1,
       customerId: `customer-${index}`,
@@ -60,13 +64,18 @@ describe("commerce PDF", () => {
     if (process.env.PDF_FIXTURE_PATH) await writeFile(process.env.PDF_FIXTURE_PATH, buffer);
 
     const document = await getDocument({ data: new Uint8Array(buffer) }).promise;
-    expect(document.numPages).toBe(6);
+    expect(document.numPages).toBe(7);
     let text = "";
     for (let pageNumber = 1; pageNumber <= document.numPages; pageNumber += 1) {
       const page = await document.getPage(pageNumber);
       const viewport = page.getViewport({ scale: 1 });
-      expect(viewport.width).toBeCloseTo(595.28, 1);
-      expect(viewport.height).toBeCloseTo(841.89, 1);
+      if (pageNumber === 1) {
+        expect(viewport.width).toBeCloseTo(841.89, 1);
+        expect(viewport.height).toBeCloseTo(595.28, 1);
+      } else {
+        expect(viewport.width).toBeCloseTo(595.28, 1);
+        expect(viewport.height).toBeCloseTo(841.89, 1);
+      }
       const content = await page.getTextContent();
       const pageText = content.items.map((item) => "str" in item ? item.str : "").join(" ");
       expect(pageText).toContain("CYNA");
@@ -75,6 +84,10 @@ describe("commerce PDF", () => {
     }
     expect(text).toContain("CYNA");
     expect(text).toContain("Commerce report");
+    expect(text).toContain("Sales per day");
+    expect(text).toContain("Average cart by category");
+    expect(text).toContain("Sales distribution by category");
+    expect(text).toContain("Category 0");
     expect(text).toContain("Top products");
     expect(text).toContain("Upcoming renewals");
     expect(text).toContain("Showing the first 20 of 21 rows.");
@@ -82,6 +95,7 @@ describe("commerce PDF", () => {
     expect(text).toContain("Annual subscription outlook");
     expect(text).toContain("Subscription status distribution");
     expect(text).toContain(`Page ${document.numPages} / ${document.numPages}`);
+    expect(text).not.toMatch(/NaN|Infinity/);
   }, 20_000);
 
   it("keeps French report copy and accented glyphs extractable", async () => {
@@ -122,5 +136,50 @@ describe("commerce PDF", () => {
     expect(text).toContain("Renouvellements à venir");
     expect(text).toContain("Répartition des statuts d'abonnement");
     expect(text).toContain("12 135,00 €");
+    expect(text).not.toMatch(/NaN|Infinity/);
+  }, 20_000);
+
+  it("renders the five-week preset with five weekly points", async () => {
+    const range = createReportRange("5w", { now: new Date("2026-04-02T12:00:00Z") });
+    const subscriptions = aggregateSubscriptionHealth({
+      generatedAt: new Date("2026-04-02T12:00:00Z"),
+      horizon: 30,
+      subscriptions: [],
+    });
+    const orders: CommerceOrder[] = [{
+      customerId: "weekly-customer",
+      date: "2026-03-29T12:00:00Z",
+      guestEmail: null,
+      id: 501,
+      lines: [{
+        billingPlan: "monthly",
+        categoryId: 8,
+        categoryName: "SOC",
+        productId: 8,
+        productName: "Managed SOC",
+        quantity: 1,
+        subtotal: 850,
+      }],
+      status: "paid",
+      total: 850,
+    }];
+    const data = aggregateCommerceReport({
+      generatedAt: new Date("2026-04-02T12:00:00Z"),
+      locale: "en",
+      orders,
+      range,
+      subscriptionHealth: subscriptions,
+    });
+    const element = createElement(CommerceReportPdf, { data }) as unknown as Parameters<typeof renderToBuffer>[0];
+    const buffer = await renderToBuffer(element);
+    const document = await getDocument({ data: new Uint8Array(buffer) }).promise;
+    const firstPage = await document.getPage(1);
+    const content = await firstPage.getTextContent();
+    const text = content.items.map((item) => "str" in item ? item.str : "").join(" ");
+
+    expect(data.trend).toHaveLength(5);
+    expect(text).toContain("Sales per week");
+    expect(text).toContain("SOC");
+    expect(text).not.toMatch(/NaN|Infinity/);
   }, 20_000);
 });

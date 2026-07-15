@@ -2,7 +2,10 @@
 
 import { redirect } from "next/navigation";
 
-import { validatePassword } from "@/lib/auth/password-policy";
+import {
+  getAuthPasswordErrorKey,
+  validatePassword,
+} from "@/lib/auth/password-policy";
 import { createAdminClient } from "@/lib/supabase/server";
 import { isActiveAdmin } from "@/lib/auth/roles";
 import { isAdminDestination, sanitizeAuthNext } from "@/lib/auth/mfa-return";
@@ -101,12 +104,12 @@ export async function register(
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${normaliseLocale(locale)}`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${normaliseLocale(locale)}&flow=signup`,
       },
     });
     if (error) {
       return {
-        errorKey: error.code === "weak_password" ? "errorTooShort" : "errorUnavailable",
+        errorKey: getAuthPasswordErrorKey(error) ?? "errorUnavailable",
       };
     }
     if (data.user) {
@@ -148,7 +151,7 @@ export async function resetPassword(
   try {
     const supabase = await createServerClient();
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${normaliseLocale(locale)}&next=/user-dashboard/update-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?locale=${normaliseLocale(locale)}&flow=recovery&next=/user-dashboard/update-password`,
     });
     return error ? { errorKey: "errorUnavailable" } : { successKey: "resetEmailSent" };
   } catch (error) {
@@ -172,7 +175,7 @@ export async function updatePassword(
   const { error } = await supabase.auth.updateUser({ password });
   if (error) {
     return {
-      errorKey: error.code === "weak_password" ? "errorTooShort" : "errorUpdateFailed",
+      errorKey: getAuthPasswordErrorKey(error) ?? "errorUpdateFailed",
     };
   }
   const { getLocale } = await import("next-intl/server");

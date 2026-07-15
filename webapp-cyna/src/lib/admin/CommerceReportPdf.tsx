@@ -1,7 +1,11 @@
 import {
+  Circle,
   Document,
   Page,
+  Path,
+  Rect,
   StyleSheet,
+  Svg,
   Text,
   View,
 } from "@react-pdf/renderer";
@@ -22,6 +26,17 @@ const styles = StyleSheet.create({
   kpiLabel: { color: "#64748b", fontSize: 7, marginBottom: 5 },
   kpiValue: { color: "#4c1d95", fontFamily: "Helvetica-Bold", fontSize: 14 },
   kpiChange: { color: "#475569", fontSize: 7, marginTop: 4 },
+  featuredCharts: { flexDirection: "row", justifyContent: "space-between" },
+  chartCard: { backgroundColor: "#ffffff", borderColor: "#e2e8f0", borderRadius: 5, borderWidth: 1, height: 280, padding: 10, width: "32.4%" },
+  chartTitle: { color: "#1e1b4b", fontFamily: "Helvetica-Bold", fontSize: 9, marginBottom: 3 },
+  chartHelp: { color: "#64748b", fontSize: 5.5, lineHeight: 1.25, marginBottom: 5, minHeight: 14 },
+  chartLabels: { flexDirection: "row", height: 22, marginTop: 2 },
+  chartLabel: { color: "#64748b", fontSize: 4.5, textAlign: "center" },
+  chartTotal: { color: "#475569", fontFamily: "Helvetica-Bold", fontSize: 6, marginTop: 3 },
+  legend: { flexDirection: "row", flexWrap: "wrap", marginHorizontal: -2, marginTop: 6 },
+  legendItem: { alignItems: "center", flexDirection: "row", marginBottom: 4, marginHorizontal: 2, width: "47%" },
+  legendSwatch: { borderRadius: 1, height: 6, marginRight: 3, width: 6 },
+  legendLabel: { color: "#334155", fontSize: 5.5, width: "85%" },
   section: { backgroundColor: "#ffffff", borderColor: "#e2e8f0", borderRadius: 5, borderWidth: 1, marginBottom: 12, padding: 12 },
   sectionTitle: { color: "#1e1b4b", fontFamily: "Helvetica-Bold", fontSize: 11, marginBottom: 9 },
   trendRow: { alignItems: "center", flexDirection: "row", marginBottom: 5 },
@@ -70,7 +85,13 @@ const copy = {
     average: "Average order value",
     customers: "Unique customers",
     previous: "vs. previous period",
-    trend: "Revenue trend",
+    salesDay: "Sales per day",
+    salesWeek: "Sales per week",
+    salesMonth: "Sales per month",
+    categoryAverage: "Average cart by category",
+    categoryAverageHelp: "EUR per category - Each segment is a category average. The stacked height is not an overall average.",
+    categorySales: "Sales distribution by category",
+    totalSales: "Total sales",
     topProducts: "Top products",
     categories: "Category distribution",
     billing: "Billing plan mix",
@@ -115,7 +136,13 @@ const copy = {
     average: "Panier moyen",
     customers: "Clients uniques",
     previous: "vs période précédente",
-    trend: "Évolution du chiffre d'affaires",
+    salesDay: "Ventes par jour",
+    salesWeek: "Ventes par semaine",
+    salesMonth: "Ventes par mois",
+    categoryAverage: "Paniers moyens par catégorie",
+    categoryAverageHelp: "EUR par catégorie - Chaque segment est un panier moyen. La hauteur cumulée n'est pas une moyenne globale.",
+    categorySales: "Répartition des ventes par catégorie",
+    totalSales: "Total des ventes",
     topProducts: "Meilleurs produits",
     categories: "Répartition par catégorie",
     billing: "Mix des plans de facturation",
@@ -160,7 +187,11 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
   const currencyText = (value: number) => sanitizePdfNumberText(currency.format(value));
   const numberText = (value: number) => sanitizePdfNumberText(number.format(value));
   const timestamp = new Intl.DateTimeFormat(data.locale, { dateStyle: "medium", timeStyle: "short", timeZone: data.range.timeZone }).format(new Date(data.generatedAt));
-  const maxTrend = Math.max(1, ...data.trend.map((point) => point.revenue));
+  const salesTitle = data.range.granularity === "month"
+    ? t.salesMonth
+    : data.range.granularity === "week"
+      ? t.salesWeek
+      : t.salesDay;
   const kpis = [
     { label: t.revenue, value: currencyText(data.current.grossRevenue), change: data.current.changes.grossRevenue },
     { label: t.orders, value: numberText(data.current.orderCount), change: data.current.changes.orderCount },
@@ -170,11 +201,11 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
 
   return (
     <Document author="CYNA" subject={`${data.range.from} - ${data.range.to}`} title={`CYNA - ${t.title}`}>
-      <Page size="A4" style={styles.page}>
+      <Page orientation="landscape" size="A4" style={styles.page}>
         <View style={styles.pageBackground} />
         <ReportChrome generated={timestamp} pageLabel={t.page} />
         <Text style={styles.title}>{t.title}</Text>
-        <Text style={styles.subtitle}>{t.period}: {data.range.from} - {data.range.to} · Europe/Paris</Text>
+        <Text style={styles.subtitle}>{t.period}: {data.range.from} - {data.range.to} - Europe/Paris - {t.generated}: {timestamp}</Text>
 
         <View style={styles.kpiGrid}>
           {kpis.map((item) => (
@@ -186,17 +217,16 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
           ))}
         </View>
 
-        <View style={styles.section} wrap={false}>
-          <Text style={styles.sectionTitle}>{t.trend}</Text>
-          {data.trend.length ? data.trend.slice(0, 18).map((point) => (
-            <View key={point.key} style={styles.trendRow}>
-              <Text style={styles.trendLabel}>{point.label}</Text>
-              <View style={styles.trendTrack}><View style={[styles.trendBar, { width: `${Math.max(1, (point.revenue / maxTrend) * 100)}%` }]} /></View>
-              <Text style={styles.trendValue}>{currencyText(point.revenue)} · {numberText(point.orders)}</Text>
-            </View>
-          )) : <Text style={styles.empty}>{t.noData}</Text>}
+        <View style={styles.featuredCharts} wrap={false}>
+          <RevenueChart currency={currencyText} data={data} noData={t.noData} title={salesTitle} totalLabel={t.totalSales} />
+          <CategoryAverageChart currency={currencyText} data={data} help={t.categoryAverageHelp} noData={t.noData} title={t.categoryAverage} />
+          <CategoryPieChart currency={currencyText} data={data} noData={t.noData} title={t.categorySales} />
         </View>
+      </Page>
 
+      <Page size="A4" style={styles.page}>
+        <View style={styles.pageBackground} />
+        <ReportChrome generated={timestamp} pageLabel={t.page} />
         <View style={styles.section} wrap={false}>
           <Text style={styles.sectionTitle}>{t.subscriptions}</Text>
           <Text style={styles.note}>{t.forecast}: {data.subscriptions.horizon} {t.days} ({data.subscriptions.asOf} - {data.subscriptions.to})</Text>
@@ -218,8 +248,8 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
           <Text style={styles.sectionTitle}>{t.annualOutlook}</Text>
           <Text style={styles.note}>{t.annualPeriod}: {data.subscriptions.asOf} - {data.subscriptions.annualTo}</Text>
           <View style={[styles.subscriptionRow, { marginBottom: 10, marginTop: 8 }]}>
-            <View style={[styles.subscriptionItem, { width: "48%" }]}><Text>{t.annualRenewals}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.annualRenewalCount)} · {currencyText(data.subscriptions.annualRenewalValue)}</Text></View>
-            <View style={[styles.subscriptionItem, { width: "48%" }]}><Text>{t.annualEndings}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.annualScheduledEndingCount)} · {currencyText(data.subscriptions.annualScheduledEndingValue)}</Text></View>
+            <View style={[styles.subscriptionItem, { width: "48%" }]}><Text>{t.annualRenewals}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.annualRenewalCount)} - {currencyText(data.subscriptions.annualRenewalValue)}</Text></View>
+            <View style={[styles.subscriptionItem, { width: "48%" }]}><Text>{t.annualEndings}</Text><Text style={styles.subscriptionValue}>{numberText(data.subscriptions.annualScheduledEndingCount)} - {currencyText(data.subscriptions.annualScheduledEndingValue)}</Text></View>
           </View>
           <AnnualDueTable currency={currencyText} data={data.subscriptions.annualOutlook} labels={t} />
         </View>
@@ -293,6 +323,221 @@ export function CommerceReportPdf({ data }: { data: CommerceReportData }) {
   );
 }
 
+function RevenueChart({
+  currency,
+  data,
+  noData,
+  title,
+  totalLabel,
+}: {
+  currency: (value: number) => string;
+  data: CommerceReportData;
+  noData: string;
+  title: string;
+  totalLabel: string;
+}) {
+  const maximum = Math.max(0, ...data.trend.map((point) => point.revenue));
+  const count = Math.max(1, data.trend.length);
+  const gap = count > 16 ? 1.5 : 4;
+  const barWidth = Math.max(1, (210 - gap * (count - 1)) / count);
+
+  return (
+    <View style={styles.chartCard} wrap={false}>
+      <Text style={styles.chartTitle}>{title}</Text>
+      <Text style={styles.chartHelp}>{data.range.from} - {data.range.to}</Text>
+      {maximum > 0 ? (
+        <>
+          <Svg height={142} viewBox="0 0 220 142" width="100%">
+            {data.trend.map((point, index) => {
+              const height = safeChartValue((point.revenue / maximum) * 126);
+              return (
+                <Rect
+                  fill="#8b5cf6"
+                  height={height}
+                  key={point.key}
+                  width={barWidth}
+                  x={5 + index * (barWidth + gap)}
+                  y={136 - height}
+                />
+              );
+            })}
+          </Svg>
+          <ChartAxisLabels labels={data.trend.map((point) => point.label)} />
+          <Text style={styles.chartTotal}>{totalLabel}: {currency(data.current.grossRevenue)}</Text>
+        </>
+      ) : <Text style={styles.empty}>{noData}</Text>}
+    </View>
+  );
+}
+
+function CategoryAverageChart({
+  currency,
+  data,
+  help,
+  noData,
+  title,
+}: {
+  currency: (value: number) => string;
+  data: CommerceReportData;
+  help: string;
+  noData: string;
+  title: string;
+}) {
+  const points = data.categoryAverages.points;
+  const categories = data.categoryAverages.categories;
+  const totals = points.map((point) => categories.reduce(
+    (total, category) => total + (point.values[category.key]?.averageOrderValue ?? 0),
+    0,
+  ));
+  const maximum = Math.max(0, ...totals);
+  const count = Math.max(1, points.length);
+  const gap = count > 16 ? 1.5 : 4;
+  const barWidth = Math.max(1, (210 - gap * (count - 1)) / count);
+
+  return (
+    <View style={styles.chartCard} wrap={false}>
+      <Text style={styles.chartTitle}>{title}</Text>
+      <Text style={styles.chartHelp}>{help}</Text>
+      {maximum > 0 ? (
+        <>
+          <Svg height={128} viewBox="0 0 220 128" width="100%">
+            {points.flatMap((point, pointIndex) => {
+              let bottom = 122;
+              return categories.map((category) => {
+                const value = point.values[category.key]?.averageOrderValue ?? 0;
+                const height = safeChartValue((value / maximum) * 112);
+                bottom -= height;
+                return (
+                  <Rect
+                    fill={category.color}
+                    height={height}
+                    key={`${point.key}-${category.key}`}
+                    width={barWidth}
+                    x={5 + pointIndex * (barWidth + gap)}
+                    y={bottom}
+                  />
+                );
+              });
+            })}
+          </Svg>
+          <ChartAxisLabels labels={points.map((point) => point.label)} />
+          <CategoryLegend
+            categories={categories.map((category) => ({
+              color: category.color,
+              key: category.key,
+              label: `${category.name}: ${currency(category.averageOrderValue)}`,
+            }))}
+          />
+        </>
+      ) : <Text style={styles.empty}>{noData}</Text>}
+    </View>
+  );
+}
+
+function CategoryPieChart({
+  currency,
+  data,
+  noData,
+  title,
+}: {
+  currency: (value: number) => string;
+  data: CommerceReportData;
+  noData: string;
+  title: string;
+}) {
+  const total = data.categories.reduce((sum, category) => sum + category.revenue, 0);
+  let angle = -90;
+
+  return (
+    <View style={styles.chartCard} wrap={false}>
+      <Text style={styles.chartTitle}>{title}</Text>
+      <Text style={styles.chartHelp}>{data.range.from} - {data.range.to}</Text>
+      {total > 0 ? (
+        <>
+          <Svg height={150} viewBox="0 0 220 150" width="100%">
+            {data.categories.length === 1 ? (
+              <Circle cx={110} cy={75} fill={data.categories[0].color} r={62} />
+            ) : data.categories.map((category) => {
+              const startAngle = angle;
+              const endAngle = angle + (category.revenue / total) * 360;
+              angle = endAngle;
+              return (
+                <Path
+                  d={pieSlicePath(110, 75, 62, startAngle, endAngle)}
+                  fill={category.color}
+                  key={category.key}
+                />
+              );
+            })}
+          </Svg>
+          <CategoryLegend
+            categories={data.categories.map((category) => ({
+              color: category.color,
+              key: category.key,
+              label: `${category.name}: ${currency(category.revenue)} (${((category.revenue / total) * 100).toFixed(1)}%)`,
+            }))}
+          />
+        </>
+      ) : <Text style={styles.empty}>{noData}</Text>}
+    </View>
+  );
+}
+
+function ChartAxisLabels({ labels }: { labels: string[] }) {
+  const step = labels.length <= 8 ? 1 : Math.ceil(labels.length / 6);
+  return (
+    <View style={styles.chartLabels}>
+      {labels.map((label, index) => (
+        <Text key={`${label}-${index}`} style={[styles.chartLabel, { width: `${100 / labels.length}%` }]}>
+          {index === 0 || index === labels.length - 1 || index % step === 0 ? label : ""}
+        </Text>
+      ))}
+    </View>
+  );
+}
+
+function CategoryLegend({
+  categories,
+}: {
+  categories: { color: string; key: string; label: string }[];
+}) {
+  return (
+    <View style={styles.legend}>
+      {categories.map((category) => (
+        <View key={category.key} style={styles.legendItem}>
+          <View style={[styles.legendSwatch, { backgroundColor: category.color }]} />
+          <Text style={styles.legendLabel}>{category.label}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function safeChartValue(value: number): number {
+  return Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
+function pieSlicePath(
+  centerX: number,
+  centerY: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+): string {
+  const start = polarPoint(centerX, centerY, radius, startAngle);
+  const end = polarPoint(centerX, centerY, radius, endAngle);
+  const largeArc = endAngle - startAngle > 180 ? 1 : 0;
+  return `M ${centerX} ${centerY} L ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
+}
+
+function polarPoint(centerX: number, centerY: number, radius: number, angle: number) {
+  const radians = (angle * Math.PI) / 180;
+  return {
+    x: centerX + radius * Math.cos(radians),
+    y: centerY + radius * Math.sin(radians),
+  };
+}
+
 function AnnualDueTable({ currency, data, labels }: {
   currency: (value: number) => string;
   data: CommerceReportData["subscriptions"]["annualOutlook"];
@@ -322,7 +567,7 @@ function SubscriptionStatusTable({ items, noData }: { items: { count: number; la
 }
 
 function ReportChrome({ generated, pageLabel }: { generated: string; pageLabel: string }) {
-  return <><View fixed style={styles.header}><Text style={styles.brand} render={() => "CYNA"} /><Text style={styles.headerMeta} render={() => generated} /></View><View fixed style={styles.footer}><Text render={() => `CYNA Back-Office · ${generated}`} /><Text render={({ pageNumber, totalPages }) => `${pageLabel} ${pageNumber} / ${totalPages}`} /></View></>;
+  return <><View fixed style={styles.header}><Text style={styles.brand} render={() => "CYNA"} /><Text style={styles.headerMeta} render={() => generated} /></View><View fixed style={styles.footer}><Text render={() => `CYNA Back-Office - ${generated}`} /><Text render={({ pageNumber, totalPages }) => `${pageLabel} ${pageNumber} / ${totalPages}`} /></View></>;
 }
 
 function ReportTable({ compact = false, headers, noData, rows }: { compact?: boolean; headers: [string, string, string]; noData: string; rows: { id: string; metric: string; name: string; quantity: string; revenue: string }[] }) {

@@ -1,6 +1,14 @@
 import type { Locale } from "@/lib/i18n/translations";
 
-export type ReportPreset = "7d" | "30d" | "90d" | "ytd" | "custom";
+export type ReportPreset = "7d" | "5w" | "custom";
+
+export type ReportGranularity = "day" | "week" | "month";
+
+export type ReportRangeErrorCode =
+  | "INVALID_DATE_FORMAT"
+  | "RANGE_REVERSED"
+  | "RANGE_IN_FUTURE"
+  | "RANGE_TOO_LONG";
 
 export type ReportRange = {
   from: string;
@@ -11,8 +19,10 @@ export type ReportRange = {
   previousTo: string;
   previousFromIso: string;
   previousToExclusiveIso: string;
+  granularity: ReportGranularity;
   preset: ReportPreset;
   timeZone: "Europe/Paris";
+  today: string;
 };
 
 export type CommerceKpis = {
@@ -27,6 +37,7 @@ export type KpiComparison = CommerceKpis & {
 };
 
 export type CommerceTrendPoint = {
+  averageOrderValue: number;
   key: string;
   label: string;
   orders: number;
@@ -42,10 +53,32 @@ export type ProductBreakdown = {
 };
 
 export type CategoryBreakdown = {
+  averageOrderValue: number;
+  color: string;
   id: number | null;
+  isOther: boolean;
+  key: string;
   name: string;
+  orderCount: number;
   quantity: number;
   revenue: number;
+};
+
+export type CategoryAverageMetric = {
+  averageOrderValue: number;
+  orderCount: number;
+  revenue: number;
+};
+
+export type CategoryAveragePoint = {
+  key: string;
+  label: string;
+  values: Record<string, CategoryAverageMetric>;
+};
+
+export type CategoryAverageSeries = {
+  categories: CategoryBreakdown[];
+  points: CategoryAveragePoint[];
 };
 
 export type BillingBreakdown = {
@@ -115,6 +148,7 @@ export type CommerceReportData = {
   previous: CommerceKpis;
   subscriptions: SubscriptionHealthData;
   trend: CommerceTrendPoint[];
+  categoryAverages: CategoryAverageSeries;
   topProducts: ProductBreakdown[];
   categories: CategoryBreakdown[];
   billingMix: BillingBreakdown[];

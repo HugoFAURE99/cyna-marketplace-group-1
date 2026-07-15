@@ -5,12 +5,12 @@ import { createElement } from "react";
 import { CommerceReportPdf } from "@/lib/admin/CommerceReportPdf";
 import { getCommerceReport } from "@/lib/admin/commerce-report";
 import type { ReportPreset, SubscriptionHorizon } from "@/lib/admin/commerce-report-types";
-import { createReportRange } from "@/lib/admin/report-range";
+import { createReportRange, isReportRangeError } from "@/lib/admin/report-range";
 import type { Locale } from "@/lib/i18n/translations";
 import { captureOperationalException } from "@/lib/observability/capture";
 import { createServerClient } from "@/lib/supabase/server-client";
 
-const PRESETS = new Set<ReportPreset>(["7d", "30d", "90d", "ytd", "custom"]);
+const PRESETS = new Set<ReportPreset>(["7d", "5w", "custom"]);
 const HORIZONS = new Set<SubscriptionHorizon>([7, 30, 60, 90]);
 
 export async function GET(request: NextRequest) {
@@ -30,8 +30,11 @@ export async function GET(request: NextRequest) {
   }
 
   const locale: Locale = request.nextUrl.searchParams.get("locale") === "en" ? "en" : "fr";
-  const requestedPreset = request.nextUrl.searchParams.get("preset") as ReportPreset | null;
-  const preset = requestedPreset && PRESETS.has(requestedPreset) ? requestedPreset : "30d";
+  const requestedPreset = request.nextUrl.searchParams.get("preset") ?? "7d";
+  if (!PRESETS.has(requestedPreset as ReportPreset)) {
+    return NextResponse.json({ error: "INVALID_PRESET" }, { status: 400 });
+  }
+  const preset = requestedPreset as ReportPreset;
 
   try {
     const range = createReportRange(preset, {
@@ -56,13 +59,17 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "REPORT_FAILED";
-    if (message !== "INVALID_RANGE") {
+    const message = isReportRangeError(error)
+      ? error.code
+      : error instanceof Error
+        ? error.message
+        : "REPORT_FAILED";
+    if (!isReportRangeError(error)) {
       captureOperationalException(error, {
         area: "commerce-report",
         stage: "render-pdf",
       });
     }
-    return NextResponse.json({ error: message }, { status: message === "INVALID_RANGE" ? 400 : 500 });
+    return NextResponse.json({ error: message }, { status: isReportRangeError(error) ? 400 : 500 });
   }
 }

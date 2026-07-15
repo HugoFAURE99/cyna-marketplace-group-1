@@ -1,27 +1,27 @@
-import { NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase/server-client'
-import { sanitizeAuthNext } from '@/lib/auth/mfa-return'
+import { NextResponse } from "next/server";
+
+import { getAuthCallbackFailure } from "@/lib/auth/callback-result";
+import { sanitizeAuthNext } from "@/lib/auth/mfa-return";
+import { createServerClient } from "@/lib/supabase/server-client";
 
 export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url)
-    const code = searchParams.get('code')
-    const locale = searchParams.get('locale') === 'en' ? 'en' : 'fr'
+  const { searchParams } = new URL(request.url);
+  const code = searchParams.get("code");
+  const locale = searchParams.get("locale") === "en" ? "en" : "fr";
+  const next = searchParams.get("next") ?? "/";
+  const redirectPath = sanitizeAuthNext(next, locale);
 
-    const next = searchParams.get('next') ?? '/'
-    const redirectPath = sanitizeAuthNext(next, locale)
+  if (code) {
+    const supabase = await createServerClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
 
-    // 3. Un seul bloc pour faire l'échange et la redirection
-    if (code) {
-        const supabase = await createServerClient()
-
-        // C'est ici qu'on interroge Supabase et qu'on crée la variable "error"
-        const { error } = await supabase.auth.exchangeCodeForSession(code)
-
-        if (!error) {
-            return NextResponse.redirect(new URL(redirectPath, request.url))
-        }
+    if (!error) {
+      return NextResponse.redirect(new URL(redirectPath, request.url));
     }
+  }
 
-    // 4. Erreur : on renvoie au login avec une clé d'erreur traduisible
-    return NextResponse.redirect(new URL(`/${locale}/login?error=invalidLink`, request.url))
+  const result = getAuthCallbackFailure(searchParams);
+  const loginUrl = new URL(`/${locale}/login`, request.url);
+  loginUrl.searchParams.set(result.parameter, result.key);
+  return NextResponse.redirect(loginUrl);
 }

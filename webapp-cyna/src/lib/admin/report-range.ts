@@ -1,4 +1,9 @@
-import type { ReportPreset, ReportRange } from "@/lib/admin/commerce-report-types";
+import type {
+  ReportGranularity,
+  ReportPreset,
+  ReportRange,
+  ReportRangeErrorCode,
+} from "@/lib/admin/commerce-report-types";
 
 const TIME_ZONE = "Europe/Paris" as const;
 const DAY_MS = 86_400_000;
@@ -35,6 +40,13 @@ function shiftDate(key: string, days: number): string {
   });
 }
 
+function startOfWeek(key: string): string {
+  const parts = parseDateKey(key);
+  if (!parts) throw new Error("Invalid report date");
+  const day = new Date(Date.UTC(parts.year, parts.month - 1, parts.day)).getUTCDay();
+  return shiftDate(key, -(day === 0 ? 6 : day - 1));
+}
+
 function parisDateKey(now: Date): string {
   const values = new Intl.DateTimeFormat("en-CA", {
     timeZone: TIME_ZONE,
@@ -45,6 +57,10 @@ function parisDateKey(now: Date): string {
   const part = (type: Intl.DateTimeFormatPartTypes) =>
     Number(values.find((value) => value.type === type)?.value);
   return dateKey({ year: part("year"), month: part("month"), day: part("day") });
+}
+
+export function reportTodayKey(now = new Date()): string {
+  return parisDateKey(now);
 }
 
 function timeZoneOffset(instant: Date): number {
@@ -93,29 +109,61 @@ function daysInclusive(from: string, to: string): number {
   );
 }
 
+export class ReportRangeError extends Error {
+  readonly code: ReportRangeErrorCode;
+
+  constructor(code: ReportRangeErrorCode) {
+    super(code);
+    this.name = "ReportRangeError";
+    this.code = code;
+  }
+}
+
+export function isReportRangeError(error: unknown): error is ReportRangeError {
+  return error instanceof ReportRangeError;
+}
+
+export function validateCustomReportRange(
+  from: string | undefined,
+  to: string | undefined,
+  today = reportTodayKey(),
+): ReportRangeErrorCode | null {
+  if (!from || !to || !parseDateKey(from) || !parseDateKey(to)) {
+    return "INVALID_DATE_FORMAT";
+  }
+  if (from > to) return "RANGE_REVERSED";
+  if (from > today || to > today) return "RANGE_IN_FUTURE";
+  if (daysInclusive(from, to) > 366) return "RANGE_TOO_LONG";
+  return null;
+}
+
 export function createReportRange(
   preset: ReportPreset,
   options: { from?: string; to?: string; now?: Date } = {},
 ): ReportRange {
-  const today = parisDateKey(options.now ?? new Date());
+  const today = reportTodayKey(options.now ?? new Date());
   let from: string;
   let to = today;
+  let granularity: ReportGranularity;
 
   if (preset === "custom") {
-    if (!options.from || !options.to || !parseDateKey(options.from) || !parseDateKey(options.to)) {
-      throw new Error("INVALID_RANGE");
-    }
-    from = options.from;
-    to = options.to;
-  } else if (preset === "ytd") {
-    from = `${today.slice(0, 4)}-01-01`;
+    const error = validateCustomReportRange(options.from, options.to, today);
+    if (error) throw new ReportRangeError(error);
+    from = options.from as string;
+    to = options.to as string;
+    const customLength = daysInclusive(from, to);
+    granularity = customLength <= 31 ? "day" : customLength <= 120 ? "week" : "month";
+  } else if (preset === "5w") {
+    from = shiftDate(startOfWeek(today), -28);
+    granularity = "week";
   } else {
-    const length = preset === "7d" ? 7 : preset === "30d" ? 30 : 90;
-    from = shiftDate(today, -(length - 1));
+    from = shiftDate(today, -6);
+    granularity = "day";
   }
 
   const length = daysInclusive(from, to);
-  if (length < 1 || length > 366) throw new Error("INVALID_RANGE");
+  if (length < 1) throw new ReportRangeError("RANGE_REVERSED");
+  if (length > 366) throw new ReportRangeError("RANGE_TOO_LONG");
 
   const previousTo = shiftDate(from, -1);
   const previousFrom = shiftDate(previousTo, -(length - 1));
@@ -128,8 +176,10 @@ export function createReportRange(
     previousTo,
     previousFromIso: parisMidnightIso(previousFrom),
     previousToExclusiveIso: parisMidnightIso(shiftDate(previousTo, 1)),
+    granularity,
     preset,
     timeZone: TIME_ZONE,
+    today,
   };
 }
 
@@ -141,4 +191,10 @@ export function enumerateReportDays(from: string, to: string): string[] {
   const count = daysInclusive(from, to);
   if (count < 1 || count > 366) return [];
   return Array.from({ length: count }, (_, index) => shiftDate(from, index));
+}
+
+export function reportBucketKey(day: string, granularity: ReportGranularity): string {
+  if (granularity === "day") return day;
+  if (granularity === "week") return startOfWeek(day);
+  return `${day.slice(0, 7)}-01`;
 }

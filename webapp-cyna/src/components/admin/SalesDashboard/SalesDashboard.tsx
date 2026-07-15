@@ -3,10 +3,12 @@
 import { useState, useTransition } from "react";
 import { ArrowDownRight, ArrowUpRight, Download, Loader2, Mail, Minus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Bar, BarChart, CartesianGrid, Cell, ComposedChart, Legend, Line, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 
 import { getCommerceReportAction } from "@/app/[locale]/(admin)/admin/_actions/sales.actions";
-import type { CommerceReportData, ReportPreset, SubscriptionDueItem, SubscriptionHorizon } from "@/lib/admin/commerce-report-types";
+import { SalesOverviewCharts } from "@/components/admin/SalesDashboard/SalesOverviewCharts";
+import type { CommerceReportData, ReportPreset, ReportRangeErrorCode, SubscriptionDueItem, SubscriptionHorizon } from "@/lib/admin/commerce-report-types";
+import { validateCustomReportRange } from "@/lib/admin/report-range";
 import type { Locale } from "@/lib/i18n/translations";
 
 const COLORS = ["#7e22ce", "#2563eb", "#059669", "#d97706", "#dc2626", "#64748b"];
@@ -23,17 +25,39 @@ export function SalesDashboard({ initialData, initialTab = "orders", locale }: {
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  function updateUrl(nextTab: SalesTab, nextHorizon = horizon) {
+  function updateUrl(nextTab: SalesTab, nextHorizon = horizon, report = data) {
     const url = new URL(window.location.href);
     url.searchParams.set("tab", nextTab);
     url.searchParams.set("horizon", String(nextHorizon));
+    url.searchParams.set("preset", report.range.preset);
+    if (report.range.preset === "custom") {
+      url.searchParams.set("from", report.range.from);
+      url.searchParams.set("to", report.range.to);
+    } else {
+      url.searchParams.delete("from");
+      url.searchParams.delete("to");
+    }
     window.history.replaceState(null, "", url);
+  }
+
+  function rangeErrorMessage(code: ReportRangeErrorCode) {
+    if (code === "RANGE_REVERSED") return t("rangeErrors.RANGE_REVERSED");
+    if (code === "RANGE_IN_FUTURE") return t("rangeErrors.RANGE_IN_FUTURE");
+    if (code === "RANGE_TOO_LONG") return t("rangeErrors.RANGE_TOO_LONG");
+    return t("rangeErrors.INVALID_DATE_FORMAT");
   }
 
   function load(nextPreset: ReportPreset, customFrom = from, customTo = to, nextHorizon = horizon) {
     setPreset(nextPreset);
     setHorizon(nextHorizon);
     setError("");
+    if (nextPreset === "custom") {
+      const rangeError = validateCustomReportRange(customFrom, customTo, data.range.today);
+      if (rangeError) {
+        setError(rangeErrorMessage(rangeError));
+        return;
+      }
+    }
     startTransition(async () => {
       try {
         const result = await getCommerceReportAction({
@@ -43,10 +67,14 @@ export function SalesDashboard({ initialData, initialTab = "orders", locale }: {
           locale,
           horizon: nextHorizon,
         });
-        setData(result);
-        setFrom(result.range.from);
-        setTo(result.range.to);
-        updateUrl(tab, nextHorizon);
+        if (!result.ok) {
+          setError(rangeErrorMessage(result.error));
+          return;
+        }
+        setData(result.data);
+        setFrom(result.data.range.from);
+        setTo(result.data.range.to);
+        updateUrl(tab, nextHorizon, result.data);
       } catch {
         setError(t("rangeError"));
       }
@@ -58,15 +86,15 @@ export function SalesDashboard({ initialData, initialTab = "orders", locale }: {
     updateUrl(nextTab);
   }
 
-  const reportHref = `/api/admin/sales/report?locale=${locale}&preset=${preset}&from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&horizon=${horizon}`;
+  const reportHref = `/api/admin/sales/report?locale=${locale}&preset=${data.range.preset}&from=${encodeURIComponent(data.range.from)}&to=${encodeURIComponent(data.range.to)}&horizon=${horizon}`;
 
   return (
     <div className="space-y-6">
       <header className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div><h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1><p className="mt-1 text-sm text-muted-foreground">{t("subtitle", { from: data.range.from, to: data.range.to })}</p></div>
         <div className="flex flex-wrap items-end gap-2 rounded-xl border bg-card p-3 shadow-sm">
-          <label className="grid gap-1 text-xs font-medium text-muted-foreground">{t("period")}<select className="min-h-10 rounded-md border bg-background px-3 text-sm text-foreground" onChange={(event) => load(event.target.value as ReportPreset)} value={preset}><option value="7d">{t("last7days")}</option><option value="30d">{t("last30days")}</option><option value="90d">{t("last90days")}</option><option value="ytd">{t("yearToDate")}</option><option value="custom">{t("custom")}</option></select></label>
-          {preset === "custom" && <><label className="grid gap-1 text-xs font-medium text-muted-foreground">{t("from")}<input className="min-h-10 rounded-md border bg-background px-3 text-sm" max={to} onChange={(event) => setFrom(event.target.value)} type="date" value={from} /></label><label className="grid gap-1 text-xs font-medium text-muted-foreground">{t("to")}<input className="min-h-10 rounded-md border bg-background px-3 text-sm" min={from} onChange={(event) => setTo(event.target.value)} type="date" value={to} /></label><button className="min-h-10 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50" disabled={isPending || !from || !to} onClick={() => load("custom", from, to)} type="button">{t("apply")}</button></>}
+          <label className="grid gap-1 text-xs font-medium text-muted-foreground">{t("period")}<select className="min-h-10 rounded-md border bg-background px-3 text-sm text-foreground" onChange={(event) => { const value = event.target.value as ReportPreset; if (value === "custom") setPreset(value); else load(value); }} value={preset}><option value="7d">{t("last7days")}</option><option value="5w">{t("last5weeks")}</option><option value="custom">{t("custom")}</option></select></label>
+          {preset === "custom" && <><label className="grid gap-1 text-xs font-medium text-muted-foreground">{t("from")}<input className="min-h-10 rounded-md border bg-background px-3 text-sm" max={to || data.range.today} onChange={(event) => setFrom(event.target.value)} type="date" value={from} /></label><label className="grid gap-1 text-xs font-medium text-muted-foreground">{t("to")}<input className="min-h-10 rounded-md border bg-background px-3 text-sm" max={data.range.today} min={from} onChange={(event) => setTo(event.target.value)} type="date" value={to} /></label><button className="min-h-10 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-50" disabled={isPending} onClick={() => load("custom", from, to)} type="button">{t("apply")}</button></>}
           <a className="inline-flex min-h-10 items-center gap-2 rounded-md border bg-background px-4 text-sm font-semibold transition hover:bg-accent" href={reportHref}><Download aria-hidden="true" className="size-4" /> {t("exportPdf")}</a>
         </div>
       </header>
@@ -78,7 +106,7 @@ export function SalesDashboard({ initialData, initialTab = "orders", locale }: {
       {(isPending || error) && <div className={`flex items-center gap-2 rounded-lg border px-4 py-3 text-sm ${error ? "border-destructive/30 bg-destructive/5 text-destructive" : "bg-card text-muted-foreground"}`}>{isPending && <Loader2 aria-hidden="true" className="size-4 animate-spin" />}{error || t("loading")}</div>}
 
       {tab === "orders" ? <OrderAnalytics data={data} locale={locale} /> : (
-        <SubscriptionAnalytics data={data} horizon={horizon} locale={locale} onHorizonChange={(value) => load(preset, from, to, value)} />
+        <SubscriptionAnalytics data={data} horizon={horizon} locale={locale} onHorizonChange={(value) => load(data.range.preset, data.range.from, data.range.to, value)} />
       )}
     </div>
   );
@@ -89,11 +117,12 @@ function OrderAnalytics({ data, locale }: { data: CommerceReportData; locale: Lo
   const currency = new Intl.NumberFormat(locale, { style: "currency", currency: "EUR" });
   const number = new Intl.NumberFormat(locale);
   const kpis = [["grossRevenue", t("grossRevenue"), currency.format(data.current.grossRevenue)], ["orderCount", t("orderCount"), number.format(data.current.orderCount)], ["averageOrderValue", t("averageOrderValue"), currency.format(data.current.averageOrderValue)], ["uniqueCustomers", t("uniqueCustomers"), number.format(data.current.uniqueCustomers)]] as const;
-  return <>
+  return <div className="space-y-6">
+    <SalesOverviewCharts data={data} key={`${data.range.preset}-${data.range.from}-${data.range.to}`} locale={locale} />
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label={t("kpis")}>{kpis.map(([key, label, value]) => <KpiCard change={data.current.changes[key]} key={key} label={label} value={value} versus={t("versusPrevious")} />)}</section>
-    <section className="grid gap-4 xl:grid-cols-3"><ChartCard className="xl:col-span-2" title={t("trendTitle")}><ResponsiveContainer height={320} width="100%"><ComposedChart data={data.trend} margin={{ left: 0, right: 10, top: 10 }}><CartesianGrid strokeDasharray="3 3" vertical={false} /><XAxis dataKey="label" fontSize={11} minTickGap={20} /><YAxis fontSize={11} tickFormatter={(value) => `${value}€`} yAxisId="revenue" /><YAxis allowDecimals={false} fontSize={11} orientation="right" yAxisId="orders" /><Tooltip formatter={(value, name) => name === t("revenue") ? currency.format(Number(value)) : number.format(Number(value))} /><Legend /><Bar dataKey="revenue" fill="#7e22ce" name={t("revenue")} radius={[4, 4, 0, 0]} yAxisId="revenue" /><Line dataKey="orders" dot={false} name={t("orders")} stroke="#2563eb" strokeWidth={2} yAxisId="orders" /></ComposedChart></ResponsiveContainer></ChartCard><ChartCard title={t("categoryDistribution")}>{data.categories.length ? <ResponsiveContainer height={320} width="100%"><PieChart><Pie data={data.categories.slice(0, 8)} dataKey="revenue" innerRadius="48%" nameKey="name" outerRadius="78%">{data.categories.slice(0, 8).map((item, index) => <Cell fill={COLORS[index % COLORS.length]} key={item.name} />)}</Pie><Tooltip formatter={(value) => currency.format(Number(value))} /><Legend /></PieChart></ResponsiveContainer> : <EmptyState label={t("noData")} />}</ChartCard><ChartCard className="xl:col-span-2" title={t("topProducts")}>{data.topProducts.length ? <ResponsiveContainer height={320} width="100%"><BarChart data={data.topProducts.slice(0, 8)} layout="vertical" margin={{ left: 10, right: 20 }}><CartesianGrid horizontal={false} strokeDasharray="3 3" /><XAxis fontSize={11} tickFormatter={(value) => `${value}€`} type="number" /><YAxis dataKey="name" fontSize={11} type="category" width={130} /><Tooltip formatter={(value) => currency.format(Number(value))} /><Bar dataKey="revenue" fill="#059669" name={t("revenue")} radius={[0, 4, 4, 0]} /></BarChart></ResponsiveContainer> : <EmptyState label={t("noData")} />}</ChartCard><ChartCard title={t("billingMix")}><div className="space-y-3 py-2">{data.billingMix.length ? data.billingMix.map((item, index) => <div className="rounded-lg border p-3" key={item.plan}><div className="flex items-center justify-between gap-3"><span className="font-semibold capitalize"><span className="mr-2 inline-block size-2 rounded-full" style={{ background: COLORS[index % COLORS.length] }} />{item.plan}</span><span className="text-sm font-semibold">{currency.format(item.revenue)}</span></div><p className="mt-1 text-xs text-muted-foreground">{t("units", { count: item.quantity })}</p></div>) : <EmptyState label={t("noData")} />}</div></ChartCard></section>
+    <section className="grid gap-4 xl:grid-cols-3"><ChartCard className="xl:col-span-2" title={t("topProducts")}>{data.topProducts.length ? <BarChart data={data.topProducts.slice(0, 8)} layout="vertical" margin={{ left: 10, right: 20 }} responsive style={{ height: 320, width: "100%" }}><CartesianGrid horizontal={false} strokeDasharray="3 3" /><XAxis fontSize={11} tickFormatter={(value) => currency.format(Number(value))} type="number" /><YAxis dataKey="name" fontSize={11} type="category" width={130} /><Tooltip formatter={(value) => currency.format(Number(value))} /><Bar dataKey="revenue" fill="#8b5cf6" name={t("revenue")} /></BarChart> : <EmptyState label={t("noData")} />}</ChartCard><ChartCard title={t("billingMix")}><div className="space-y-3 py-2">{data.billingMix.length ? data.billingMix.map((item, index) => <div className="rounded-lg border p-3" key={item.plan}><div className="flex items-center justify-between gap-3"><span className="font-semibold capitalize"><span className="mr-2 inline-block size-2 rounded-full" style={{ background: COLORS[index % COLORS.length] }} />{item.plan}</span><span className="text-sm font-semibold">{currency.format(item.revenue)}</span></div><p className="mt-1 text-xs text-muted-foreground">{t("units", { count: item.quantity })}</p></div>) : <EmptyState label={t("noData")} />}</div></ChartCard></section>
     <section className="grid gap-4 xl:grid-cols-2"><BreakdownTable currency={currency} items={data.topProducts} title={t("productRanking")} type="product" /><BreakdownTable currency={currency} items={data.categories} title={t("categoryRanking")} type="category" /></section>
-  </>;
+  </div>;
 }
 
 function SubscriptionAnalytics({ data, horizon, locale, onHorizonChange }: { data: CommerceReportData; horizon: SubscriptionHorizon; locale: Locale; onHorizonChange: (value: SubscriptionHorizon) => void }) {
