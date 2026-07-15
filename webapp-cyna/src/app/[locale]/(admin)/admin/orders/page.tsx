@@ -31,6 +31,7 @@ export default async function OrdersPage({
     orderId: tOrders("orderId"),
     date: tOrders("date"),
     client: tOrders("client"),
+    guest: tOrders("guest"),
     total: tOrders("total"),
     status: tOrders("status"),
     actions: tOrders("actions"),

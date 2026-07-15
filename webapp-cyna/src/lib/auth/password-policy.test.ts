@@ -6,13 +6,19 @@ import {
 } from "@/lib/auth/password-policy";
 
 describe("password policy", () => {
-  it("accepts passwords containing at least eight characters", () => {
-    expect(validatePassword("abcdefgh")).toBeNull();
-    expect(validatePassword("a-secure-password")).toBeNull();
+  it("accepts passwords meeting the complexity policy", () => {
+    expect(validatePassword("Abcdefg1!")).toBeNull();
+    expect(validatePassword("Str0ng-Pass!")).toBeNull();
   });
 
   it("rejects passwords shorter than eight characters", () => {
-    expect(validatePassword("abcdefg")).toBe("errorTooShort");
+    expect(validatePassword("Ab1!def")).toBe("errorTooShort");
+  });
+
+  it("rejects passwords missing a required character class", () => {
+    // Length is fine (8+) but no uppercase / number / special character.
+    expect(validatePassword("abcdefgh")).toBe("errorComplexity");
+    expect(validatePassword("a-secure-password")).toBe("errorComplexity");
   });
 
   it.each([

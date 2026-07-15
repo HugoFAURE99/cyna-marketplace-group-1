@@ -9,6 +9,7 @@ export type OrderRow = {
   statut_commande: string;
   client_email: string;
   client_name: string | null;
+  is_guest: boolean;
   type_facturation: string | null;
   invoice_url: string | null;
 };
@@ -65,8 +66,15 @@ export async function getOrders(): Promise<OrderRow[]> {
     }
   }
 
-  // Fetch user names for linked accounts
-  const compteIds = [...new Set(commandeToCompte.values())];
+  // Fetch user names for linked accounts. The order's own id_compte is the
+  // primary owner (used to be ignored here); the abonnement is only a fallback
+  // for legacy orders. Orders with neither are genuine guest checkouts.
+  const compteIds = [
+    ...new Set([
+      ...commandes.flatMap((c) => (c.id_compte ? [c.id_compte] : [])),
+      ...commandeToCompte.values(),
+    ]),
+  ];
   const userMap = new Map<string, { nom_complet: string; adresse_mail: string }>();
 
   if (compteIds.length > 0) {
@@ -94,7 +102,7 @@ export async function getOrders(): Promise<OrderRow[]> {
   }
 
   return commandes.map((c) => {
-    const compteId = commandeToCompte.get(c.id_commande);
+    const compteId = c.id_compte ?? commandeToCompte.get(c.id_commande) ?? null;
     const user = compteId ? userMap.get(compteId) : null;
 
     return {
@@ -104,6 +112,7 @@ export async function getOrders(): Promise<OrderRow[]> {
       statut_commande: c.statut_commande,
       client_email: user?.adresse_mail || c.mail_utilisateur_invite || "—",
       client_name: user?.nom_complet || null,
+      is_guest: compteId === null,
       type_facturation: billingMap.get(c.id_commande) || null,
       invoice_url: c.url_facture || null,
     };
@@ -129,14 +138,15 @@ export async function getOrderDetail(id: number): Promise<OrderDetail | null> {
     .limit(1)
     .maybeSingle();
 
+  const compteId = commande.id_compte ?? abonnement?.id_compte ?? null;
   let client_email = commande.mail_utilisateur_invite || "—";
   let client_name: string | null = null;
 
-  if (abonnement?.id_compte) {
+  if (compteId) {
     const { data: user } = await supabase
       .from("utilisateur")
       .select("nom_complet, adresse_mail")
-      .eq("id_compte", abonnement.id_compte)
+      .eq("id_compte", compteId)
       .single();
 
     if (user) {
@@ -144,6 +154,7 @@ export async function getOrderDetail(id: number): Promise<OrderDetail | null> {
       client_name = user.nom_complet;
     }
   }
+  const is_guest = compteId === null;
 
   // Line items
   const { data: lignes } = await supabase
@@ -213,6 +224,7 @@ export async function getOrderDetail(id: number): Promise<OrderDetail | null> {
     statut_commande: commande.statut_commande,
     client_email,
     client_name,
+    is_guest,
     lignes: lignesFormatted,
     promotion,
     invoice_url,
