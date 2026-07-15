@@ -1,0 +1,19 @@
+{
+  "Conventions générales": 3,
+  "Recherche catalogue": 3,
+  "GET /api/search": 3,
+  "Callback d'authentification": 4,
+  "GET /api/auth/callback": 4,
+  "Rapport commerce administrateur": 4,
+  "GET /api/admin/sales/report": 4,
+  "Chatbot CynAI": 5,
+  "POST /api/chat": 5,
+  "Outils Gemini": 6,
+  "Cookie et propriété": 6,
+  "Limites du contrat actuel": 7,
+  "Webhook Stripe": 7,
+  "POST /api/webhooks/stripe": 7,
+  "Server Actions et interfaces internes": 9,
+  "RPC et dépendances de données": 10,
+  "Compatibilité, tests et observabilité": 10
+}

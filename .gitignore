@@ -2,3 +2,9 @@
 .vscode/*
 
 .claude/*
+
+# Documentation build tooling and local renders
+documentation/.tools/
+documentation/.rendered/
+documentation/__pycache__/
+documentation/.~lock.*#

@@ -1,6 +1,6 @@
 # Analyse d'écart — cahier des charges CYNA
 
-Audit du site web au 13 juillet 2026 à partir de « A06 - SUP DE VINCI - Projet
+Audit du site web mis à jour au 15 juillet 2026 à partir de « A06 - SUP DE VINCI - Projet
 fil rouge CYNA DEV », avec l'application Android et l'exigence de plusieurs
 dépôts explicitement hors périmètre. Les numéros de page sont ceux du PDF.
 
@@ -43,7 +43,7 @@ déploiement.
 | Statistiques back-office | Partiel | P2 | Graphiques présents, sans preuve complète de conformité de chaque indicateur demandé. |
 | Accessibilité clavier et responsive | Partiel | P1 | Composants responsive et dialogs accessibles ; audit WCAG global et tests automatisés manquants. |
 | Internationalisation et RTL | Partiel | P2 | FR/EN via `next-intl`; aucune langue RTL ni inversion de mise en page. |
-| Performance, sécurité et analytics | Partiel | P1 | RLS, webhook signé et rendu Next.js présents ; budgets de performance, audit de sécurité, journalisation et analytics restent à formaliser. |
+| Performance, sécurité, CI et supervision | Partiel | P1 | RLS, webhook signé, CI GitHub, audit des dépendances, Netlify et Sentry erreurs uniquement sont versionnés ; restent les budgets de performance, l’audit de sécurité exhaustif, les analytics et la configuration des services de production. |
 | Application Android | Hors périmètre | — | Exclue de cette livraison. |
 | Deux dépôts Git / livrables multi-repositories | Hors périmètre | — | Exclu selon la décision de cadrage. |
 

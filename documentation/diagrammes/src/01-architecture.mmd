@@ -1,0 +1,41 @@
+%%{init: {"theme":"base","themeVariables":{"primaryColor":"#F1EEFA","primaryTextColor":"#1A1A24","primaryBorderColor":"#4A339E","lineColor":"#4A339E","secondaryColor":"#E8EEF5","tertiaryColor":"#FFFFFF","fontFamily":"Calibri, Arial"}}}%%
+flowchart LR
+  User[Client ou visiteur]
+  Admin[Administrateur AAL2]
+
+  subgraph Next[Application Next.js 16]
+    UI[App Router FR / EN]
+    Actions[Server Actions]
+    API[Route Handlers]
+    Proxy[Proxy i18n + session + RBAC]
+    Chat[CynAI /api/chat]
+  end
+
+  subgraph Data[Supabase]
+    Auth[Auth + MFA]
+    DB[(PostgreSQL + RLS)]
+    Storage[Storage factures et médias]
+  end
+
+  Stripe[Stripe Checkout, Billing et Webhooks]
+  Gemini[Google Gemini 3.1 Flash Lite]
+  Sentry[Sentry erreurs + source maps]
+  Netlify[Netlify OpenNext]
+
+  User --> UI
+  Admin --> UI
+  UI --> Proxy
+  UI --> Actions
+  UI --> API
+  API --> Chat
+  Proxy --> Auth
+  Actions --> Auth
+  Actions --> DB
+  Actions --> Storage
+  API --> DB
+  Actions --> Stripe
+  Stripe --> API
+  Chat --> Gemini
+  Chat --> DB
+  Next -. erreurs filtrées .-> Sentry
+  Netlify --> Next

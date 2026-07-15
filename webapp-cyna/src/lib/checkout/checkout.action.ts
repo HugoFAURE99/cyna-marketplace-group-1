@@ -3,7 +3,10 @@
 import type Stripe from "stripe";
 
 import { getCartView, type CartViewItem } from "@/lib/cart/cart";
-import { getCheckoutPromotionOptions } from "@/lib/checkout/checkout-session";
+import {
+  getCheckoutPromotionOptions,
+  getLinePromotionId,
+} from "@/lib/checkout/checkout-session";
 import {
   MAX_LICENSE_USERS,
   MIN_LICENSE_USERS,
@@ -124,10 +127,10 @@ async function createCheckout({
   const orderLines = items.map((item) => ({
     id_commande: order.id_commande,
     id_prix: item.tariffId,
-    id_promotion:
-      item.automaticPromotion?.id === automaticPromotion?.id
-        ? automaticPromotion.id
-        : null,
+    id_promotion: getLinePromotionId(
+      item.automaticPromotion,
+      automaticPromotion,
+    ),
     quantite: item.licenseUserCount,
     prix_unitaire: item.originalUnitPriceCents / 100,
     sous_total: item.lineTotalCents / 100,
