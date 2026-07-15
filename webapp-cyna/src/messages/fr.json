@@ -160,7 +160,7 @@
     "saveCartPrompt": "<login>Connectez-vous</login> ou <register>créez un compte</register> pour sauvegarder votre panier",
     "checkoutError": "Une erreur est survenue lors de la préparation de la commande.",
     "redirecting": "Redirection...",
-    "securePayment": "Paiement sécurisé via Stripe.",
+    "securePayment": "Paiement traité par Stripe. CYNA ne stocke ni votre numéro complet de carte ni le cryptogramme.",
     "mixedIntervalsError": "Vous ne pouvez pas mélanger des abonnements mensuels et annuels dans la même commande. Veuillez uniformiser vos choix de facturation."
   },
   "guestCheckout": {
@@ -1088,6 +1088,7 @@
       "order": "Commande",
       "subscription": "Abonnement",
       "account": "Compte",
+      "data_access": "Droit d'accès aux données",
       "technical": "Problème technique",
       "other": "Autre"
     },
@@ -1135,7 +1136,12 @@
     "intelprop_title": "Propriété intellectuelle et contrefaçons",
     "intelprop_paragraph1": "Le code source de l'application et les contenus originaux du projet ont été réalisés dans un cadre pédagogique par l'équipe étudiante.",
     "intelprop_paragraph2": "Les noms, exemples de produits, bibliothèques et services tiers restent la propriété de leurs titulaires respectifs. Leur présence n'implique aucun partenariat commercial.",
-    "intelprop_paragraph3": "Le catalogue est un contenu fictif de démonstration et ne fournit aucune licence de véritables produits de cybersécurité."
+    "intelprop_paragraph3": "Le catalogue est un contenu fictif de démonstration et ne fournit aucune licence de véritables produits de cybersécurité.",
+    "privacy_title": "Données personnelles et RGPD",
+    "privacy_paragraph1": "CYNA limite la collecte aux données personnelles nécessaires au fonctionnement du compte, des commandes et du support. Aucune donnée ne doit être conservée par simple commodité lorsqu'une information moins précise ou anonyme suffit.",
+    "privacy_paragraph2": "Pour demander l'accès à vos données personnelles, ouvrez un ticket et choisissez « Droit d'accès aux données ». Une vérification d'identité proportionnée peut être demandée. Ne transmettez jamais votre mot de passe, un code MFA ou des données de carte dans un ticket.",
+    "payment_security_title": "Paiement et PCI DSS",
+    "payment_security_paragraph": "Le numéro complet de carte et le cryptogramme sont saisis directement dans Stripe Checkout et ne sont pas stockés par CYNA. PCI DSS encadre la protection des données de carte. Stripe indique être prestataire certifié PCI DSS de niveau 1 ; cette certification ne s'étend pas automatiquement à CYNA, qui reste responsable de la sécurité de son intégration."
   },
   "terms": {
     "title": "Conditions Générales d'Utilisation",
@@ -1195,6 +1201,7 @@
       "order": "Commande",
       "subscription": "Abonnement",
       "account": "Compte",
+      "data_access": "Droit d'accès aux données",
       "technical": "Problème technique",
       "other": "Autre"
     },
