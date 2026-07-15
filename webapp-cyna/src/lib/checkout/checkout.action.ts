@@ -17,6 +17,7 @@ import { calculatePromotionalPriceCents } from "@/lib/promotions/automatic-promo
 import { captureOperationalException } from "@/lib/observability/capture";
 import { createAdminClient } from "@/lib/supabase/server";
 import { createServerClient } from "@/lib/supabase/server-client";
+import { getSiteOrigin } from "@/lib/site-url";
 import { stripe } from "@/lib/stripe";
 
 type CheckoutInput = {
@@ -34,9 +35,7 @@ export type BuyNowInput = {
 };
 
 function getSiteUrl() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-  if (!siteUrl) throw new Error("SITE_URL_NOT_CONFIGURED");
-  return siteUrl.replace(/\/$/, "");
+  return getSiteOrigin();
 }
 
 async function createCheckout({
