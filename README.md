@@ -1,5 +1,7 @@
 # CYNA marketplace
 
+## lien : https://cyna-g1.netlify.app/en
+
 Projet de Bachelor réalisé par une équipe de quatre étudiants de l’Institut Limayrac. CYNA est un prototype pédagogique de marketplace de logiciels de cybersécurité ; il ne fournit aucun service de sécurité réel.
 
 L’application Next.js, les migrations Supabase et les commandes de développement se trouvent dans [`webapp-cyna`](./webapp-cyna/README.md). Les livrables fonctionnels, techniques, utilisateur et de test se trouvent dans [`documentation`](./documentation/README.md).
